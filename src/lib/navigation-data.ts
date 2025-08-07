@@ -1,14 +1,15 @@
-import { AudioWaveform, BookOpen, Bot, Command, Frame, GalleryVerticalEnd, Map, PieChart, Settings2, SquareTerminal, TypeIcon as type, LucideIcon, House, PersonStanding } from 'lucide-react'
+import { AudioWaveform, BookOpen, Command, Frame, GalleryVerticalEnd, Map, PieChart, Settings2, LucideIcon, House, PersonStanding } from 'lucide-react'
 
+export interface NavSubItem {
+    title: string
+    url: string
+}
 export interface NavItem {
     title: string
     url: string
     icon?: LucideIcon
     isActive?: boolean
-    items?: {
-        title: string
-        url: string
-    }[]
+    items?: NavSubItem[]
 }
 
 export interface ProjectItem {
@@ -38,16 +39,16 @@ export const navigationData: NavItem[] = [
         isActive: true,
         items: [
             {
-                title: "Panel",
+                title: "Panel1",
                 url: "/",
             },
             {
                 title: "Panel2",
-                url: "#",
+                url: "/panel2",
             },
             {
                 title: "Panel3",
-                url: "#",
+                url: "/panel3",
             },
         ],
     },
@@ -99,20 +100,20 @@ export const navigationData: NavItem[] = [
         icon: Settings2,
         items: [
             {
-                title: "General",
-                url: "#",
+                title: "Configuracion1",
+                url: "/configuracion1",
             },
             {
-                title: "Team",
-                url: "#",
+                title: "Configuracion2",
+                url: "/configuracion2",
             },
             {
-                title: "Billing",
-                url: "#",
+                title: "Configuracion3",
+                url: "/configuracion3",
             },
             {
-                title: "Limits",
-                url: "#",
+                title: "Configuracion4",
+                url: "/configuracion4",
             },
         ],
     },
@@ -140,7 +141,7 @@ export const projectsData: ProjectItem[] = [
 // Datos de equipos
 export const teamsData: TeamItem[] = [
     {
-        name: "Acme Inc",
+        name: "Bolsa de Empleo",
         logo: GalleryVerticalEnd,
         plan: "Enterprise",
     },
@@ -164,13 +165,13 @@ export const userData: UserData = {
 }
 
 // Función helper para encontrar un item de navegación por URL
-export function findNavItemByUrl(url: string): { mainItem: NavItem; subItem?: NavItem['items'][0] } | null {
+export function findNavItemByUrl(url: string): { mainItem: NavItem; subItem?: NavSubItem } | null {
     for (const mainItem of navigationData) {
         if (mainItem.url === url) {
             return { mainItem }
         }
 
-        if (mainItem.items) {
+        if (mainItem.items && mainItem.items.length > 0) {
             for (const subItem of mainItem.items) {
                 if (subItem.url === url) {
                     return { mainItem, subItem }
@@ -189,7 +190,7 @@ export function getAllNavigationUrls(): string[] {
     navigationData.forEach(mainItem => {
         urls.push(mainItem.url)
 
-        if (mainItem.items) {
+        if (mainItem.items && mainItem.items.length > 0) {
             mainItem.items.forEach(subItem => {
                 urls.push(subItem.url)
             })

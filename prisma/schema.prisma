@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Persona {
+  id              String    @id @default(uuid())
+  nombre          String
+  apellido        String
+  telefono        String?
+  direccion       String?
+  fechaNacimiento DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [id], references: [personaId], onDelete: Cascade)
+}
+
+model Usuario {
+  id              String     @id @default(uuid())
+  personaId       String     @unique
+  email           String     @unique
+  passwordHash    String
+  rol             RolUsuario
+  emailVerificado Boolean    @default(false)
+  activo          Boolean    @default(true)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Relaciones
+  persona  Persona?
+  empleado Empleado?
+}
+
+model Empleado {
+  id           String   @id @default(uuid())
+  usuarioId    String   @unique
+  departamento String
+  cargo        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+}
+
+enum RolUsuario {
+  CANDIDATO
+  RECLUTADOR
+  ADMIN
+}

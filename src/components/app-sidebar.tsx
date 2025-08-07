@@ -1,8 +1,6 @@
 "use client"
 
 import * as React from "react"
-/* import { AudioWaveform, BookOpen, Command, Frame, GalleryVerticalEnd, Map, PieChart, Settings2, House, PersonStanding } from "lucide-react" */
-
 import { NavMain } from "@/components/nav-main"
 // import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"

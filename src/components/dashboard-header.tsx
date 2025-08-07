@@ -4,8 +4,6 @@ import { DynamicBreadcrumb } from '@/components/dynamic-breadcrumb'
 import { useBreadcrumbs } from '@/hooks/use-breadcrumbs'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
-import { BookOpen, Bot, Settings2, SquareTerminal } from 'lucide-react'
-import { navigationData } from '@/lib/navigation-data'
 
 // Navigation data
 /* const navData = [
@@ -97,7 +95,7 @@ import { navigationData } from '@/lib/navigation-data'
 ] */
 
 export function DashboardHeader() {
-    const breadcrumbs = useBreadcrumbs(navigationData)
+    const breadcrumbs = useBreadcrumbs()
 
     return (
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

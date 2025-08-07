@@ -1,0 +1,77 @@
+// app/api/empleados/route.ts
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+// import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const empleadoSchema = z.object({
+    nombre: z.string().min(2),
+    apellido: z.string().min(2),
+    telefono: z.string().optional(),
+    direccion: z.string().optional(),
+    fechaNacimiento: z.string().optional(), // formato ISO (yyyy-mm-dd)
+    email: z.string().email(),
+    password: z.string().min(6),
+    rol: z.enum(["RECLUTADOR", "ADMIN"]), // solo roles válidos para empleados
+
+    departamento: z.string().min(2),
+    cargo: z.string().min(2),
+});
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const data = empleadoSchema.parse(body);
+
+        // const passwordHash = await bcrypt.hash(data.password, 10);
+
+        const nuevoEmpleado = await prisma.persona.create({
+            data: {
+                nombre: data.nombre,
+                apellido: data.apellido,
+                telefono: data.telefono,
+                direccion: data.direccion,
+                fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : undefined,
+                usuario: {
+                    create: {
+                        email: data.email,
+                        passwordHash: data.password,
+                        rol: data.rol,
+                        empleado: {
+                            create: {
+                                departamento: data.departamento,
+                                cargo: data.cargo,
+                            },
+                        },
+                    },
+                },
+            },
+            include: {
+                usuario: {
+                    include: {
+                        empleado: true,
+                    },
+                },
+            },
+        });
+
+        return NextResponse.json(
+            { message: "Empleado creado correctamente", empleado: nuevoEmpleado },
+            { status: 201 }
+        );
+    } catch (error) {
+        console.error("Error al crear empleado:", error);
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                { message: "Datos inválidos", errors: error.flatten() },
+                { status: 400 }
+            );
+        }
+
+        return NextResponse.json(
+            { message: "Error interno del servidor" },
+            { status: 500 }
+        );
+    }
+}

@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
-import type { NavItem } from '@/lib/navigation-data'
 import { findNavItemByUrl } from '@/lib/navigation-data'
 
 interface BreadcrumbItem {
@@ -11,18 +10,18 @@ interface BreadcrumbItem {
     isActive: boolean
 }
 
-export function useBreadcrumbs(navItems: NavItem[]) {
+export function useBreadcrumbs() {
     const pathname = usePathname()
 
     const breadcrumbs = useMemo(() => {
         const crumbs: BreadcrumbItem[] = []
 
         // Always add Dashboard as the first breadcrumb
-        crumbs.push({
+        /* crumbs.push({
             title: "Dashboard",
-            url: "/dashboard",
-            isActive: pathname === "/dashboard"
-        })
+            url: "/",
+            isActive: pathname === "/"
+        }) */
 
         // Use helper function to find navigation item
         const navMatch = findNavItemByUrl(pathname)
@@ -52,11 +51,18 @@ export function useBreadcrumbs(navItems: NavItem[]) {
                     isActive: true
                 })
             }
-        }
+        } /* else if (pathname === "/dashboard") {
+            // Only show Dashboard if we're actually on the dashboard page
+            crumbs.push({
+                title: "Dashboard",
+                url: "/dashboard",
+                isActive: true
+            })
+        } */
 
         // If no specific match found, just return Dashboard
         return crumbs
-    }, [pathname, navItems])
+    }, [pathname])
 
     return breadcrumbs
 }
