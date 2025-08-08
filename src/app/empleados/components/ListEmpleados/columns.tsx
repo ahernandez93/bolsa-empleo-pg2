@@ -45,7 +45,7 @@ export const columns: ColumnDef<EmpleadoConDatos>[] = [
     header: "Estado",
     cell: ({ row }) => (
       row.original.activo
-        ? <Badge variant="success">Activo</Badge>
+        ? <Badge variant="default">Activo</Badge>
         : <Badge variant="destructive">Inactivo</Badge>
     ),
   },

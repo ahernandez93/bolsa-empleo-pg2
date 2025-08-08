@@ -1,21 +1,15 @@
 "use client"
 
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-} from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: {
-  columns: any
-  data: TData[]
-}) {
+interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+}
+
+export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
@@ -24,7 +18,7 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <div className="items-center px-4 py-4">
+    <div className="items-center p-4 bg-background shadow-lg rounded-lg mt-4 border">
       <div className="rounded-md border">
         <Table>
           <TableHeader>

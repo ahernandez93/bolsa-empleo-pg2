@@ -32,13 +32,26 @@ export async function POST(req: Request) {
                 apellido: data.apellido,
                 telefono: data.telefono,
                 direccion: data.direccion,
-                fechaNacimiento: data.fechaNacimiento
-                    ? new Date(data.fechaNacimiento)
-                    : undefined,
+                fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : undefined,
+                usuario: {
+                    create: {
+                        email: data.email,
+                        passwordHash,
+                        rol: data.rol,
+                        activo: true,
+                        emailVerificado: false,
+                        empleado: {
+                            create: {
+                                departamento: data.departamento,
+                                cargo: data.cargo,
+                            },
+                        },
+                    },
+                },
             },
         });
 
-        const usuario = await prisma.usuario.create({
+        /* const usuario = await prisma.usuario.create({
             data: {
                 personaId: persona.id,
                 email: data.email,
@@ -56,13 +69,13 @@ export async function POST(req: Request) {
             include: {
                 empleado: true,
             },
-        });
+        }); */
 
         return NextResponse.json(
             {
                 message: "Empleado creado correctamente", empleado: {
-                    ...persona,
-                    usuario,
+                    persona/* ,
+                    usuario, */
                 }
             },
             { status: 201 }

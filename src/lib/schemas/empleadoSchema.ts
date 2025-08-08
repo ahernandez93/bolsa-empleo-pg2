@@ -6,13 +6,11 @@ export const empleadoSchema = z.object({
   telefono: z.string().optional(),
   direccion: z.string().optional(),
   fechaNacimiento: z.string().optional(),
-
   email: z.string().email("Email inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
   rol: z.enum(["RECLUTADOR", "ADMIN"]/* , {
     errorMap: () => ({ message: "Selecciona un rol válido" }),
   } */),
-
   departamento: z.string().min(2, "El departamento es requerido"),
   cargo: z.string().min(2, "El cargo es requerido"),
 });
