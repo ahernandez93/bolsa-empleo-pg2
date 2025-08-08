@@ -1,7 +1,7 @@
 // app/api/empleados/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-// import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const empleadoSchema = z.object({
@@ -23,40 +23,47 @@ export async function POST(req: Request) {
         const body = await req.json();
         const data = empleadoSchema.parse(body);
 
-        // const passwordHash = await bcrypt.hash(data.password, 10);
+        const passwordHash = await bcrypt.hash(data.password, 10);
 
-        const nuevoEmpleado = await prisma.persona.create({
+        const persona = await prisma.persona.create({
             data: {
                 nombre: data.nombre,
                 apellido: data.apellido,
                 telefono: data.telefono,
                 direccion: data.direccion,
-                fechaNacimiento: data.fechaNacimiento ? new Date(data.fechaNacimiento) : undefined,
-                usuario: {
+                fechaNacimiento: data.fechaNacimiento
+                    ? new Date(data.fechaNacimiento)
+                    : undefined,
+            },
+        });
+
+        const usuario = await prisma.usuario.create({
+            data: {
+                personaId: persona.id,
+                email: data.email,
+                passwordHash,
+                rol: data.rol,
+                activo: true,
+                emailVerificado: false,
+                empleado: {
                     create: {
-                        email: data.email,
-                        passwordHash: data.password,
-                        rol: data.rol,
-                        empleado: {
-                            create: {
-                                departamento: data.departamento,
-                                cargo: data.cargo,
-                            },
-                        },
+                        departamento: data.departamento,
+                        cargo: data.cargo,
                     },
                 },
             },
             include: {
-                usuario: {
-                    include: {
-                        empleado: true,
-                    },
-                },
+                empleado: true,
             },
         });
 
         return NextResponse.json(
-            { message: "Empleado creado correctamente", empleado: nuevoEmpleado },
+            {
+                message: "Empleado creado correctamente", empleado: {
+                    ...persona,
+                    usuario,
+                }
+            },
             { status: 201 }
         );
     } catch (error) {

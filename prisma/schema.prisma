@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/prisma"
 }
 
 datasource db {
@@ -25,7 +24,7 @@ model Persona {
   updatedAt       DateTime  @updatedAt
 
   // Relaciones
-  usuario Usuario @relation(fields: [id], references: [personaId], onDelete: Cascade)
+  usuario Usuario?
 }
 
 model Usuario {
@@ -40,7 +39,7 @@ model Usuario {
   updatedAt       DateTime   @updatedAt
 
   // Relaciones
-  persona  Persona?
+  persona  Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
   empleado Empleado?
 }
 
