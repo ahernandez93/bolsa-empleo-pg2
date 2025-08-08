@@ -13,7 +13,8 @@ const empleadoSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6),
     rol: z.enum(["RECLUTADOR", "ADMIN"]), // solo roles válidos para empleados
-
+    activo: z.boolean().optional().default(true),
+    emailVerificado: z.boolean().optional().default(false),
     departamento: z.string().min(2),
     cargo: z.string().min(2),
 });
@@ -82,3 +83,25 @@ export async function POST(req: Request) {
         );
     }
 }
+
+export async function GET() {
+    try {
+        const empleados = await prisma.empleado.findMany({
+            include: {
+                usuario: {
+                    include: {
+                        persona: true,
+                    },
+                },
+            },
+        });
+        return NextResponse.json({ empleados });
+    } catch (error) {
+        console.error("Error al obtener empleados:", error);
+        return NextResponse.json(
+            { message: "Error interno del servidor" },
+            { status: 500 }
+        );
+    }
+}
+
