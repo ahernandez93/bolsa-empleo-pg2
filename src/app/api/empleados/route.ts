@@ -51,31 +51,10 @@ export async function POST(req: Request) {
             },
         });
 
-        /* const usuario = await prisma.usuario.create({
-            data: {
-                personaId: persona.id,
-                email: data.email,
-                passwordHash,
-                rol: data.rol,
-                activo: true,
-                emailVerificado: false,
-                empleado: {
-                    create: {
-                        departamento: data.departamento,
-                        cargo: data.cargo,
-                    },
-                },
-            },
-            include: {
-                empleado: true,
-            },
-        }); */
-
         return NextResponse.json(
             {
                 message: "Empleado creado correctamente", empleado: {
-                    persona/* ,
-                    usuario, */
+                    persona
                 }
             },
             { status: 201 }

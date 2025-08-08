@@ -24,6 +24,8 @@ export default async function Empleados() {
     return (
         <div className="p-6">
             <HeaderEmpleados />
+
+            
             <ListEmpleados empleados={empleados} />
         </div>
     )

@@ -3,6 +3,8 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import { Button } from "@/components/ui/button"
+import { Pencil, Trash2 } from "lucide-react"
 
 export type EmpleadoConDatos = {
   id: string
@@ -15,8 +17,12 @@ export type EmpleadoConDatos = {
   activo: boolean
   createdAt: string
 }
+interface GetColumnsProps {
+  onEdit: (empleado: EmpleadoConDatos) => void
+  onDelete: (empleado: EmpleadoConDatos) => void
+}
 
-export const columns: ColumnDef<EmpleadoConDatos>[] = [
+export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<EmpleadoConDatos>[] => [
   {
     accessorKey: "nombre",
     header: "Nombre",
@@ -53,5 +59,31 @@ export const columns: ColumnDef<EmpleadoConDatos>[] = [
     accessorKey: "createdAt",
     header: "Creado",
     cell: ({ row }) => format(new Date(row.original.createdAt), "dd/MM/yyyy"),
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: ({ row }) => {
+      const empleado = row.original
+
+      return (
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => onEdit(empleado)}
+          >
+            <Pencil className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => onDelete(empleado)}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )
+    },
   },
 ]
