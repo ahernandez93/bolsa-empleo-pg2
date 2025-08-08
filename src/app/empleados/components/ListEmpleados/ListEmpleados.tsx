@@ -1,8 +1,9 @@
+"use client"
 
-export default function ListEmpleados() {
-    return (
-        <div>
-            <h1>Lista de Empleados</h1>
-        </div>
-    )
+import { DataTable } from "./data-table"
+import { columns, EmpleadoConDatos } from "./columns"
+
+export function ListEmpleados({ empleados }: { empleados: EmpleadoConDatos[] }) {
+    return <DataTable columns={columns} data={empleados} />
 }
+

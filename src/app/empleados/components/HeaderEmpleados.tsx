@@ -10,7 +10,7 @@ export function HeaderEmpleados() {
     const [openModalCreate, setOpenModalCreate] = useState(false);
 
     return (
-        <div className="flex justify-between items-center px-6">
+        <div className="flex justify-between items-center px-4">
             <h2 className="text-2xl">Listado de Empleados</h2>
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>

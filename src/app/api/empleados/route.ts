@@ -95,7 +95,20 @@ export async function GET() {
                 },
             },
         });
-        return NextResponse.json({ empleados });
+
+        const data = empleados.map(emp => ({
+            id: emp.id,
+            nombre: emp.usuario.persona.nombre,
+            apellido: emp.usuario.persona.apellido,
+            email: emp.usuario.email,
+            telefono: emp.usuario.persona.telefono,
+            departamento: emp.departamento,
+            cargo: emp.cargo,
+            activo: emp.usuario.activo,
+            createdAt: emp.createdAt,
+        }))
+
+        return NextResponse.json({ empleados: data });
     } catch (error) {
         console.error("Error al obtener empleados:", error);
         return NextResponse.json(
