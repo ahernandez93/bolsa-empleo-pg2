@@ -24,7 +24,7 @@ export function HeaderEmpleados() {
                             Ingrese los datos del nuevo empleado
                         </DialogDescription>
                     </DialogHeader>
-                    <FormCreateEmpleado setOpenModalCreate={setOpenModalCreate} />
+                    <FormCreateEmpleado setOpenModalCreate={setOpenModalCreate} isEditMode={false} />
                     {/* <FormCreateEmpleado2 setOpenModalCreate={setOpenModalCreate} /> */}
                 </DialogContent>
             </Dialog>

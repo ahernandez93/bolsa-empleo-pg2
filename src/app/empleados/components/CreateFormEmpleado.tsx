@@ -27,7 +27,6 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
     // const { setOpenModalCreate } = props;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
-    const [mensaje, setMensaje] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false)
 
@@ -59,7 +58,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                 direccion: initialData.usuario.persona.direccion || "",
                 fechaNacimiento: initialData.usuario.persona.fechaNacimiento?.split("T")[0] || "",
                 email: initialData.usuario.email,
-                password: "", // no se muestra por seguridad
+                password: "",
                 rol: initialData.usuario.rol,
                 departamento: initialData.departamento,
                 cargo: initialData.cargo,
@@ -70,7 +69,6 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
     const isValid = form.formState.isValid;
 
     const onSubmit = async (data: EmpleadoFormData | EmpleadoUpdateData) => {
-        setMensaje(null);
         setError(null);
         setIsLoading(true)
 
@@ -98,7 +96,6 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         } finally {
             setIsLoading(false)
         }
-        console.log(data);
     }
 
     return (
@@ -270,7 +267,6 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                     </Button>
                 </div>
 
-                {mensaje && <p className="col-span-2 text-green-600 text-center">{mensaje}</p>}
                 {error && <p className="col-span-2 text-red-600 text-center">{error}</p>}
             </form>
         </Form>

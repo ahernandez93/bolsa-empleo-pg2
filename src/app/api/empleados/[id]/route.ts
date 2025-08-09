@@ -33,8 +33,33 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
+        const { id } = await params
         const body = await request.json()
         const validatedData = empleadoUpdateSchema.parse(body)
+
+        const existingEmpleado = await prisma.empleado.findUnique({
+            where: { id },
+            include: {
+                usuario: true
+            }
+        })
+
+        if (!existingEmpleado) {
+            return NextResponse.json({ message: "Empleado no encontrado" }, { status: 404 })
+        }
+
+        if (validatedData.email !== existingEmpleado.usuario.email) {
+            const emailExists = await prisma.usuario.findUnique({
+                where: { email: validatedData.email }
+            })
+
+            if (emailExists) {
+                return NextResponse.json(
+                    { message: "El email ya está en uso por otro usuario" },
+                    { status: 409 }
+                )
+            }
+        }
 
         const usuarioUpdateData: Prisma.UsuarioUpdateInput = {
             email: validatedData.email,
@@ -55,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         }
 
         const updatedEmpleado = await prisma.empleado.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 departamento: validatedData.departamento,
                 cargo: validatedData.cargo,
@@ -83,6 +108,54 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             )
         }
 
+        // Manejo específico de errores de Prisma
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                return NextResponse.json(
+                    { message: "El email ya está en uso" },
+                    { status: 409 }
+                )
+            }
+            if (error.code === 'P2025') {
+                return NextResponse.json(
+                    { message: "Empleado no encontrado" },
+                    { status: 404 }
+                )
+            }
+        }
+
         return NextResponse.json({ message: "Error del servidor" }, { status: 500 })
+    }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    try {
+        const { id } = await params
+
+        const empleado = await prisma.empleado.findUnique({
+            where: { id },
+        });
+
+        if (!empleado) {
+            return NextResponse.json(
+                { message: "Empleado no encontrado" },
+                { status: 404 }
+            );
+        }
+
+        await prisma.empleado.delete({
+            where: { id },
+        });
+
+        return NextResponse.json(
+            { message: "Empleado eliminado correctamente" },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error eliminando empleado:", error);
+        return NextResponse.json(
+            { message: "Error interno al eliminar el empleado" },
+            { status: 500 }
+        );
     }
 }
