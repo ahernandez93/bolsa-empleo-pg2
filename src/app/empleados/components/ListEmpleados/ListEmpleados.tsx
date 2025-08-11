@@ -28,19 +28,17 @@ export function ListEmpleados({ empleados }: { empleados: EmpleadoConDatos[] }) 
     }
 
     const handleDelete = async (empleado: EmpleadoConDatos) => {
-        // Función para ejecutar la eliminación
         const executeDelete = async () => {
             try {
                 await axios.delete(`/api/empleados/${empleado.id}`);
                 toast.success("Empleado eliminado correctamente");
-                router.refresh(); // Recarga solo los datos
+                router.refresh();
             } catch (error) {
                 console.error("Error al eliminar el empleado:", error);
                 toast.error("Hubo un error al eliminar el empleado");
             }
         }
 
-        // Toast de confirmación con botones de acción
         toast(`¿Eliminar a ${empleado.nombre} ${empleado.apellido}?`, {
             description: "Esta acción no se puede deshacer",
             action: {
@@ -50,11 +48,10 @@ export function ListEmpleados({ empleados }: { empleados: EmpleadoConDatos[] }) 
             cancel: {
                 label: "Cancelar",
                 onClick: () => {
-                    // Opcional: toast de cancelación
-                    // toast.info("Eliminación cancelada")
+                    toast.info("Eliminación cancelada")
                 }
             },
-            duration: 10000, // 10 segundos para que el usuario tenga tiempo de decidir
+            duration: 10000,
         })
     }
     const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete })

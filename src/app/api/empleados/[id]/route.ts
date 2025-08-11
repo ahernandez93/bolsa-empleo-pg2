@@ -40,7 +40,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         const existingEmpleado = await prisma.empleado.findUnique({
             where: { id },
             include: {
-                usuario: true
+                usuario: {
+                    select: { id: true, email: true },
+                },
             }
         })
 
@@ -49,8 +51,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         }
 
         if (validatedData.email !== existingEmpleado.usuario.email) {
-            const emailExists = await prisma.usuario.findUnique({
-                where: { email: validatedData.email }
+            const emailExists = await prisma.usuario.findFirst({
+                where: {
+                    email: validatedData.email,
+                    id: { not: existingEmpleado.usuario.id },
+                }
             })
 
             if (emailExists) {
@@ -70,12 +75,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                     apellido: validatedData.apellido,
                     telefono: validatedData.telefono,
                     direccion: validatedData.direccion,
-                    fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : undefined,
+                    fechaNacimiento: validatedData.fechaNacimiento ? new Date(validatedData.fechaNacimiento) : null,
                 },
             },
         }
 
-        if (validatedData.password && validatedData.password.trim() !== "") {
+        if (validatedData.password?.trim()) {
             usuarioUpdateData.passwordHash = await bcrypt.hash(validatedData.password, 10)
         }
 
@@ -108,7 +113,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             )
         }
 
-        // Manejo específico de errores de Prisma
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             if (error.code === 'P2002') {
                 return NextResponse.json(
@@ -134,6 +138,13 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
         const empleado = await prisma.empleado.findUnique({
             where: { id },
+            include: {
+                usuario: {
+                    select: {
+                        personaId: true,
+                    },
+                },
+            },
         });
 
         if (!empleado) {
@@ -143,8 +154,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
             );
         }
 
-        await prisma.empleado.delete({
-            where: { id },
+        await prisma.persona.delete({
+            where: { id: empleado.usuario.personaId },
         });
 
         return NextResponse.json(

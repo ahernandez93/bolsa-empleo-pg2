@@ -1,16 +1,15 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { empleadoSchema, EmpleadoFormData, empleadoUpdateSchema, EmpleadoUpdateData   } from "@/lib/schemas/empleadoSchema";
+import { empleadoSchema, EmpleadoFormData, empleadoUpdateSchema, EmpleadoUpdateData } from "@/lib/schemas/empleadoSchema";
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import axios/* , { AxiosError } */ from "axios";
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { EmpleadoCompleto } from "@/types"
@@ -24,7 +23,6 @@ type FormCreateProps = {
 
 export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode = false }: FormCreateProps) {
 
-    // const { setOpenModalCreate } = props;
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -32,39 +30,33 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
 
     const schema = isEditMode ? empleadoUpdateSchema : empleadoSchema;
 
+    const defaultValues = initialData ? {
+        nombre: initialData.usuario.persona.nombre,
+        apellido: initialData.usuario.persona.apellido,
+        telefono: initialData.usuario.persona.telefono || "",
+        direccion: initialData.usuario.persona.direccion || "",
+        fechaNacimiento: initialData.usuario.persona.fechaNacimiento?.split("T")[0] || "",
+        email: initialData.usuario.email,
+        password: "",
+        rol: initialData.usuario.rol,
+        departamento: initialData.departamento,
+        cargo: initialData.cargo,
+    } : {
+        nombre: "",
+        apellido: "",
+        telefono: "",
+        direccion: "",
+        fechaNacimiento: "",
+        email: "",
+        password: "",
+        rol: undefined,
+        departamento: "",
+        cargo: "",
+    };
     const form = useForm<EmpleadoFormData | EmpleadoUpdateData>({
         resolver: zodResolver(schema),
-        defaultValues: {
-            nombre: "",
-            apellido: "",
-            telefono: "",
-            direccion: "",
-            fechaNacimiento: "",
-            email: "",
-            password: "",
-            rol: "RECLUTADOR",
-            departamento: "",
-            cargo: "",
-        },
+        defaultValues: defaultValues,
     });
-
-
-    useEffect(() => {
-        if (initialData) {
-            form.reset({
-                nombre: initialData.usuario.persona.nombre,
-                apellido: initialData.usuario.persona.apellido,
-                telefono: initialData.usuario.persona.telefono || "",
-                direccion: initialData.usuario.persona.direccion || "",
-                fechaNacimiento: initialData.usuario.persona.fechaNacimiento?.split("T")[0] || "",
-                email: initialData.usuario.email,
-                password: "",
-                rol: initialData.usuario.rol,
-                departamento: initialData.departamento,
-                cargo: initialData.cargo,
-            })
-        }
-    }, [initialData, form])
 
     const isValid = form.formState.isValid;
 
@@ -183,18 +175,17 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                     control={form.control}
                     name="password"
                     render={({ field }) => {
-
                         return (
                             <FormItem>
-                                <FormLabel>Contraseña</FormLabel>
+                                <FormLabel>Contraseña {/* {isEditMode && "(dejar en blanco para no cambiar)"} */}</FormLabel>
                                 <div className="relative">
                                     <FormControl>
                                         <Input
                                             type={showPassword ? "text" : "password"}
                                             placeholder="••••••••"
                                             {...field}
-                                            className="pr-10" // deja espacio para el icono
-                                            autoComplete="off"
+                                            className="pr-10"
+                                            autoComplete="new-password"
                                         />
                                     </FormControl>
                                     <Button
@@ -216,23 +207,25 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                 <FormField
                     control={form.control}
                     name="rol"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Rol</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecciona un rol" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="RECLUTADOR">Reclutador</SelectItem>
-                                    <SelectItem value="ADMIN">Admin</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
+                    render={({ field }) => {
+                        return (
+                            <FormItem>
+                                <FormLabel>Rol</FormLabel>
+                                <Select /* key={field.value} */ onValueChange={field.onChange} value={field.value ?? ""}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona un rol" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="RECLUTADOR">Reclutador</SelectItem>
+                                        <SelectItem value="ADMIN">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        );
+                    }}
                 />
                 <FormField
                     control={form.control}

@@ -94,6 +94,7 @@ export async function GET() {
             apellido: emp.usuario.persona.apellido,
             email: emp.usuario.email,
             telefono: emp.usuario.persona.telefono,
+            rol: emp.usuario.rol,
             departamento: emp.departamento,
             cargo: emp.cargo,
             activo: emp.usuario.activo,
