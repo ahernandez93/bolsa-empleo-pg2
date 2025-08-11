@@ -1,15 +1,10 @@
-import { AppSidebar } from '@/components/app-sidebar'
-import { DashboardHeader } from '@/components/dashboard-header'
-import {
-    SidebarInset,
-    SidebarProvider,
-} from '@/components/ui/sidebar'
+import { AppSidebar } from "@/components/app-sidebar";
+import { DashboardHeader } from "@/components/dashboard-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({
     children,
-}: {
-    children: React.ReactNode
-}) {
+}: Readonly<{ children: React.ReactNode }>) {
     return (
         <SidebarProvider>
             <AppSidebar />
@@ -18,5 +13,5 @@ export default function DashboardLayout({
                 {children}
             </SidebarInset>
         </SidebarProvider>
-    )
+    );
 }

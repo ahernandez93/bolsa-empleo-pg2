@@ -39,14 +39,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
+          {/* <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-              <DashboardHeader />
+              <DashboardHeader /> */}
               {children}
               <Toaster />
-            </SidebarInset>
-          </SidebarProvider>
+            {/* </SidebarInset>
+          </SidebarProvider> */}
         </ThemeProvider>
       </body>
     </html>

@@ -56,6 +56,8 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
     const form = useForm<EmpleadoFormData | EmpleadoUpdateData>({
         resolver: zodResolver(schema),
         defaultValues: defaultValues,
+        mode: "onChange",
+        reValidateMode: "onChange",
     });
 
     const isValid = form.formState.isValid;
