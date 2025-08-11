@@ -45,7 +45,7 @@ export function LoginForm({
               <Button type="submit" className="w-full">
                 Iniciar Sesión
               </Button>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+              {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   O continuar con
                 </span>
@@ -78,7 +78,7 @@ export function LoginForm({
                   </svg>
                   <span className="sr-only">Login with Meta</span>
                 </Button>
-              </div>
+              </div> */}
               <div className="text-center text-sm">
                 ¿No tienes una cuenta?{" "}
                 <a href="#" className="underline underline-offset-4">
@@ -89,10 +89,12 @@ export function LoginForm({
           </form>
           <div className="bg-muted relative hidden md:block">
             <Image
-              src="/portada2-login.webp"
+              src="/portada5.jpg"
               alt="Portada Login"
               width={100}
               height={100}
+              quality={100}
+              priority={true}
               // className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
               className="absolute inset-0 h-full w-full object-cover"
             />
