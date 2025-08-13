@@ -17,6 +17,13 @@ export default middleware((req) => {
     const { nextUrl, auth } = req
     const isLoggetIn = !!auth?.user
 
+    const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
+
+    // Permite que las rutas de la API de NextAuth pasen siempre
+    if (isApiAuthRoute) {
+        return NextResponse.next();
+    }
+
     if (!publicRoutes.includes(nextUrl.pathname) && !isLoggetIn) {
         return NextResponse.redirect(new URL("/login", nextUrl))
     }
@@ -33,5 +40,3 @@ export const config = {
         '/(api|trpc)(.*)',
     ],
 }
-
-

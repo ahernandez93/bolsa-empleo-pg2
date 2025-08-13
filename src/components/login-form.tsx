@@ -9,8 +9,6 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
-import { signIn } from "next-auth/react"
-// import { signIn } from "@/lib/auth/auth"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -38,11 +36,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    /* const res = await signIn("Credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: false,
-    }); */
     const res = await LoginAction(data.email, data.password);
 
     console.log(res);
@@ -71,7 +64,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   </p>
                 </div>
 
-                {/* Campo Email */}
                 <FormField
                   control={form.control}
                   name="email"
@@ -90,7 +82,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   )}
                 />
 
-                {/* Campo Contraseña */}
                 <FormField
                   control={form.control}
                   name="password"
@@ -113,7 +104,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                   )}
                 />
 
-                {/* Botón */}
                 <Button
                   type="submit"
                   className="w-full"
@@ -138,7 +128,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
             </form>
           </Form>
 
-          {/* Imagen Lateral */}
           <div className="bg-muted relative hidden md:block">
             <Image
               src="/portada5.jpg"

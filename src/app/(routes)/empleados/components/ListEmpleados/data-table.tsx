@@ -10,8 +10,11 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+  // Ensure data is always an array to prevent undefined errors
+  const safeData = data || [];
+  
   const table = useReactTable({
-    data,
+    data: safeData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -48,7 +51,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="text-center">
-                  No hay registros
+                  {safeData.length === 0 ? "No hay empleados registrados" : "No hay registros"}
                 </TableCell>
               </TableRow>
             )}
