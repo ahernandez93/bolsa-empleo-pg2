@@ -7,6 +7,7 @@ import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import { navigationData, /* projectsData, */ teamsData } from '@/lib/navigation-data'
+import type { Session } from "next-auth"
 
 /* const navMainData = [
   {
@@ -138,7 +139,11 @@ const data = {
   ],
 } */
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  session: Session | null
+}
+
+export function AppSidebar({session, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -149,7 +154,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavProjects projects={projectsData} /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+        <NavUser session={session}/>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

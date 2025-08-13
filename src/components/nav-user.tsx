@@ -1,14 +1,15 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react"
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut, /* Sparkles */ } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
-import { signOut, useSession } from "next-auth/react"
+import { signOut, /* useSession */ } from "next-auth/react"
+import type { Session } from "next-auth"
 
-export function NavUser() {
-  const { data: session, status } = useSession();
+export function NavUser({ session }: { session: Session | null }) {
+  // const { data: session, status } = useSession();
   const { isMobile } = useSidebar()
 
   const closeSession = async () => {
@@ -16,7 +17,6 @@ export function NavUser() {
   }
 
   if (status === "loading") {
-    // Puedes poner un skeleton loader aquí si lo prefieres
     return null;
   }
 
@@ -24,10 +24,8 @@ export function NavUser() {
     return null;
   }
 
-  // Extraemos el usuario de la sesión
   const user = session?.user;
 
-  // Fallback para iniciales si no hay nombre
   const initials = user?.name
     ?.split(' ')
     .map((n) => n[0])
@@ -43,7 +41,6 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                {/* NextAuth usa 'image' por defecto, no 'avatar' */}
                 <AvatarImage src={user?.image || undefined} alt={user?.name || ""} />
                 <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
               </Avatar>
@@ -72,32 +69,28 @@ export function NavUser() {
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
                 Upgrade to Pro
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+                Cuenta
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
-                Notifications
+                Notificaciones
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={closeSession}>
               <LogOut />
-              Log out
+              Cerrar Sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

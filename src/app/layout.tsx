@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner"
-import { NextAuthProvider } from "@/components/providers";
+import { auth } from "@/lib/auth/auth";
+import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,18 +21,15 @@ export const metadata: Metadata = {
   description: "Bolsa de Empleo es una plataforma de intermediacion laboral",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
-
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextAuthProvider>
+        <SessionProvider session={session}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -41,7 +39,7 @@ export default function RootLayout({
             {children}
             <Toaster />
           </ThemeProvider>
-        </NextAuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );

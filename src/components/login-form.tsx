@@ -42,6 +42,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     if (res.success) {
       toast.success("Inicio de sesión exitoso");
       router.push("/");
+      router.refresh();
     } else {
       setError(res.error);
       toast.error("Error al iniciar sesión");

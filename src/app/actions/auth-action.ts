@@ -21,7 +21,6 @@ export const LoginAction = async (email: string, password: string) => {
         console.error("Login error:", error);
         
         if (error instanceof AuthError) {
-            // Handle different types of AuthError
             switch (error.type) {
                 case 'CredentialsSignin':
                     return { success: false, error: "Credenciales inválidas" };
@@ -32,7 +31,6 @@ export const LoginAction = async (email: string, password: string) => {
             }
         }
         
-        // Handle other types of errors
         if (error instanceof Error) {
             return { success: false, error: error.message };
         }
