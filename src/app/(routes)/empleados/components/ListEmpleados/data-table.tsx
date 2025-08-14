@@ -1,9 +1,10 @@
 "use client"
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, } from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, SortingState, } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { DataTableToolbar } from "./data-table-toolbar"
+import { useState } from "react"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -11,19 +12,23 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-  // Ensure data is always an array to prevent undefined errors
-  const safeData = data || [];
+  const [globalFilter, setGlobalFilter] = useState([])
+  const [sorting, setSorting] = useState<SortingState>([]);
 
+  const safeData = data || [];
   const table = useReactTable({
     data: safeData,
     columns,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
-      columnFilters: [],
+      sorting,
+      globalFilter
     },
+    onGlobalFilterChange: setGlobalFilter,
   })
 
   return (

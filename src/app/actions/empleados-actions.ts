@@ -21,7 +21,6 @@ export const getEmpleados = async () => {
             nombre: emp.usuario.persona.nombre,
             apellido: emp.usuario.persona.apellido,
             email: emp.usuario.email,
-            // telefono: emp.usuario.persona.telefono ?? undefined,
             rol: emp.usuario.rol,
             departamento: emp.departamento,
             cargo: emp.cargo,

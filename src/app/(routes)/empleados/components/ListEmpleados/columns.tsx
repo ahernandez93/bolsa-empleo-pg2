@@ -4,15 +4,13 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
-import { ArrowUpDown } from "lucide-react"
+import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 
 export type EmpleadoConDatos = {
   id: string
   nombre: string
   apellido: string
   email: string
-  // telefono?: string
   rol: string
   departamento: string
   cargo: string
@@ -24,38 +22,55 @@ interface GetColumnsProps {
   onDelete: (empleado: EmpleadoConDatos) => void
 }
 
+const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
+  return (
+    <span className="flex flex-col ml-1">
+      <ArrowUp
+        className={`w-3 h-3 ${sort === "asc" ? "text-blue-600" : "text-gray-300"}`}
+      />
+      <ArrowDown
+        className={`w-3 h-3 -mt-3 ${sort === "desc" ? "text-blue-600" : "text-gray-300"}`}
+      />
+    </span>
+  )
+}
+
 export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<EmpleadoConDatos>[] => [
   {
     accessorKey: "nombre",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Nombre
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(sort === "asc")}
+          className="flex items-center gap-0"
+        >
+          Nombre
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
     cell: ({ row }) => (
       <span className="font-medium">{row.original.nombre} {row.original.apellido}</span>
     ),
   },
   {
     accessorKey: "email",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Correo
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex items-center gap-0"
+        >
+          Correo
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
   },
-  /* {
-    accessorKey: "telefono",
-    header: "Teléfono",
-  }, */
   {
     accessorKey: "rol",
     header: "Rol",
@@ -79,15 +94,19 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Creado
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="flex items-center gap-0"
+        >
+          Creado
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
     cell: ({ row }) => format(new Date(row.original.createdAt), "dd/MM/yyyy"),
   },
   {
