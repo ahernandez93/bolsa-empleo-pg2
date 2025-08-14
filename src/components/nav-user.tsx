@@ -16,15 +16,11 @@ export function NavUser({ session }: { session: Session | null }) {
     await signOut()
   }
 
-  if (status === "loading") {
+  if (!session) {
     return null;
   }
 
-  if (status === "unauthenticated") {
-    return null;
-  }
-
-  const user = session?.user;
+  const user = session.user;
 
   const initials = user?.name
     ?.split(' ')

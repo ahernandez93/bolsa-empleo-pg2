@@ -5,13 +5,14 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 
 export type EmpleadoConDatos = {
   id: string
   nombre: string
   apellido: string
   email: string
-  telefono?: string
+  // telefono?: string
   rol: string
   departamento: string
   cargo: string
@@ -26,19 +27,35 @@ interface GetColumnsProps {
 export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<EmpleadoConDatos>[] => [
   {
     accessorKey: "nombre",
-    header: "Nombre",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Nombre
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => (
       <span className="font-medium">{row.original.nombre} {row.original.apellido}</span>
     ),
   },
   {
     accessorKey: "email",
-    header: "Correo",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Correo
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
   },
-  {
+  /* {
     accessorKey: "telefono",
     header: "Teléfono",
-  },
+  }, */
   {
     accessorKey: "rol",
     header: "Rol",
@@ -62,7 +79,15 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
   },
   {
     accessorKey: "createdAt",
-    header: "Creado",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Creado
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => format(new Date(row.original.createdAt), "dd/MM/yyyy"),
   },
   {
