@@ -4,6 +4,7 @@ import { NextResponse } from "next/server"
 import z from "zod"
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
+import { RolUsuario } from "@prisma/client";
 
 export async function GET(request: Request, { params }: { params: { id: string } }
 ) {
@@ -68,7 +69,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         const usuarioUpdateData: Prisma.UsuarioUpdateInput = {
             email: validatedData.email,
-            rol: validatedData.rol,
+            rol: validatedData.rol as RolUsuario,
+            activo: validatedData.activo,
             persona: {
                 update: {
                     nombre: validatedData.nombre,

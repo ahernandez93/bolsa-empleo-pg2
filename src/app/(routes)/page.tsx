@@ -1,7 +1,12 @@
-export default function Home() {
+import { auth } from "@/lib/auth/auth";
+import { Label } from "@/components/ui/label";
+
+export default async function Home() {
+  const session = await auth();
   return (
     <>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <Label className="text-2xl font-bold">Bienvenido {session?.user?.name}</Label>
         <div className="grid auto-rows-min gap-4 md:grid-cols-3">
           <div className="bg-muted/50 aspect-video rounded-xl" />
           <div className="bg-muted/50 aspect-video rounded-xl" />

@@ -14,6 +14,7 @@ import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { EmpleadoCompleto } from "@/types"
 import { Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
@@ -41,6 +42,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         rol: initialData.usuario.rol,
         departamento: initialData.departamento,
         cargo: initialData.cargo,
+        activo: initialData.usuario?.activo,
     } : {
         nombre: "",
         apellido: "",
@@ -52,6 +54,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         rol: undefined,
         departamento: "",
         cargo: "",
+        activo: true,
     };
     const form = useForm<EmpleadoFormData | EmpleadoUpdateData>({
         resolver: zodResolver(schema),
@@ -252,6 +255,27 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                                 <Input placeholder="Ej: Desarrollador" {...field} />
                             </FormControl>
                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="activo"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                            <div className="space-y-0.5">
+                                <FormLabel className="text-base">Estado</FormLabel>
+                                <p className="text-sm text-muted-foreground">
+                                    {field.value ? "El usuario está activo" : "El usuario está inactivo"}
+                                </p>
+                            </div>
+                            <FormControl>
+                                <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                            </FormControl>
                         </FormItem>
                     )}
                 />

@@ -12,6 +12,7 @@ const schemaBase = {
   rol: z.string().min(1, "El rol es requerido").refine((v) => (ROLES as readonly string[]).includes(v), { message: "Rol inválido" }),
   departamento: z.string().min(1, "El departamento es requerido").min(2, "El departamento debe tener al menos 2 caracteres"),
   cargo: z.string().min(1, "El cargo es requerido").min(2, "El cargo debe tener al menos 2 caracteres"),
+  activo: z.boolean().optional(),
 };
 
 export const empleadoSchema = z.object({

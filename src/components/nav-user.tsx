@@ -9,7 +9,6 @@ import { signOut, /* useSession */ } from "next-auth/react"
 import type { Session } from "next-auth"
 
 export function NavUser({ session }: { session: Session | null }) {
-  // const { data: session, status } = useSession();
   const { isMobile } = useSidebar()
 
   const closeSession = async () => {
@@ -22,10 +21,7 @@ export function NavUser({ session }: { session: Session | null }) {
 
   const user = session.user;
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('') || "";
+  const initials = user?.name?.split(' ').map((n) => n[0]).join('') || "";
 
   return (
     <SidebarMenu>
