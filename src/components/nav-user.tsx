@@ -1,11 +1,11 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut, /* Sparkles */ } from "lucide-react"
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
-import { signOut, /* useSession */ } from "next-auth/react"
+import { signOut } from "next-auth/react"
 import type { Session } from "next-auth"
 
 export function NavUser({ session }: { session: Session | null }) {
@@ -61,13 +61,6 @@ export function NavUser({ session }: { session: Session | null }) {
                 </div>
               </div>
             </DropdownMenuLabel>
-            {/* <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
