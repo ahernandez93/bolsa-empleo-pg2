@@ -3,8 +3,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FormCreateEmpleado } from "./FormCreateEmpleado";
+import { DepartamentoItem } from "@/app/actions/departamentos-actions";
+import { CargoItem } from "@/app/actions/cargos-actions";
 
-export function HeaderEmpleados() {
+export function HeaderEmpleados({ departamentos, cargos }: { departamentos: DepartamentoItem[], cargos: CargoItem[] }) {
     const [openModalCreate, setOpenModalCreate] = useState(false);
 
     return (
@@ -23,7 +25,12 @@ export function HeaderEmpleados() {
                             Ingrese los datos del nuevo empleado
                         </DialogDescription>
                     </DialogHeader>
-                    <FormCreateEmpleado setOpenModalCreate={setOpenModalCreate} isEditMode={false} />
+                    <FormCreateEmpleado
+                        setOpenModalCreate={setOpenModalCreate}
+                        isEditMode={false}
+                        departamentos={departamentos}
+                        cargos={cargos}
+                    />
                 </DialogContent>
             </Dialog>
         </div>

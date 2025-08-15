@@ -37,7 +37,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 
             <Select
                 onValueChange={(value) =>
-                    table.getColumn("departamento")?.setFilterValue(value === "all" ? "" : value)
+                    table.getColumn("departamentodescripcion")?.setFilterValue(value === "all" ? "" : value)
                 }
                 defaultValue="all"
             >

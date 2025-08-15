@@ -9,8 +9,16 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { EmpleadoCompleto } from "@/types"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { DepartamentoItem } from "@/app/actions/departamentos-actions"
+import { CargoItem } from "@/app/actions/cargos-actions"
 
-export function ListEmpleados({ empleados }: { empleados: EmpleadoConDatos[] }) {
+interface ListEmpleadosProps {
+    empleados: EmpleadoConDatos[]
+    departamentos: DepartamentoItem[]
+    cargos: CargoItem[]
+}
+
+export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleadosProps) {
     const [editingEmpleado, setEditingEmpleado] = useState<EmpleadoCompleto | null>(null)
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const router = useRouter()
@@ -75,6 +83,8 @@ export function ListEmpleados({ empleados }: { empleados: EmpleadoConDatos[] }) 
                         initialData={editingEmpleado}
                         setOpenModalCreate={setOpenModalCreate}
                         isEditMode={Boolean(editingEmpleado)}
+                        departamentos={departamentos}
+                        cargos={cargos}
                     />
                 </DialogContent>
             </Dialog>

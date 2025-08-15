@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { departamentoSchema } from "@/lib/schemas/departamentoSchema"
+import { cargoSchema } from "@/lib/schemas/cargoSchema"
 import { NextResponse } from "next/server"
 import z from "zod"
 import { Prisma } from "@prisma/client";
@@ -8,17 +8,17 @@ export async function GET(request: Request, { params }: { params: { id: string }
 ) {
     try {
         const { id } = await params
-        const departamento = await prisma.departamento.findUnique({
+        const cargo = await prisma.cargo.findUnique({
             where: { id: parseInt(id) },
         })
 
-        if (!departamento) {
-            return NextResponse.json({ message: "Departamento no encontrado" }, { status: 404 })
+        if (!cargo) {
+            return NextResponse.json({ message: "Cargo no encontrado" }, { status: 404 })
         }
 
-        return NextResponse.json(departamento)
+        return NextResponse.json(cargo)
     } catch (error) {
-        console.error("Error al obtener empleado:", error)
+        console.error("Error al obtener cargo:", error)
         return NextResponse.json({ message: "Error del servidor" }, { status: 500 })
     }
 }
@@ -27,30 +27,30 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     try {
         const { id } = await params
         const body = await request.json()
-        const validatedData = departamentoSchema.parse(body)
+        const validatedData = cargoSchema.parse(body)
 
-        const existingDepartamento = await prisma.departamento.findUnique({
+        const existingCargo = await prisma.cargo.findUnique({
             where: { id: parseInt(id) },
         })
 
-        if (!existingDepartamento) {
-            return NextResponse.json({ message: "Departamento no encontrado" }, { status: 404 })
+        if (!existingCargo) {
+            return NextResponse.json({ message: "Cargo no encontrado" }, { status: 404 })
         }
 
 
-        const departamentoUpdateData: Prisma.DepartamentoUpdateInput = {
+        const cargoUpdateData: Prisma.CargoUpdateInput = {
             descripcion: validatedData.descripcion,
             habilitado: validatedData.habilitado,
         }
 
-        const updatedDepartamento = await prisma.departamento.update({
+        const updatedCargo = await prisma.cargo.update({
             where: { id: parseInt(id) },
-            data: departamentoUpdateData,
+            data: cargoUpdateData,
         })
 
-        return NextResponse.json(updatedDepartamento)
+        return NextResponse.json(updatedCargo)
     } catch (error) {
-        console.error("Error al actualizar departamento:", error)
+        console.error("Error al actualizar cargo:", error)
 
         if (error instanceof z.ZodError) {
             return NextResponse.json(
@@ -62,7 +62,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             if (error.code === 'P2025') {
                 return NextResponse.json(
-                    { message: "Departamento no encontrado" },
+                    { message: "Cargo no encontrado" },
                     { status: 404 }
                 )
             }
@@ -76,29 +76,29 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     try {
         const { id } = await params
 
-        const departamento = await prisma.departamento.findUnique({
+        const cargo = await prisma.cargo.findUnique({
             where: { id: parseInt(id) },
         });
 
-        if (!departamento) {
+        if (!cargo) {
             return NextResponse.json(
-                { message: "Departamento no encontrado" },
+                { message: "Cargo no encontrado" },
                 { status: 404 }
             );
         }
 
-        await prisma.departamento.delete({
+        await prisma.cargo.delete({
             where: { id: parseInt(id) },
         });
 
         return NextResponse.json(
-            { message: "Departamento eliminado correctamente" },
+            { message: "Cargo eliminado correctamente" },
             { status: 200 }
         );
     } catch (error) {
-        console.error("Error eliminando departamento:", error);
+        console.error("Error eliminando cargo:", error);
         return NextResponse.json(
-            { message: "Error interno al eliminar el departamento" },
+            { message: "Error interno al eliminar el cargo" },
             { status: 500 }
         );
     }

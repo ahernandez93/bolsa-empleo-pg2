@@ -10,20 +10,23 @@ export const getEmpleados = async () => {
                         persona: true,
                     },
                 },
+                departamento: true,
+                cargo: true,
             },
             orderBy: {
                 createdAt: "desc",
             },
         });
-
         const data = empleados.map(emp => ({
             id: emp.id,
             nombre: emp.usuario.persona.nombre,
             apellido: emp.usuario.persona.apellido,
             email: emp.usuario.email,
             rol: emp.usuario.rol,
-            departamento: emp.departamento,
-            cargo: emp.cargo,
+            departamentoId: emp.departamentoId,
+            departamentodescripcion: emp.departamento.descripcion,
+            cargoId: emp.cargoId,
+            cargodescripcion: emp.cargo.descripcion,
             activo: emp.usuario.activo,
             createdAt: emp.createdAt.toISOString(),
         }));

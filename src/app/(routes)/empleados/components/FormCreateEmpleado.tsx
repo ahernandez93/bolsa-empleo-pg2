@@ -15,14 +15,18 @@ import { toast } from "sonner";
 import { EmpleadoCompleto } from "@/types"
 import { Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { DepartamentoItem } from "@/app/actions/departamentos-actions";
+import { CargoItem } from "@/app/actions/cargos-actions";
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
     initialData?: EmpleadoCompleto | null,
-    isEditMode: boolean
+    isEditMode: boolean,
+    departamentos: DepartamentoItem[],
+    cargos: CargoItem[],
 }
 
-export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode = false }: FormCreateProps) {
+export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode = false, departamentos, cargos }: FormCreateProps) {
 
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -40,8 +44,8 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         email: initialData.usuario.email,
         password: "",
         rol: initialData.usuario.rol,
-        departamento: initialData.departamento,
-        cargo: initialData.cargo,
+        departamentoId: initialData.departamentoId.toString(),
+        cargoId: initialData.cargoId.toString(),
         activo: initialData.usuario?.activo,
     } : {
         nombre: "",
@@ -52,8 +56,8 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         email: "",
         password: "",
         rol: undefined,
-        departamento: "",
-        cargo: "",
+        departamentoId: undefined,
+        cargoId: undefined,
         activo: true,
     };
     const form = useForm<EmpleadoFormData | EmpleadoUpdateData>({
@@ -224,7 +228,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                                     </FormControl>
                                     <SelectContent>
                                         <SelectItem value="RECLUTADOR">Reclutador</SelectItem>
-                                        <SelectItem value="ADMIN">Admin</SelectItem>
+                                        <SelectItem value="ADMIN">Administrador</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -234,26 +238,54 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                 />
                 <FormField
                     control={form.control}
-                    name="departamento"
+                    name="departamentoId"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Departamento</FormLabel>
-                            <FormControl>
-                                <Input placeholder="TI, RRHH, etc." {...field} />
-                            </FormControl>
+                            <Select
+                                onValueChange={field.onChange} 
+                                value={field.value?.toString() ?? ""}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione un departamento" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {departamentos.map((dep) => (
+                                        <SelectItem key={dep.id} value={dep.id.toString()}>
+                                            {dep.descripcion}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <FormField
                     control={form.control}
-                    name="cargo"
+                    name="cargoId"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Cargo</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Ej: Desarrollador" {...field} />
-                            </FormControl>
+                            <Select
+                                onValueChange={field.onChange} 
+                                value={field.value?.toString() ?? ""}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccione un cargo" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {cargos.map((cargo) => (
+                                        <SelectItem key={cargo.id} value={cargo.id.toString()}>
+                                            {cargo.descripcion}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}

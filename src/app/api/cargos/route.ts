@@ -1,16 +1,16 @@
-// app/api/empleados/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { departamentoSchema } from "@/lib/schemas/departamentoSchema";
+import { cargoSchema } from "@/lib/schemas/cargoSchema";
+
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const data = departamentoSchema.parse(body);
+        const data = cargoSchema.parse(body);
 
 
-        const departamento = await prisma.departamento.create({
+        const cargo = await prisma.cargo.create({
             data: {
                 descripcion: data.descripcion,
                 habilitado: data.habilitado,
@@ -19,15 +19,15 @@ export async function POST(req: Request) {
 
         return NextResponse.json(
             {
-                message: "Departamento creado correctamente", departamento: {
-                    descripcion: departamento.descripcion,
-                    habilitado: departamento.habilitado
+                message: "Cargo creado correctamente", cargo: {
+                    descripcion: cargo.descripcion,
+                    habilitado: cargo.habilitado
                 }
             },
             { status: 201 }
         );
     } catch (error) {
-        console.error("Error al crear departamento:", error);
+        console.error("Error al crear cargo:", error);
 
         if (error instanceof z.ZodError) {
             return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
 export async function GET() {
     try {
-        const departamentos = await prisma.departamento.findMany({
+        const cargos = await prisma.cargo.findMany({
             select: {
                 id: true,
                 descripcion: true,
@@ -53,15 +53,15 @@ export async function GET() {
             },
         });
 
-        const data = departamentos.map(emp => ({
+        const data = cargos.map(emp => ({
             id: emp.id,
             descripcion: emp.descripcion,
             habilitado: emp.habilitado,
         }))
 
-        return NextResponse.json({ departamentos: data });
+        return NextResponse.json({ cargos: data });
     } catch (error) {
-        console.error("Error al obtener departamentos:", error);
+        console.error("Error al obtener cargos:", error);
         return NextResponse.json(
             { message: "Error interno del servidor" },
             { status: 500 }

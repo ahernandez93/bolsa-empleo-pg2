@@ -1,8 +1,8 @@
 export type EmpleadoCompleto = {
     id: string
     usuarioId: string
-    departamento: string
-    cargo: string
+    departamentoId: number
+    cargoId: number
     createdAt: string
     updatedAt: string
     usuario: {

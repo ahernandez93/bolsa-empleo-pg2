@@ -4,6 +4,8 @@ import { ListEmpleados } from "./components/ListEmpleados/ListEmpleados"
 // import { prisma } from "@/lib/prisma"
 // import { headers } from 'next/headers'
 import { getEmpleados } from "@/app/actions/empleados-actions"
+import { getDepartamentos } from "@/app/actions/departamentos-actions"
+import { getCargos } from "@/app/actions/cargos-actions"
 
 /* async function getEmpleados() {
     try {
@@ -31,11 +33,20 @@ import { getEmpleados } from "@/app/actions/empleados-actions"
 
 export default async function EmpleadosPage() {
     const empleados = await getEmpleados();
+    const departamentos = await getDepartamentos();
+    const cargos = await getCargos();
 
     return (
         <div className="p-6">
-            <HeaderEmpleados />
-            <ListEmpleados empleados={empleados} />
+            <HeaderEmpleados
+                departamentos={departamentos ?? []}
+                cargos={cargos ?? []}
+            />
+            <ListEmpleados
+                empleados={empleados}
+                departamentos={departamentos ?? []}
+                cargos={cargos ?? []}
+            />
         </div>
     )
 }

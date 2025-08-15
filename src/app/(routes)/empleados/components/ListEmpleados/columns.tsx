@@ -12,8 +12,10 @@ export type EmpleadoConDatos = {
   apellido: string
   email: string
   rol: string
-  departamento: string
-  cargo: string
+  departamentoId: number
+  departamentodescripcion: string
+  cargoId: number
+  cargodescripcion: string
   activo: boolean
   createdAt: string
 }
@@ -72,16 +74,16 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
     },
   },
   {
-    accessorKey: "rol",
-    header: "Rol",
-  },
-  {
-    accessorKey: "departamento",
+    accessorKey: "departamentodescripcion",
     header: "Departamento",
   },
   {
-    accessorKey: "cargo",
+    accessorKey: "cargodescripcion",
     header: "Cargo",
+  },
+  {
+    accessorKey: "rol",
+    header: "Rol",
   },
   {
     accessorKey: "activo",
