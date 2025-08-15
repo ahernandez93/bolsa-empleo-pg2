@@ -2,28 +2,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FormCreateEmpleado } from "./FormCreateEmpleado";
+import { FormCreateDepartamento } from "./FormCreateDepartamento";
 
-export function HeaderEmpleados() {
+export function HeaderDepartamentos() {
     const [openModalCreate, setOpenModalCreate] = useState(false);
 
     return (
         <div className="flex justify-between items-center px-4">
-            <h2 className="text-2xl">Listado de Empleados</h2>
+            <h2 className="text-2xl">Listado de Departamentos</h2>
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
                 <DialogTrigger asChild>
-                    <Button>Agregar Empleado</Button>
+                    <Button>Agregar Departamento</Button>
                 </DialogTrigger>
 
                 <DialogContent className="sm:max-w-[625px]">
                     <DialogHeader>
-                        <DialogTitle>Nuevo Empleado</DialogTitle>
+                        <DialogTitle>Nuevo Departamento</DialogTitle>
                         <DialogDescription>
-                            Ingrese los datos del nuevo empleado
+                            Ingrese los datos del nuevo departamento
                         </DialogDescription>
                     </DialogHeader>
-                    <FormCreateEmpleado setOpenModalCreate={setOpenModalCreate} isEditMode={false} />
+                    <FormCreateDepartamento setOpenModalCreate={setOpenModalCreate} isEditMode={false} />
                 </DialogContent>
             </Dialog>
         </div>

@@ -1,8 +1,14 @@
+import { HeaderDepartamentos } from "./components/HeaderDepartamentos";
+// import { ListDepartamentos } from "./components/ListDepartamentos";
+// import { getDepartamentos } from "@/app/actions/departamentos-actions";
 
-export default function Departamentos() {
+export default async function Departamentos() {
+    // const departamentos = await getDepartamentos();
+
     return (
-        <div>
-            Departamentos
+        <div className="p-6">
+            <HeaderDepartamentos />
+            {/* <ListDepartamentos departamentos={departamentos} /> */}
         </div>
     )
 }

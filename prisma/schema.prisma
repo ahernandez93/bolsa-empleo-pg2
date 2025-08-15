@@ -10,8 +10,8 @@ generator client {
 
 datasource db {
   // provider = "mysql"
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -41,20 +41,44 @@ model Usuario {
   updatedAt       DateTime   @updatedAt
 
   // Relaciones
-  persona  Persona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  persona  Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
   empleado Empleado?
 }
 
 model Empleado {
-  id           String   @id @default(uuid())
-  usuarioId    String   @unique
-  departamento String
-  cargo        String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             String   @id @default(uuid())
+  usuarioId      String   @unique
+  departamentoId Int
+  cargoId        Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relaciones
-  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuario      Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  departamento Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
+  cargo        Cargo        @relation(fields: [cargoId], references: [id], onDelete: Restrict)
+}
+
+model Departamento {
+  id          Int      @id @default(autoincrement())
+  descripcion String
+  habilitado  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  empleados Empleado[]
+}
+
+model Cargo {
+  id          Int      @id @default(autoincrement())
+  descripcion String
+  habilitado  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  empleados Empleado[]
 }
 
 enum RolUsuario {
