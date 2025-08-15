@@ -89,8 +89,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         const updatedEmpleado = await prisma.empleado.update({
             where: { id },
             data: {
-                departamento: validatedData.departamento,
-                cargo: validatedData.cargo,
+                departamento: {
+                    connect: { id: Number(validatedData.departamentoId) },
+                },
+                cargo: {
+                    connect: { id: Number(validatedData.cargoId) },
+                },
                 usuario: {
                     update: usuarioUpdateData,
                 },

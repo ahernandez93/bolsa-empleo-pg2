@@ -15,8 +15,8 @@ const empleadoSchema = z.object({
     rol: z.enum(["RECLUTADOR", "ADMIN"]), // solo roles válidos para empleados
     activo: z.boolean().optional().default(true),
     emailVerificado: z.boolean().optional().default(false),
-    departamento: z.string().min(2),
-    cargo: z.string().min(2),
+    departamentoId: z.number(),
+    cargoId: z.number(),
 });
 
 export async function POST(req: Request) {
@@ -42,8 +42,16 @@ export async function POST(req: Request) {
                         emailVerificado: false,
                         empleado: {
                             create: {
-                                departamento: data.departamento,
-                                cargo: data.cargo,
+                                departamento: {
+                                    connect: {
+                                        id: data.departamentoId,
+                                    },
+                                },
+                                cargo: {
+                                    connect: {
+                                        id: data.cargoId,
+                                    },
+                                },
                             },
                         },
                     },
@@ -95,8 +103,8 @@ export async function GET() {
             email: emp.usuario.email,
             telefono: emp.usuario.persona.telefono,
             rol: emp.usuario.rol,
-            departamento: emp.departamento,
-            cargo: emp.cargo,
+            departamentoId: emp.departamentoId,
+            cargoId: emp.cargoId,
             activo: emp.usuario.activo,
             createdAt: emp.createdAt,
         }))
