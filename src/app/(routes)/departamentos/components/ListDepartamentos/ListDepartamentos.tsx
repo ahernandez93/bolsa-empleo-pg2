@@ -1,33 +1,28 @@
 "use client"
 
 import { DataTable } from "./data-table"
-import { getColumns, EmpleadoConDatos } from "./columns"
+import { getColumns, DepartamentoData } from "./columns"
 import { useState } from "react"
 import axios from "axios"
-import { FormCreateEmpleado } from "../FormCreateEmpleado"
+import { FormCreateDepartamento } from "../FormCreateDepartamento"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { EmpleadoCompleto } from "@/types"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { CargoItem } from "@/app/actions/cargos-actions"
-import { DepartamentoItem } from "@/app/actions/departamentos-actions"
 
-interface ListEmpleadosProps {
-    empleados: EmpleadoConDatos[]
-    departamentos: DepartamentoItem[]
-    cargos: CargoItem[]
+interface ListDepartamentosProps {
+    departamentos: DepartamentoData[]
 }
 
-export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleadosProps) {
-    const [editingEmpleado, setEditingEmpleado] = useState<EmpleadoCompleto | null>(null)
+export function ListDepartamentos({ departamentos }: ListDepartamentosProps) {
+    const [editingDepartamento, setEditingDepartamento] = useState<DepartamentoData | null>(null)
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const router = useRouter()
 
-    const handleEdit = async (empleado: EmpleadoConDatos) => {
+    const handleEdit = async (departamento: DepartamentoData) => {
         try {
-            const res = await axios.get(`/api/empleados/${empleado.id}`)
-            const empleadoCompleto = res.data
-            setEditingEmpleado(empleadoCompleto)
+            const res = await axios.get(`/api/departamentos/${departamento.id}`)
+            const departamentoCompleto = res.data
+            setEditingDepartamento(departamentoCompleto)
             setOpenModalCreate(true)
         } catch (error) {
             console.error("Error al obtener detalles del empleado:", error)
@@ -35,11 +30,11 @@ export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleado
         }
     }
 
-    const handleDelete = async (empleado: EmpleadoConDatos) => {
+    const handleDelete = async (departamento: DepartamentoData) => {
         const executeDelete = async () => {
             try {
-                await axios.delete(`/api/empleados/${empleado.id}`);
-                toast.success("Empleado eliminado correctamente");
+                await axios.delete(`/api/departamentos/${departamento.id}`);
+                toast.success("Departamento eliminado correctamente");
                 router.refresh();
             } catch (error) {
                 console.error("Error al eliminar el empleado:", error);
@@ -47,7 +42,7 @@ export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleado
             }
         }
 
-        toast(`¿Eliminar a ${empleado.nombre} ${empleado.apellido}?`, {
+        toast(`¿Eliminar a ${departamento.descripcion}?`, {
             description: "Esta acción no se puede deshacer",
             action: {
                 label: "Eliminar",
@@ -66,25 +61,23 @@ export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleado
 
     return (
         <>
-            <DataTable columns={columns} data={empleados} />
+            <DataTable columns={columns} data={departamentos} />
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
                 <DialogContent className="sm:max-w-[625px]">
                     <DialogHeader>
                         <DialogTitle>
-                            {editingEmpleado ? "Editar Empleado" : "Nuevo Empleado"}
+                            {editingDepartamento ? "Editar Departamento" : "Nuevo Departamento"}
                         </DialogTitle>
                         <DialogDescription>
-                            {editingEmpleado ? "Actualice los datos del empleado" : "Ingrese los datos del nuevo empleado"}
+                            {editingDepartamento ? "Actualice los datos del departamento" : "Ingrese los datos del nuevo departamento"}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <FormCreateEmpleado
-                        initialData={editingEmpleado}
+                    <FormCreateDepartamento
+                        initialData={editingDepartamento}
                         setOpenModalCreate={setOpenModalCreate}
-                        isEditMode={Boolean(editingEmpleado)}
-                        departamentos={departamentos}
-                        cargos={cargos}
+                        isEditMode={Boolean(editingDepartamento)}
                     />
                 </DialogContent>
             </Dialog>

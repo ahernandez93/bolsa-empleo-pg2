@@ -4,7 +4,7 @@ import { ListEmpleados } from "./components/ListEmpleados/ListEmpleados"
 // import { prisma } from "@/lib/prisma"
 // import { headers } from 'next/headers'
 import { getEmpleados } from "@/app/actions/empleados-actions"
-import { getDepartamentos } from "@/app/actions/departamentos-actions"
+import { getDepartamentosHabilitados } from "@/app/actions/departamentos-actions"
 import { getCargos } from "@/app/actions/cargos-actions"
 
 /* async function getEmpleados() {
@@ -33,7 +33,7 @@ import { getCargos } from "@/app/actions/cargos-actions"
 
 export default async function EmpleadosPage() {
     const empleados = await getEmpleados();
-    const departamentos = await getDepartamentos();
+    const departamentos = await getDepartamentosHabilitados();
     const cargos = await getCargos();
 
     return (

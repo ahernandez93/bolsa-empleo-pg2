@@ -27,3 +27,19 @@ export type EmpleadoCompleto = {
         }
     }
 }
+
+export type DepartamentoCompleto = {
+    id: number
+    descripcion: string
+    habilitado: boolean
+    createdAt: string
+    updatedAt: string
+}
+
+export type CargoCompleto = {
+    id: number
+    descripcion: string
+    habilitado: boolean
+    createdAt: string
+    updatedAt: string
+}
