@@ -7,12 +7,14 @@ import { Table } from "@tanstack/react-table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { useState, useEffect } from "react"
+import { DepartamentoItem } from "@/app/actions/departamentos-actions"
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
+    departamentos: DepartamentoItem[]
 }
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table, departamentos }: DataTableToolbarProps<TData>) {
     const [globalFilter, setGlobalFilter] = useState<string>("")
 
     useEffect(() => {
@@ -46,20 +48,24 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="Ventas">Ventas</SelectItem>
-                    <SelectItem value="Recursos Humanos">Recursos Humanos</SelectItem>
-                    <SelectItem value="TI">TI</SelectItem>
-                    <SelectItem value="Administración">Administración</SelectItem>
+                    {departamentos.map((dep) => (
+                        <SelectItem 
+                            key={dep.id} 
+                            value={dep.descripcion.toString()}
+                        >
+                            {dep.descripcion}
+                        </SelectItem>
+                    ))}
                 </SelectContent>
             </Select>
 
             {isFiltered && (
-                <Button 
-                    variant="ghost" 
+                <Button
+                    variant="ghost"
                     onClick={() => {
                         table.resetColumnFilters()
                         setGlobalFilter("")
-                    }} 
+                    }}
                     className="h-8 px-2"
                 >
                     Limpiar filtros

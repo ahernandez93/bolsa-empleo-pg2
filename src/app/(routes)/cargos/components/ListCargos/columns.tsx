@@ -6,7 +6,7 @@ import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 
-export type DepartamentoData = {
+export type CargoData = {
   id: number
   descripcion: string
   habilitado: boolean
@@ -14,8 +14,8 @@ export type DepartamentoData = {
   updatedAt: string
 }
 interface GetColumnsProps {
-  onEdit: (departamento: DepartamentoData) => void
-  onDelete: (departamento: DepartamentoData) => void
+  onEdit: (cargo: CargoData) => void
+  onDelete: (cargo: CargoData) => void
 }
 
 const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
@@ -31,7 +31,7 @@ const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
   )
 }
 
-export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<DepartamentoData>[] => [
+export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<CargoData>[] => [
   {
     accessorKey: "descripcion",
     header: ({ column }) => {

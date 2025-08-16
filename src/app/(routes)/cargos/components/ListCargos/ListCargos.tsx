@@ -1,48 +1,48 @@
 "use client"
 
 import { DataTable } from "./data-table"
-import { getColumns, DepartamentoData } from "./columns"
+import { getColumns, CargoData } from "./columns"
 import { useState } from "react"
 import axios from "axios"
-import { FormCreateDepartamento } from "../FormCreateDepartamento"
+import { FormCreateCargo } from "../FormCreateCargo"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-interface ListDepartamentosProps {
-    departamentos: DepartamentoData[]
+interface ListCargosProps {
+    cargos: CargoData[]
 }
 
-export function ListDepartamentos({ departamentos }: ListDepartamentosProps) {
-    const [editingDepartamento, setEditingDepartamento] = useState<DepartamentoData | null>(null)
+export function ListCargos({ cargos }: ListCargosProps) {
+    const [editingCargo, setEditingCargo] = useState<CargoData | null>(null)
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const router = useRouter()
 
-    const handleEdit = async (departamento: DepartamentoData) => {
+    const handleEdit = async (cargo: CargoData) => {
         try {
-            const res = await axios.get(`/api/departamentos/${departamento.id}`)
-            const departamentoCompleto = res.data
-            setEditingDepartamento(departamentoCompleto)
+            const res = await axios.get(`/api/cargos/${cargo.id}`)
+            const cargoCompleto = res.data
+            setEditingCargo(cargoCompleto)
             setOpenModalCreate(true)
         } catch (error) {
-            console.error("Error al obtener detalles del departamento:", error)
-            toast.error("Error al obtener detalles del departamento")
+            console.error("Error al obtener detalles del cargo:", error)
+            toast.error("Error al obtener detalles del cargo")
         }
     }
 
-    const handleDelete = async (departamento: DepartamentoData) => {
+    const handleDelete = async (cargo: CargoData) => {
         const executeDelete = async () => {
             try {
-                await axios.delete(`/api/departamentos/${departamento.id}`);
-                toast.success("Departamento eliminado correctamente");
+                await axios.delete(`/api/cargos/${cargo.id}`);
+                toast.success("Cargo eliminado correctamente");
                 router.refresh();
             } catch (error) {
-                console.error("Error al eliminar el departamento:", error);
-                toast.error("Hubo un error al eliminar el departamento");
+                console.error("Error al eliminar el cargo:", error);
+                toast.error("Hubo un error al eliminar el cargo");
             }
         }
 
-        toast(`¿Eliminar a ${departamento.descripcion}?`, {
+        toast(`¿Eliminar a ${cargo.descripcion}?`, {
             description: "Esta acción no se puede deshacer",
             action: {
                 label: "Eliminar",
@@ -61,23 +61,23 @@ export function ListDepartamentos({ departamentos }: ListDepartamentosProps) {
 
     return (
         <>
-            <DataTable columns={columns} data={departamentos} />
+            <DataTable columns={columns} data={cargos} />
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
                 <DialogContent className="sm:max-w-[625px]">
                     <DialogHeader>
                         <DialogTitle>
-                            {editingDepartamento ? "Editar Departamento" : "Nuevo Departamento"}
+                            {editingCargo ? "Editar Cargo" : "Nuevo Cargo"}
                         </DialogTitle>
                         <DialogDescription>
-                            {editingDepartamento ? "Actualice los datos del departamento" : "Ingrese los datos del nuevo departamento"}
+                            {editingCargo ? "Actualice los datos del cargo" : "Ingrese los datos del nuevo cargo"}
                         </DialogDescription>
                     </DialogHeader>
 
-                    <FormCreateDepartamento
-                        initialData={editingDepartamento}
+                    <FormCreateCargo
+                        initialData={editingCargo}
                         setOpenModalCreate={setOpenModalCreate}
-                        isEditMode={Boolean(editingDepartamento)}
+                        isEditMode={Boolean(editingCargo)}
                     />
                 </DialogContent>
             </Dialog>

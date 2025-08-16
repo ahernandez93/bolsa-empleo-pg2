@@ -5,15 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { useState } from "react"
-import { DepartamentoItem } from "@/app/actions/departamentos-actions"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  departamentos: DepartamentoItem[];
 }
 
-export function DataTable<TData, TValue>({ columns, data, departamentos }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState([])
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -35,7 +33,7 @@ export function DataTable<TData, TValue>({ columns, data, departamentos }: DataT
 
   return (
     <div className="items-center p-4 bg-background shadow-lg rounded-lg mt-4 border">
-      <DataTableToolbar<TData> table={table} departamentos={departamentos} />
+      <DataTableToolbar<TData> table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
