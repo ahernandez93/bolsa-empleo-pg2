@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { useState } from "react"
+import TablePagination from "@/components/table-pagination"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,6 +89,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           Siguiente
         </Button>
       </div>
+      {/* <TablePagination/> */}
     </div>
   )
 }
