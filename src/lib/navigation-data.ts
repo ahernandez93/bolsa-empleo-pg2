@@ -77,8 +77,8 @@ export const navigationData: NavItem[] = [
         icon: BookOpen,
         items: [
             {
-                title: "Crear Nueva Vacante",
-                url: "/vacantes",
+                title: "Crear Nueva Oferta",
+                url: "/ofertaslaborales",
             },
             {
                 title: "Postulaciones Recibidas",

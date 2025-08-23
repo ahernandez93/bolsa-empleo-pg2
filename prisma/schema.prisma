@@ -43,6 +43,12 @@ model Usuario {
   // Relaciones
   persona  Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
   empleado Empleado?
+
+  // Relaciones con ofertas
+  ofertasAsignadas    OfertaLaboral[] @relation("OfertasAsignadas")
+  ofertasPublicadas   OfertaLaboral[] @relation("OfertasPublicadas")
+  ofertasAprobadas    OfertaLaboral[] @relation("OfertasAprobadas")
+  ofertasActualizadas OfertaLaboral[] @relation("OfertasActualizadas")
 }
 
 model Empleado {
@@ -81,8 +87,78 @@ model Cargo {
   empleados Empleado[]
 }
 
+model OfertaLaboral {
+  id                    String      @id @default(uuid())
+  puesto                String
+  descripcionPuesto     String
+  area                  String?
+  ubicacionPais         String
+  ubicacionDepartamento String?
+  ubicacionCiudad       String?
+  empresa               String
+  nivelAcademico        String?
+  experienciaLaboral    String?
+  tipoTrabajo           TipoTrabajo
+  modalidad             Modalidad
+  salario               Float?
+
+  reclutadorId     String?
+  agregadoPorId    String
+  actualizadoPorId String?
+  aprobadoPorId    String?
+
+  fechaCreacion      DateTime     @default(now())
+  fechaActualizacion DateTime     @updatedAt
+  estado             EstadoOferta @default(PENDIENTE)
+
+  reclutador     Usuario?  @relation("OfertasAsignadas", fields: [reclutadorId], references: [id])
+  agregadoPor    Usuario   @relation("OfertasPublicadas", fields: [agregadoPorId], references: [id])
+  actualizadoPor Usuario?  @relation("OfertasActualizadas", fields: [actualizadoPorId], references: [id])
+  aprobadoPor    Usuario?  @relation("OfertasAprobadas", fields: [aprobadoPorId], references: [id])
+
+  habilidades OfertaHabilidad[]
+}
+
+model Habilidad {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ofertas OfertaHabilidad[]
+}
+
+model OfertaHabilidad {
+  id              Int    @id @default(autoincrement())
+  ofertaLaboralId String
+  habilidadId     Int
+
+  ofertaLaboral OfertaLaboral @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
+  habilidad     Habilidad     @relation(fields: [habilidadId], references: [id], onDelete: Cascade)
+
+  @@unique([ofertaLaboralId, habilidadId])
+}
+
 enum RolUsuario {
   CANDIDATO
   RECLUTADOR
   ADMIN
+}
+
+enum TipoTrabajo {
+  PERMANENTE
+  TEMPORAL
+}
+
+enum Modalidad {
+  PRESENCIAL
+  REMOTO
+  HIBRIDO
+}
+
+enum EstadoOferta {
+  PENDIENTE
+  ABIERTA
+  RECHAZADA
+  CERRADA
 }
