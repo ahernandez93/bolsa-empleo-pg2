@@ -1,3 +1,5 @@
+import { OfertaLaboral } from "@prisma/client";
+
 export type EmpleadoCompleto = {
     id: string
     usuarioId: string
@@ -63,4 +65,6 @@ export type OfertaLaboralCompleta = {
     createdAt: string
     updatedAt: string
 }
+
+export type InitialDataUpdateOfertaLaboral = Pick<OfertaLaboral, "id" | "puesto" | "descripcionPuesto" | "area" | "ubicacionPais" | "ubicacionDepartamento" | "ubicacionCiudad" | "empresa" | "nivelAcademico" | "experienciaLaboral" | "tipoTrabajo" | "modalidad" | "salario" | "estado">;
 

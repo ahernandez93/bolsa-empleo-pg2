@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma"
-import { ofertaLaboralServerSchema } from "@/lib/schemas/ofertaLaboralSchema"
+import { ofertaLaboralUpdateSchema } from "@/lib/schemas/ofertaLaboralSchema"
 import { NextResponse } from "next/server"
 import z from "zod"
 import { Prisma } from "@prisma/client";
+import { auth } from "@/lib/auth/auth";
 
 export async function GET(request: Request, { params }: { params: { id: string } }
 ) {
@@ -26,8 +27,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         const { id } = await params
+        const session = await auth();
+        const actualizadoPorId = session?.user?.id;
         const body = await request.json()
-        const validatedData = ofertaLaboralServerSchema.parse(body)
+        const validatedData = ofertaLaboralUpdateSchema.parse(body)
 
         const existingOfertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },
@@ -51,6 +54,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             modalidad: validatedData.modalidad,
             salario: validatedData.salario,
             estado: validatedData.estado,
+            ...(actualizadoPorId
+                ? { actualizadoPor: { connect: { id: actualizadoPorId } } }
+                : {}),
         }
 
         const updatedOfertaLaboral = await prisma.ofertaLaboral.update({

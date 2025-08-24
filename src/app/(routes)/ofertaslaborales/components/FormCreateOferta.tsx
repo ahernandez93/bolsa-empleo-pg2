@@ -13,12 +13,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
-import { ofertaLaboralFormSchema, OfertaLaboralFormData } from "@/lib/schemas/ofertaLaboralSchema";
-import { OfertaLaboral } from "@prisma/client";
+import { ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, OfertaLaboralFormData, OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
+import { InitialDataUpdateOfertaLaboral } from "@/types";
+
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
-    initialData?: OfertaLaboral,
+    initialData?: InitialDataUpdateOfertaLaboral | null,
     isEditMode: boolean
 }
 
@@ -41,6 +42,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         tipoTrabajo: initialData.tipoTrabajo,
         modalidad: initialData.modalidad,
         salario: initialData.salario,
+        estado: initialData.estado,
     } : {
         puesto: "",
         descripcionPuesto: "",
@@ -55,8 +57,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         modalidad: undefined,
         salario: undefined,
     };
-    const form = useForm<OfertaLaboralFormData>({
-        resolver: zodResolver(ofertaLaboralFormSchema),
+    const form = useForm<OfertaLaboralFormData | OfertaLaboralUpdateData>({
+        resolver: zodResolver(isEditMode ? ofertaLaboralUpdateSchema : ofertaLaboralFormSchema),
         defaultValues: defaultValues,
         mode: "onChange",
         reValidateMode: "onChange",
@@ -114,9 +116,9 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 estado: "PENDIENTE",
             };
             if (isEditMode) {
-                /* await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
+                await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
                 toast.success("Oferta Laboral actualizada correctamente")
-                console.log("Oferta Laboral actualizada correctamente", payload) */
+                console.log("Oferta Laboral actualizada correctamente", payload)
             } else {
                 await axios.post("/api/ofertaslaborales", payload)
                 toast.success("Oferta Laboral creada exitosamente")
@@ -141,7 +143,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
     }
     /* console.log(form.formState.isValid)
     console.log(form.formState.errors) */
-    /* console.log("Errores del formulario:", form.formState.errors);
+ /*    console.log("Errores del formulario:", form.formState.errors);
     console.log("Valores actuales:", form.getValues()); */
     return (
         <div className="max-w-4xl mx-auto h-[80vh] overflow-y-auto p-0">
@@ -433,6 +435,31 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     </FormItem>
                                 )}
                             />
+                            {isEditMode && (
+                            <FormField
+                                control={form.control}
+                                name="estado"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Estado</FormLabel>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccione estado" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="PENDIENTE">Pendiente</SelectItem>
+                                                <SelectItem value="ABIERTA">Abierta</SelectItem>
+                                                <SelectItem value="RECHAZADA">Rechazada</SelectItem>
+                                                <SelectItem value="CERRADA">Cerrada</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            )}
                         </CardContent>
                     </Card>
 

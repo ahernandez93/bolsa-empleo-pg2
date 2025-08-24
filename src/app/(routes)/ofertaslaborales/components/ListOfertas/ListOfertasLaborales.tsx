@@ -6,17 +6,17 @@ import { useState } from "react"
 import axios from "axios"
 import { FormCreateOferta } from "../FormCreateOferta"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { OfertaLaboralCompleta } from "@/types"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { OfertaLaboral } from "@prisma/client";
+// import { OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
+import { InitialDataUpdateOfertaLaboral } from "@/types"
 
 interface ListEmpleadosProps {
     ofertasLaborales: OfertaLaboralConDatos[]
 }
 
 export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
-    const [editingOferta, setEditingOferta] = useState<OfertaLaboral | null>(null)
+    const [editingOferta, setEditingOferta] = useState<InitialDataUpdateOfertaLaboral | null>(null)
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const router = useRouter()
 
@@ -76,11 +76,11 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    {/* <FormCreateOferta
+                    <FormCreateOferta
                         initialData={editingOferta}
                         setOpenModalCreate={setOpenModalCreate}
                         isEditMode={Boolean(editingOferta)}
-                    /> */}
+                    />
                 </DialogContent>
             </Dialog>
         </>

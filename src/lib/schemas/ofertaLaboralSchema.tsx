@@ -31,5 +31,11 @@ export const ofertaLaboralServerSchema = ofertaLaboralFormSchema.extend({
     estado: EstadoOfertaEnum.default("PENDIENTE"),
 });
 
+export const ofertaLaboralUpdateSchema = ofertaLaboralFormSchema.extend({
+    estado: EstadoOfertaEnum,
+});
+
 export type OfertaLaboralFormData = z.infer<typeof ofertaLaboralFormSchema>;
+export type OfertaLaboralUpdateData = z.infer<typeof ofertaLaboralUpdateSchema>;
+
 
