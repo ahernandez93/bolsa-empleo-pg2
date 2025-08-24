@@ -43,3 +43,24 @@ export type CargoCompleto = {
     createdAt: string
     updatedAt: string
 }
+
+export type OfertaLaboralCompleta = {
+    id: string
+    puesto: string
+    descripcionPuesto: string
+    area: string
+    ubicacionPais: string
+    ubicacionDepartamento: string
+    ubicacionCiudad: string
+    empresa: string
+    nivelAcademico: string
+    experienciaLaboral: number
+    tipoTrabajo: string
+    modalidad: string
+    salario: number
+    agregadoPorId: string
+    estado: string
+    createdAt: string
+    updatedAt: string
+}
+

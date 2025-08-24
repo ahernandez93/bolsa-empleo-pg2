@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,8 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
-// import { Switch } from "@/components/ui/switch";
-import { ofertaLaboralSchema, OfertaLaboralFormData } from "@/lib/schemas/ofertaLaboralSchema";
+import { ofertaLaboralFormSchema, OfertaLaboralFormData } from "@/lib/schemas/ofertaLaboralSchema";
 import { OfertaLaboral } from "@prisma/client";
 
 type FormCreateProps = {
@@ -34,41 +33,30 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         descripcionPuesto: initialData.descripcionPuesto,
         area: initialData.area || "",
         ubicacionPais: initialData.ubicacionPais,
-        ubicacionDepartamento: initialData.ubicacionDepartamento ?? undefined,
-        ubicacionCiudad: initialData.ubicacionCiudad ?? undefined,
+        ubicacionDepartamento: initialData.ubicacionDepartamento,
+        ubicacionCiudad: initialData.ubicacionCiudad,
         empresa: initialData.empresa,
-        nivelAcademico: initialData.nivelAcademico ?? undefined,
-        experienciaLaboral: initialData.experienciaLaboral ?? undefined,
+        nivelAcademico: initialData.nivelAcademico,
+        experienciaLaboral: initialData.experienciaLaboral,
         tipoTrabajo: initialData.tipoTrabajo,
         modalidad: initialData.modalidad,
-        salario: initialData.salario ?? 0,
-        reclutadorId: initialData.reclutadorId ?? undefined,
-        agregadoPorId: initialData.agregadoPorId ?? undefined,
-        actualizadoPorId: initialData.actualizadoPorId ?? undefined,
-        aprobadoPorId: initialData.aprobadoPorId ?? undefined,
-        estado: initialData.estado ?? undefined,
-
+        salario: initialData.salario,
     } : {
         puesto: "",
         descripcionPuesto: "",
         area: "",
         ubicacionPais: "",
-        ubicacionDepartamento: undefined,
-        ubicacionCiudad: undefined,
+        ubicacionDepartamento: "",
+        ubicacionCiudad: "",
         empresa: "",
-        nivelAcademico: undefined,
-        experienciaLaboral: undefined,
+        nivelAcademico: "",
+        experienciaLaboral: "",
         tipoTrabajo: undefined,
         modalidad: undefined,
-        salario: 0,
-        reclutadorId: undefined,
-        agregadoPorId: undefined,
-        actualizadoPorId: undefined,
-        aprobadoPorId: undefined,
-        estado: undefined,
+        salario: undefined,
     };
     const form = useForm<OfertaLaboralFormData>({
-        resolver: zodResolver(ofertaLaboralSchema),
+        resolver: zodResolver(ofertaLaboralFormSchema),
         defaultValues: defaultValues,
         mode: "onChange",
         reValidateMode: "onChange",
@@ -76,19 +64,63 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
 
     const isValid = form.formState.isValid;
 
+    const areas = [
+        "Recursos Humanos",
+        "Finanzas",
+        "Contabilidad",
+        "Ventas",
+        "Marketing",
+        "Atención al Cliente",
+        "Operaciones",
+        "Producción",
+        "Logística",
+        "Compras",
+        "Tecnología / IT",
+        "Desarrollo de Software",
+        "Calidad",
+        "Legal",
+        "Administración",
+        "Dirección General"
+    ];
+
+    const paises = ["Honduras", "El Salvador", "Guatemala", "Nicaragua", "Costa Rica"];
+
+    const departamentos = [
+        "Atlántida", "Colón", "Comayagua", "Copán", "Cortés", "Choluteca",
+        "El Paraíso", "Francisco Morazán", "Gracias a Dios", "Intibucá",
+        "Islas de la Bahía", "La Paz", "Lempira", "Ocotepeque",
+        "Olancho", "Santa Bárbara", "Valle", "Yoro"
+    ];
+
+    const ciudadesPorDepartamento: Record<string, string[]> = {
+        "Francisco Morazán": ["Tegucigalpa", "Valle de Ángeles", "Santa Lucía"],
+        "Cortés": ["San Pedro Sula", "Puerto Cortés", "Choloma"],
+        "Atlántida": ["La Ceiba", "Tela", "Jutiapa"],
+        "Yoro": ["El Progreso", "Yoro", "Olanchito"],
+        "Choluteca": ["Choluteca", "San Marcos de Colón"],
+    };
+
+    const paisSeleccionado = form.watch("ubicacionPais");
+    const deptoSeleccionado = form.watch("ubicacionDepartamento");
+
     const onSubmit = async (data: OfertaLaboralFormData) => {
         setError(null);
         setIsLoading(true)
 
         try {
+            const payload = {
+                ...data,
+                agregadoPorId: undefined,
+                estado: "PENDIENTE",
+            };
             if (isEditMode) {
-                /* await axios.put(`/api/ofertaslaborales/${initialData?.id}`, data)
-                toast.success("Oferta Laboral actualizada correctamente") */
-                console.log("Oferta Laboral actualizada correctamente")
+                /* await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
+                toast.success("Oferta Laboral actualizada correctamente")
+                console.log("Oferta Laboral actualizada correctamente", payload) */
             } else {
-                /* await axios.post("/api/ofertaslaborales", data)
-                toast.success("Oferta Laboral creado exitosamente") */
-                console.log("Oferta Laboral creada exitosamente")
+                await axios.post("/api/ofertaslaborales", payload)
+                toast.success("Oferta Laboral creada exitosamente")
+                console.log("Oferta Laboral creada exitosamente", payload)
             }
 
             form.reset()
@@ -107,13 +139,15 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
             setIsLoading(false)
         }
     }
-
+    /* console.log(form.formState.isValid)
+    console.log(form.formState.errors) */
+    /* console.log("Errores del formulario:", form.formState.errors);
+    console.log("Valores actuales:", form.getValues()); */
     return (
         <div className="max-w-4xl mx-auto h-[80vh] overflow-y-auto p-0">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                    {/* Sección Datos Generales del Puesto */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Datos Generales del Puesto</CardTitle>
@@ -153,57 +187,114 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Área</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Área del puesto" {...field} />
-                                        </FormControl>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Seleccione un área" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {areas.map((area) => (
+                                                    <SelectItem key={area} value={area}>
+                                                        {area}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
                             <FormField
-                                control={form.control}
                                 name="ubicacionPais"
+                                control={form.control}
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>País</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej. Guatemala" {...field} />
-                                        </FormControl>
+                                        <Select
+                                            onValueChange={(value) => {
+                                                field.onChange(value);
+                                                form.setValue("ubicacionDepartamento", "");
+                                                form.setValue("ubicacionCiudad", "");
+                                            }}
+                                            value={field.value || ""}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Seleccione un país" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {paises.map((pais) => (
+                                                    <SelectItem key={pais} value={pais}>
+                                                        {pais}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="ubicacionDepartamento"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Departamento</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej. Quetzaltenango" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            {paisSeleccionado === "Honduras" && (
+                                <FormField
+                                    name="ubicacionDepartamento"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Departamento</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    field.onChange(value);
+                                                    form.setValue("ubicacionCiudad", "");
+                                                }}
+                                                value={field.value || ""}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccione un departamento" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {departamentos.map((dep) => (
+                                                        <SelectItem key={dep} value={dep}>
+                                                            {dep}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
 
-                            <FormField
-                                control={form.control}
-                                name="ubicacionCiudad"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Ciudad</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej. Ciudad de Guatemala" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
+                            {paisSeleccionado === "Honduras" &&
+                                deptoSeleccionado &&
+                                ciudadesPorDepartamento[deptoSeleccionado] && (
+                                    <Controller
+                                        name="ubicacionCiudad"
+                                        control={form.control}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Ciudad</FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value || ""}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione una ciudad" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {ciudadesPorDepartamento[deptoSeleccionado].map((ciudad) => (
+                                                            <SelectItem key={ciudad} value={ciudad}>
+                                                                {ciudad}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 )}
-                            />
 
-                            {/* Textarea de descripción al final */}
                             <FormField
                                 control={form.control}
                                 name="descripcionPuesto"
@@ -224,7 +315,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                         </CardContent>
                     </Card>
 
-                    {/* Sección Requisitos del Puesto */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Requisitos del Puesto</CardTitle>
@@ -236,7 +326,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Nivel Académico</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Seleccione nivel académico" />
@@ -261,7 +351,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Experiencia Laboral</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Seleccione experiencia laboral" />
@@ -278,14 +368,14 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     </FormItem>
                                 )}
                             />
-                            
+
                             <FormField
                                 control={form.control}
                                 name="tipoTrabajo"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Tipo de Trabajo</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Seleccione tipo" />
@@ -307,7 +397,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Modalidad</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                                        <Select onValueChange={field.onChange} value={field.value || ""}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Seleccione modalidad" />
@@ -331,7 +421,13 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     <FormItem>
                                         <FormLabel>Salario</FormLabel>
                                         <FormControl>
-                                            <Input type="number" placeholder="Ej. 5000" {...field} />
+                                            <Input
+                                                type="number"
+                                                placeholder="Ej. 5000"
+                                                {...field}
+                                                value={field.value ?? 0}
+                                                onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -340,7 +436,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                         </CardContent>
                     </Card>
 
-                    {/* Botón de envío */}
                     <div>
                         <Button type="submit" className="w-full" disabled={!isValid || isLoading}>
                             {isEditMode ? "Guardar cambios" : "Registrar Oferta"}

@@ -1,15 +1,15 @@
 import { HeaderOfertasLaborales } from "./components/HeaderOfertasLaborales";
-// import { ListOfertasLaborales } from "./components/ListOfertasLaborales";
+import { ListOfertasLaborales } from "./components/ListOfertas/ListOfertasLaborales";
+import { getOfertasLaborales } from "@/app/actions/ofertas-actions";
 
-export default function OfertasLaboralesPage() {
+export default async function OfertasLaboralesPage() {
+    const ofertasLaborales = await getOfertasLaborales();
     return (
         <div className="p-6">
             <HeaderOfertasLaborales />
-            {/* <ListOfertasLaborales
+            <ListOfertasLaborales
                 ofertasLaborales={ofertasLaborales}
-                departamentos={departamentos ?? []}
-                cargos={cargos ?? []}
-            /> */}
+            />
         </div>
     )
 }

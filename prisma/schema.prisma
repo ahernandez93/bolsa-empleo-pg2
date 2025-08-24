@@ -91,16 +91,16 @@ model OfertaLaboral {
   id                    String      @id @default(uuid())
   puesto                String
   descripcionPuesto     String
-  area                  String?
+  area                  String
   ubicacionPais         String
-  ubicacionDepartamento String?
-  ubicacionCiudad       String?
+  ubicacionDepartamento String
+  ubicacionCiudad       String
   empresa               String
-  nivelAcademico        String?
-  experienciaLaboral    String?
+  nivelAcademico        String
+  experienciaLaboral    String
   tipoTrabajo           TipoTrabajo
   modalidad             Modalidad
-  salario               Float?
+  salario               Float
 
   reclutadorId     String?
   agregadoPorId    String
