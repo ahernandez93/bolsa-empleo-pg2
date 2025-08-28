@@ -12,7 +12,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
-import { LoginAction } from "@/app/actions/auth-action"
+import { LoginActionCandidate } from "@/app/actions/auth-action"
 
 const loginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -21,7 +21,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
-export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
+export function LoginFormCandidate({ className, ...props }: React.ComponentProps<"div">) {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -36,12 +36,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    const res = await LoginAction(data.email, data.password);
+    const res = await LoginActionCandidate(data.email, data.password);
 
-    console.log(res);
     if (res.success) {
       toast.success("Inicio de sesión exitoso");
-      router.push("/admin");
+      router.push("/");
       router.refresh();
     } else {
       setError(res.error);
@@ -121,7 +120,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
                 <div className="text-center text-sm">
                   ¿No tienes una cuenta?{" "}
-                  <a href="#" className="underline underline-offset-4">
+                  <a href="/registrar" className="underline underline-offset-4">
                     Regístrate
                   </a>
                 </div>

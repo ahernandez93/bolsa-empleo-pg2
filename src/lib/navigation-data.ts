@@ -40,15 +40,15 @@ export const navigationData: NavItem[] = [
         items: [
             {
                 title: "Panel1",
-                url: "/",
+                url: "/admin",
             },
             {
                 title: "Panel2",
-                url: "/panel2",
+                url: "/admin/panel2",
             },
             {
                 title: "Panel3",
-                url: "/panel3",
+                url: "/admin/panel3",
             },
         ],
     },
@@ -59,15 +59,15 @@ export const navigationData: NavItem[] = [
         items: [
             {
                 title: "Gestión de Empleados",
-                url: "/empleados",
+                url: "/admin/empleados",
             },
             {
                 title: "Departamentos",
-                url: "/departamentos",
+                url: "/admin/departamentos",
             },
             {
                 title: "Cargos",
-                url: "/cargos",
+                url: "/admin/cargos",
             },
         ],
     },
@@ -78,7 +78,7 @@ export const navigationData: NavItem[] = [
         items: [
             {
                 title: "Crear Nueva Oferta",
-                url: "/ofertaslaborales",
+                url: "/admin/ofertaslaborales",
             },
             {
                 title: "Postulaciones Recibidas",

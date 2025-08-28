@@ -1,9 +1,9 @@
 "use client"
 
-import { LoginFormCandidate } from "@/components/login-form-candidate"
+import { LoginForm } from "@/components/login-form"
 import { motion } from "framer-motion"
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-3xl">
@@ -13,9 +13,10 @@ export default function LoginPage() {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          <LoginFormCandidate />
+          <LoginForm />
         </motion.div>
       </div>
     </div>
   )
 }
+

@@ -63,7 +63,8 @@ export const authOptions = {
         }),
     ],
     pages: {
-        signIn: "/login",
+        // Página de inicio de sesión para administradores
+        signIn: "/admin/login",
     },
     callbacks: {
         jwt: async ({ token, user }) => {
@@ -71,7 +72,7 @@ export const authOptions = {
                 token.userId = user.id
                 token.email = user.email as string
                 token.name = user.name
-                // token.role = (user as { role: string }).role
+                token.role = (user as { role?: string }).role
             }
             return token
         },
@@ -80,7 +81,7 @@ export const authOptions = {
                 session.user.id = token.userId as string
                 session.user.email = token.email as string
                 session.user.name = token.name as string
-                // (session.user as { role: string }).role = token.role as string
+                ;(session.user as { role?: string }).role = token.role as string
             }
             return session
         },

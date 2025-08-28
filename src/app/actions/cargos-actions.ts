@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { CargoData } from "../(routes)/cargos/components/ListCargos/columns";
+import { CargoData } from "../(admin)/admin/cargos/components/ListCargos/columns";
 
 export interface CargoItem {
     id: number;

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { DepartamentoData } from "../(routes)/departamentos/components/ListDepartamentos/columns";
+import { DepartamentoData } from "../(admin)/admin/departamentos/components/ListDepartamentos/columns";
 
 
 export interface DepartamentoItem {
