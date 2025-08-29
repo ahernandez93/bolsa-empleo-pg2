@@ -52,7 +52,7 @@ export default function NavUserCandidato({ session }: { session: Session | null 
                     <DropdownMenuGroup>
                         <DropdownMenuItem>
                             <BadgeCheck />
-                            Cuenta
+                            Perfil
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                             <Bell />
