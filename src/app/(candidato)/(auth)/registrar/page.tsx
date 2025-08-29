@@ -44,7 +44,7 @@ export default function RegistrarPage() {
         setError(res.error)
         toast.error(res.error)
       }
-      
+
       router.push("/")
       router.refresh()
     } else {
@@ -116,7 +116,7 @@ export default function RegistrarPage() {
                       <FormItem>
                         <FormLabel>Contraseña</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="••••••" {...field} />
+                          <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
