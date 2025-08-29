@@ -11,6 +11,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { RegisterCandidateAction, type RegisterCandidateInput } from "@/app/actions/auth-action"
+import { signIn } from "next-auth/react"
 
 const schema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
@@ -33,8 +34,18 @@ export default function RegistrarPage() {
     setIsLoading(true)
     const res = await RegisterCandidateAction(data)
     if (res.success) {
-      toast.success("Registro exitoso. Ahora puedes iniciar sesión.")
-      router.push("/login")
+      toast.success("Registro exitoso. Iniciando sesion...")
+      const res = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      })
+      if (res?.error) {
+        setError(res.error)
+        toast.error(res.error)
+      }
+      
+      router.push("/")
       router.refresh()
     } else {
       setError(res.error ?? "Error al registrar")
