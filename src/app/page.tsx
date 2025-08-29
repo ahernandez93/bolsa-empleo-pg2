@@ -10,11 +10,14 @@ import { ChevronLeft, ChevronRight, MapPin, Building2, Briefcase, Search, User, 
 import { auth } from "@/lib/auth/auth";
 import { Session } from "next-auth";
 import NavUserCandidato from "@/components/nav-user-candidato";
-// -----------------------------------------------------------------------------
-// Página: Home de empleos para una sola empresa (JobFlow / EmpresaX Careers)
-// -----------------------------------------------------------------------------
+import { getOFertasLaboralesAbiertas } from "./actions/ofertas-actions";
+import Link from "next/link";
+import Image from "next/image";
+import { Modalidad, TipoTrabajo } from "@prisma/client";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
-const jobs: JobCardProps[] = [
+/* const jobs: JobCardProps[] = [
   {
     title: "Desarrollador Backend",
     company: "EmpresaX",
@@ -55,7 +58,22 @@ const jobs: JobCardProps[] = [
     contract: "Indefinido",
     department: "Calidad",
   },
-];
+]; */
+type JobCardProps = {
+  id: string;
+  puesto: string;
+  descripcionPuesto: string;
+  area: string;
+  ubicacionPais: string;
+  ubicacionDepartamento: string;
+  ubicacionCiudad: string;
+  empresa: string;
+  nivelAcademico: string;
+  experienciaLaboral: string;
+  tipoTrabajo: TipoTrabajo;
+  modalidad: Modalidad;
+  fechaCreacion: Date;
+};
 
 const categories = [
   { name: "Tecnología", icon: <Globe className="h-4 w-4" /> },
@@ -86,18 +104,27 @@ const testimonios = [
   },
 ];
 
+const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas();
+
 export default async function HomePage() {
   const session = await auth();
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
       <Header session={session} />
       <main className="mx-auto max-w-6xl px-4 pb-16">
-        <Hero />
+        {/* <Hero /> */}
 
-        <section className="mt-8">
-          <h2 className="text-lg font-semibold text-slate-900">Ofertas destacadas</h2>
-          <p className="text-sm text-slate-500 mb-3">Vacantes seleccionadas por nuestro equipo de talento.</p>
-          <JobsCarousel jobs={jobs} />
+        <section className="mt-8 flex flex-col gap-2">
+          <div className="flex justify-between">
+            <div className="flex flex-col gap-0">
+              <h2 className="text-lg font-semibold text-slate-900">Ofertas recientes</h2>
+              <p className="text-sm text-slate-500 mb-3">Vacantes seleccionadas por nuestro equipo de talento.</p>
+            </div>
+            <div className="flex justify-end">
+              <Button className="bg-emerald-600 hover:bg-emerald-700">Ver todas las vacantes</Button>
+            </div>
+          </div>
+          <JobsCarousel jobs={ofertasLaboralesAbiertas} />
         </section>
 
         <section className="mt-10">
@@ -132,8 +159,21 @@ function Header({ session }: { session: Session | null }) {
     <header className="sticky top-0 z-40 w-full border-b bg-white/70 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">X</div>
-          <span className="font-semibold">EmpresaX Careers</span>
+          <Link
+            className="flex items-center gap-3 flex-1"
+            href="/"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">X</div>
+            <span className="font-bold text-lg">EmpresaX</span>
+          </Link>
+          {/* <Link href="/admin" className="flex items-center gap-3 flex-1">
+            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <Image src="/logo.png" alt="Logo" style={{ objectFit: "contain", objectPosition: "left" }} fill priority sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+            </div>
+            <div className="grid flex-1 text-center text-lg leading-tight">
+              <span className="truncate font-bold text-lg">JobFlow</span>
+            </div>
+          </Link> */}
         </div>
         <nav className="hidden gap-6 text-sm text-slate-600 md:flex">
           <a className="font-medium hover:text-slate-900" href="#">Ofertas</a>
@@ -141,22 +181,25 @@ function Header({ session }: { session: Session | null }) {
             <>
               <a className="font-medium hover:text-slate-900" href="#">Guardados</a>
               <a className="font-medium hover:text-slate-900" href="#">Mis Postulaciones</a>
+              <div className="flex items-center gap-3">
+                <NavUserCandidato session={session} />
+              </div>
             </>
           ) : (
             <>
-              <a className="font-medium hover:text-slate-900" href="#">Registrate</a>
-              <a className="font-medium hover:text-slate-900" href="#">Iniciar Sesión</a>
+              <Link
+                className="font-medium hover:text-slate-900"
+                href="/registrar"
+              >Registrate</Link>
+              <Link
+                className="font-medium hover:text-slate-900"
+                href="/login"
+              >Iniciar Sesión</Link>
             </>
           )}
+
         </nav>
-        <div className="flex items-center gap-3">
-          {/* <Button variant="outline" size="sm" className="hidden md:inline-flex">Publicar CV</Button> */}
-          {/* <Avatar className="h-8 w-8">
-            <AvatarImage alt="Alex" src="" />
-            <AvatarFallback>AR</AvatarFallback>
-          </Avatar> */}
-          <NavUserCandidato session={session} />
-        </div>
+
       </div>
     </header>
   );
@@ -194,15 +237,6 @@ function Hero() {
   );
 }
 
-type JobCardProps = {
-  title: string;
-  company: string;
-  location: string;
-  modality: string;
-  contract: string;
-  department: string;
-};
-
 function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
   /* const ref = useRef<HTMLDivElement>(null);
 
@@ -230,8 +264,8 @@ function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
         className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 py-2 pr-2"
         aria-label="Ofertas destacadas"
       >
-        {jobs.map((job, idx) => (
-          <div key={idx} className="min-w-[300px] max-w-[320px] snap-start">
+        {jobs.map((job) => (
+          <div key={job.id} className="min-w-[300px] max-w-[320px] snap-start">
             <JobCard {...job} />
           </div>
         ))}
@@ -240,25 +274,25 @@ function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
   );
 }
 
-function JobCard({ title, company, location, modality, contract, department }: JobCardProps) {
+function JobCard({ puesto, area, ubicacionDepartamento, ubicacionCiudad, empresa, tipoTrabajo, modalidad, fechaCreacion }: JobCardProps) {
   return (
     <Card className="h-full border-slate-200 flex flex-col">
       <CardHeader className="pb-0">
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>{company[0]}</AvatarFallback>
-          </Avatar>
+          {/* <Avatar className="h-8 w-8">
+            <AvatarFallback>{empresa[0]}</AvatarFallback>
+          </Avatar> */}
           <div className="min-w-0">
-            <CardTitle className="truncate text-base">{title}</CardTitle>
-            <p className="truncate text-xs text-slate-500">{department}</p>
+            <CardTitle className="truncate text-base">{puesto}</CardTitle>
+            <p className="truncate text-xs text-slate-500">{area}</p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between space-y-3">
         <div className="grid grid-cols-1 text-sm text-slate-600">
-          <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{location}</span>
-          <span className="inline-flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{modality}</span>
-          <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{contract}</span>
+          <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ubicacionCiudad} - {ubicacionDepartamento}</span>
+          <span className="inline-flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{modalidad}</span>
+          <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{tipoTrabajo}</span>
         </div>
         {/* <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="secondary" className="rounded-full">{modality}</Badge>
@@ -269,7 +303,11 @@ function JobCard({ title, company, location, modality, contract, department }: J
           <Button className="w-full">Aplicar ahora</Button>
         </div>
         <div className="flex gap-2 pt-1 text-sm text-slate-500 justify-end">
-          <span>Publicado hace 2 días</span>
+          <span>Publicada{" "}
+            {formatDistanceToNow(new Date(fechaCreacion), {
+              addSuffix: true,
+              locale: es,
+            })}</span>
         </div>
       </CardContent>
     </Card>

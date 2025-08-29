@@ -98,6 +98,17 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
   {
     accessorKey: "estado",
     header: "Estado",
+    cell: ({ row }) => {
+      if (row.original.estado === "ABIERTA") {
+        return <Badge variant="default">Abierta</Badge>
+      } else if (row.original.estado === "RECHAZADA") {
+        return <Badge variant="destructive">Rechazada</Badge>
+      } else if (row.original.estado === "CERRADA") {
+        return <Badge variant="secondary">Cerrada</Badge>
+      } else {
+        return <Badge variant="secondary">Pendiente</Badge>
+      }
+    },
   },
   {
     accessorKey: "agregadoPorUsuario",

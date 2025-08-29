@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, OfertaLaboralFormData, OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
@@ -64,6 +64,40 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         reValidateMode: "onChange",
     });
 
+    // Mantener el formulario sincronizado cuando cambie initialData o el modo
+    useEffect(() => {
+        if (isEditMode && initialData) {
+            form.reset({
+                puesto: initialData.puesto,
+                descripcionPuesto: initialData.descripcionPuesto,
+                area: initialData.area || "",
+                ubicacionPais: initialData.ubicacionPais,
+                ubicacionDepartamento: initialData.ubicacionDepartamento ?? "",
+                ubicacionCiudad: initialData.ubicacionCiudad ?? "",
+                empresa: initialData.empresa,
+                nivelAcademico: initialData.nivelAcademico,
+                experienciaLaboral: initialData.experienciaLaboral,
+                tipoTrabajo: initialData.tipoTrabajo,
+                modalidad: initialData.modalidad,
+                salario: initialData.salario,
+                estado: initialData.estado,
+            } satisfies Partial<OfertaLaboralUpdateData>);
+        } else if (!isEditMode) {
+            form.reset({
+                puesto: "",
+                descripcionPuesto: "",
+                area: "",
+                ubicacionPais: "",
+                ubicacionDepartamento: "",
+                ubicacionCiudad: "",
+                empresa: "",
+                nivelAcademico: "",
+                experienciaLaboral: "",
+            } satisfies Partial<OfertaLaboralFormData>);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isEditMode, initialData]);
+
     const isValid = form.formState.isValid;
 
     const areas = [
@@ -105,21 +139,20 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
     const paisSeleccionado = form.watch("ubicacionPais");
     const deptoSeleccionado = form.watch("ubicacionDepartamento");
 
-    const onSubmit = async (data: OfertaLaboralFormData) => {
+    const onSubmit = async (data: OfertaLaboralFormData | OfertaLaboralUpdateData) => {
         setError(null);
         setIsLoading(true)
 
         try {
-            const payload = {
-                ...data,
-                agregadoPorId: undefined,
-                estado: "PENDIENTE",
-            };
             if (isEditMode) {
+                // En edición, usar el estado elegido en el formulario
+                const payload = data as OfertaLaboralUpdateData;
                 await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
                 toast.success("Oferta Laboral actualizada correctamente")
                 console.log("Oferta Laboral actualizada correctamente", payload)
             } else {
+                // En creación, el backend asigna estado por defecto (PENDIENTE)
+                const payload = data as OfertaLaboralFormData;
                 await axios.post("/api/ofertaslaborales", payload)
                 toast.success("Oferta Laboral creada exitosamente")
                 console.log("Oferta Laboral creada exitosamente", payload)

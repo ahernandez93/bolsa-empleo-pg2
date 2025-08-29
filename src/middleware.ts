@@ -13,6 +13,7 @@ const publicRoutes = [
   "/reset-password",
   "/verify-email",
   "/error",
+  "/"
 ];
 
 export default middleware((req) => {
