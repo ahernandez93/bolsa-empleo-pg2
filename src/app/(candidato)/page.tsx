@@ -10,6 +10,7 @@ import { MapPin, Search, User, Globe } from "lucide-react";
 import { getOFertasLaboralesAbiertas } from "../actions/ofertas-actions";
 import Image from "next/image";
 import JobsCarousel from "@/components/jobcarousel";
+import Link from "next/link";
 
 
 /* const jobs: JobCardProps[] = [
@@ -98,9 +99,9 @@ export default async function HomePage() {
             <h2 className="text-lg font-semibold text-slate-900">Ofertas recientes</h2>
             <p className="text-sm text-slate-500 mb-3">Vacantes seleccionadas por nuestro equipo de talento.</p>
           </div>
-          <div className="flex justify-end">
+          <Link href="/ofertas" className="flex justify-end">
             <Button className="bg-emerald-600 hover:bg-emerald-700">Ver todas las vacantes</Button>
-          </div>
+          </Link>
         </div>
         <JobsCarousel jobs={ofertasLaboralesAbiertas} />
       </section>
@@ -225,7 +226,9 @@ function CTA() {
   return (
     <div className="flex flex-col items-center justify-between gap-3 rounded-xl bg-emerald-50 p-4 text-emerald-900 md:flex-row">
       <p className="text-sm md:text-base">¿Listo para dar el siguiente paso en tu carrera?</p>
-      <Button className="bg-emerald-600 hover:bg-emerald-700">Ver todas las vacantes</Button>
+      <Link href="/ofertas" className="flex justify-end">
+        <Button className="bg-emerald-600 hover:bg-emerald-700">Ver todas las vacantes</Button>
+      </Link>
     </div>
   );
 }

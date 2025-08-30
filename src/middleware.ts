@@ -8,6 +8,7 @@ const publicRoutes = [
   "/login", // Login candidatos (raíz)
   "/admin/login", // Login administradores
   "/registrar", // Registro candidatos
+  "/ofertas", // Vacantes
   "/api/auth/register",
   "/api/auth",
   "/reset-password",
