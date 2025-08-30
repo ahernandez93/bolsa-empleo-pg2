@@ -21,6 +21,7 @@ type Job = {
     id: string;
     title: string;
     company: string;
+    category: string;
     city: string;
     country: string;
     modality: "Remoto" | "Presencial" | "Híbrido";
@@ -35,6 +36,7 @@ const JOBS: Job[] = [
         id: "1",
         title: "Frontend Developer",
         company: "Acme Inc.",
+        category: "Desarrollo web",
         city: "Madrid",
         country: "ES",
         modality: "Remoto",
@@ -48,6 +50,7 @@ const JOBS: Job[] = [
         id: "2",
         title: "Data Analyst",
         company: "Globex",
+        category: "Análisis de datos",
         city: "Barcelona",
         country: "ES",
         modality: "Híbrido",
@@ -61,6 +64,7 @@ const JOBS: Job[] = [
         id: "3",
         title: "Product Manager",
         company: "Nimbus",
+        category: "Producto",
         city: "Remoto",
         country: "ES",
         modality: "Remoto",
@@ -74,6 +78,7 @@ const JOBS: Job[] = [
         id: "4",
         title: "Backend Engineer",
         company: "Skyline",
+        category: "Desarrollo web",
         city: "Valencia",
         country: "ES",
         modality: "Presencial",
@@ -87,6 +92,7 @@ const JOBS: Job[] = [
         id: "5",
         title: "UX/UI Designer",
         company: "Pixel Co.",
+        category: "Diseño",
         city: "Remoto",
         country: "ES",
         modality: "Remoto",
@@ -100,6 +106,7 @@ const JOBS: Job[] = [
         id: "6",
         title: "Customer Success",
         company: "CoreApps",
+        category: "Atención al cliente",
         city: "Sevilla",
         country: "ES",
         modality: "Híbrido",
@@ -113,6 +120,7 @@ const JOBS: Job[] = [
         id: "7",
         title: "Marketing Specialist",
         company: "Bright",
+        category: "Marketing",
         city: "Bilbao",
         country: "ES",
         modality: "Presencial",
@@ -126,6 +134,7 @@ const JOBS: Job[] = [
         id: "8",
         title: "QA Engineer",
         company: "Rigel",
+        category: "Calidad",
         city: "Málaga",
         country: "ES",
         modality: "Híbrido",
@@ -139,6 +148,7 @@ const JOBS: Job[] = [
         id: "9",
         title: "DevOps Engineer",
         company: "TurboTech",
+        category: "Tecnología",
         city: "Remoto",
         country: "ES",
         modality: "Remoto",
@@ -163,12 +173,12 @@ export default function OffersCatalogPage() {
                 j.title.toLowerCase().includes(q) ||
                 j.company.toLowerCase().includes(q) ||
                 j.tags.join(" ").toLowerCase().includes(q);
+            const matchesCat = !category || j.category === category;
             const matchesLoc = !location || j.city.toLowerCase().includes(location.toLowerCase());
-            const matchesMod = !modality || j.modality === modality as any;
-            // category es meramente ilustrativo en este mock
-            return matchesQuery && matchesLoc && matchesMod;
+            const matchesMod = !modality || j.modality === modality;
+            return matchesQuery && matchesCat && matchesLoc && matchesMod;
         });
-    }, [query, location, modality]);
+    }, [query, location, modality, category]);
 
     return (
         <div className="min-h-screen bg-slate-50">
