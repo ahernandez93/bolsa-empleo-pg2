@@ -82,15 +82,15 @@ export const navigationData: NavItem[] = [
             },
             {
                 title: "Postulaciones Recibidas",
-                url: "/postulaciones",
+                url: "/admin/postulaciones-recibidas",
             },
             {
                 title: "Candidatos Registrados",
-                url: "/candidatos",
+                url: "/admin/candidatos",
             },
             {
                 title: "Reportes",
-                url: "/reportes",
+                url: "/admin/reportes",
             },
         ],
     },

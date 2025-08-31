@@ -14,15 +14,15 @@ export const LoginAction = async (email: string, password: string) => {
             redirect: false
         });
         console.log("SignIn result:", res);
-        
+
         if (res?.error) {
             return { success: false, error: res.error };
         }
-        
+
         return { success: true, error: null };
     } catch (error) {
         console.error("Login error:", error);
-        
+
         if (error instanceof AuthError) {
             switch (error.type) {
                 case 'CredentialsSignin':
@@ -33,11 +33,11 @@ export const LoginAction = async (email: string, password: string) => {
                     return { success: false, error: error.message || "Error de autenticación" };
             }
         }
-        
+
         if (error instanceof Error) {
             return { success: false, error: error.message };
         }
-        
+
         return { success: false, error: "Error desconocido al iniciar sesión" };
     }
 }
@@ -97,33 +97,60 @@ export type RegisterCandidateInput = z.infer<typeof registerSchema>;
 export const RegisterCandidateAction = async (input: RegisterCandidateInput) => {
     try {
         const data = registerSchema.parse(input);
+        const email = data.email.trim().toLowerCase();
 
-        const existing = await prisma.usuario.findUnique({ where: { email: data.email } });
+        const existing = await prisma.usuario.findUnique({ where: { email } });
         if (existing) {
             return { success: false, error: 'El correo ya está registrado' } as const;
         }
 
-        const persona = await prisma.persona.create({
-            data: {
-                nombre: data.nombre,
-                apellido: data.apellido,
-            },
-        });
-
         const passwordHash = await bcrypt.hash(data.password, 10);
 
-        await prisma.usuario.create({
-            data: {
-                personaId: persona.id,
-                email: data.email,
-                passwordHash,
-                rol: 'CANDIDATO',
-                emailVerificado: false,
-                activo: true,
-            },
+        const [persona, usuario, perfil] = await prisma.$transaction(async (tx) => {
+            const persona = await tx.persona.create({
+                data: {
+                    nombre: data.nombre.trim(),
+                    apellido: data.apellido.trim(),
+                },
+            });
+
+            const usuario = await tx.usuario.create({
+                data: {
+                    personaId: persona.id,
+                    email,
+                    passwordHash,
+                    rol: "CANDIDATO",
+                    emailVerificado: false,
+                    activo: true,
+                },
+            });
+
+            const perfil = await tx.perfilCandidato.create({
+                data: {
+                    usuarioId: usuario.id,
+                    resumen: null,
+                    tituloProfesional: null,
+                    experienciaTotal: null,
+                    nivelAcademico: null,
+                    expectativaSalarial: null,
+                    disponibilidad: "INMEDIATA",
+                    movilidad: false,
+                    cvUrl: null,
+                    cvKey: null,
+                    cvMimeType: null,
+                    cvSize: null,
+                },
+            });
+
+            return [persona, usuario, perfil] as const;
         });
 
-        return { success: true, error: null } as const;
+        return { 
+            success: true, 
+            error: null,
+            // útil si quieres redirigir o cachear
+            ids: { personaId: persona.id, usuarioId: usuario.id, perfilId: perfil.id },
+        } as const;
     } catch (error) {
         if (error instanceof z.ZodError) {
             return { success: false, error: error.issues?.[0]?.message ?? 'Datos inválidos' } as const;

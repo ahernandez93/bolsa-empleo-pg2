@@ -20,6 +20,7 @@ export type JobCardProps = {
     tipoTrabajo: TipoTrabajo;
     modalidad: Modalidad;
     fechaCreacion: Date;
+    alreadyApplied?: boolean;
 };
 
 export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {

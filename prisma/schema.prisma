@@ -41,8 +41,9 @@ model Usuario {
   updatedAt       DateTime   @updatedAt
 
   // Relaciones
-  persona  Persona   @relation(fields: [personaId], references: [id], onDelete: Cascade)
-  empleado Empleado?
+  persona         Persona          @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  empleado        Empleado?
+  perfilCandidato PerfilCandidato?
 
   // Relaciones con ofertas
   ofertasAsignadas    OfertaLaboral[] @relation("OfertasAsignadas")
@@ -111,12 +112,13 @@ model OfertaLaboral {
   fechaActualizacion DateTime     @updatedAt
   estado             EstadoOferta @default(PENDIENTE)
 
-  reclutador     Usuario?  @relation("OfertasAsignadas", fields: [reclutadorId], references: [id])
-  agregadoPor    Usuario   @relation("OfertasPublicadas", fields: [agregadoPorId], references: [id])
-  actualizadoPor Usuario?  @relation("OfertasActualizadas", fields: [actualizadoPorId], references: [id])
-  aprobadoPor    Usuario?  @relation("OfertasAprobadas", fields: [aprobadoPorId], references: [id])
+  reclutador     Usuario? @relation("OfertasAsignadas", fields: [reclutadorId], references: [id])
+  agregadoPor    Usuario  @relation("OfertasPublicadas", fields: [agregadoPorId], references: [id])
+  actualizadoPor Usuario? @relation("OfertasActualizadas", fields: [actualizadoPorId], references: [id])
+  aprobadoPor    Usuario? @relation("OfertasAprobadas", fields: [aprobadoPorId], references: [id])
 
-  habilidades OfertaHabilidad[]
+  habilidades   OfertaHabilidad[]
+  postulaciones Postulacion[]
 }
 
 model Habilidad {
@@ -125,7 +127,8 @@ model Habilidad {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  ofertas OfertaHabilidad[]
+  ofertas  OfertaHabilidad[]
+  perfiles PerfilCandidatoHabilidad[]
 }
 
 model OfertaHabilidad {
@@ -137,6 +140,101 @@ model OfertaHabilidad {
   habilidad     Habilidad     @relation(fields: [habilidadId], references: [id], onDelete: Cascade)
 
   @@unique([ofertaLaboralId, habilidadId])
+}
+
+model PerfilCandidato {
+  id        String @id @default(uuid())
+  usuarioId String @unique
+
+  // Datos profesionales del candidato
+  resumen             String?
+  tituloProfesional   String?
+  experienciaTotal    Int? // años de experiencia total
+  nivelAcademico      String?
+  expectativaSalarial Float?
+  disponibilidad      String? // ej. "INMEDIATA", "1 MES"
+  movilidad           Boolean @default(false)
+
+  // CV (archivo)
+  cvUrl      String? // URL pública o ruta accesible
+  cvKey      String? // S3 key o nombre de archivo local
+  cvMimeType String?
+  cvSize     Int?
+
+  fechaActualizacion DateTime @updatedAt
+
+  // Relaciones
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Colecciones
+  habilidades   PerfilCandidatoHabilidad[]
+  educacion     Educacion[]
+  experiencia   ExperienciaLaboral[]
+  postulaciones Postulacion[]
+}
+
+model PerfilCandidatoHabilidad {
+  id                String @id @default(uuid())
+  perfilCandidatoId String
+  habilidadId       Int
+
+  perfilCandidato PerfilCandidato @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+  habilidad       Habilidad       @relation(fields: [habilidadId], references: [id], onDelete: Cascade)
+
+  @@unique([perfilCandidatoId, habilidadId])
+}
+
+model Educacion {
+  id                String    @id @default(uuid())
+  perfilCandidatoId String
+  institucion       String
+  titulo            String
+  nivelAcademico    String
+  fechaInicio       DateTime?
+  fechaFin          DateTime?
+
+  perfilCandidato PerfilCandidato @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+}
+
+model ExperienciaLaboral {
+  id                    String    @id @default(uuid())
+  perfilCandidatoId     String
+  empresa               String
+  puesto                String
+  descripcion           String?
+  fechaInicio           DateTime
+  fechaFin              DateTime?
+  actualmenteTrabajando Boolean   @default(false)
+
+  perfilCandidato PerfilCandidato @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+
+  @@index([perfilCandidatoId])
+}
+
+model Postulacion {
+  id                String @id @default(uuid())
+  ofertaLaboralId   String
+  perfilCandidatoId String
+
+  estado             EstadoPostulacion @default(SOLICITUD)
+  // cartaPresentacion String? // texto opcional que escribe el candidato
+  cvSnapshotUrl      String? // URL del CV al momento de postular (snapshot)
+  cvSnapshotKey      String? // key/filename del snapshot (para borrar si reemplazas)
+  // calificacion      Int? // puntuación interna (1-5, por ejemplo)
+  notasInternas      String? // notas del reclutador
+  fechaPostulacion   DateTime          @default(now())
+  fechaActualizacion DateTime          @updatedAt
+
+  // Relaciones
+  oferta OfertaLaboral   @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
+  perfil PerfilCandidato @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+
+  // Evita duplicados: un candidato no puede aplicar dos veces a la misma oferta
+  @@unique([ofertaLaboralId, perfilCandidatoId])
+  // Índices para consultas habituales
+  @@index([ofertaLaboralId])
+  @@index([perfilCandidatoId])
+  @@index([estado])
 }
 
 enum RolUsuario {
@@ -161,4 +259,12 @@ enum EstadoOferta {
   ABIERTA
   RECHAZADA
   CERRADA
+}
+
+enum EstadoPostulacion {
+  SOLICITUD
+  ENTREVISTA
+  EVALUACIONES
+  CONTRATACION
+  RECHAZADA
 }

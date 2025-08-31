@@ -4,6 +4,8 @@ import z from "zod";
 import { ofertaLaboralServerSchema } from "@/lib/schemas/ofertaLaboralSchema";
 import { auth } from "@/lib/auth/auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         const ofertasLaborales = await prisma.ofertaLaboral.findMany({

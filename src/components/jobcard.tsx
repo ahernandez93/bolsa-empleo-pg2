@@ -4,8 +4,63 @@ import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { MapPin, Building2, Briefcase } from "lucide-react";
 import type { JobCardProps } from "@/components/jobcarousel";
+import { useState, useTransition } from "react";
+import { useSession, /* signIn */ } from "next-auth/react"; // si usas next-auth
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    /* AlertDialogTrigger, */
+} from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
-export default function JobCard({ puesto, area, ubicacionDepartamento, ubicacionCiudad, empresa, tipoTrabajo, modalidad, fechaCreacion }: JobCardProps) {
+export default function JobCard({ id, puesto, area, ubicacionDepartamento, ubicacionCiudad, empresa, tipoTrabajo, modalidad, fechaCreacion, alreadyApplied }: JobCardProps) {
+
+    const { status } = useSession(); // "authenticated" | "unauthenticated" | "loading"
+    const [open, setOpen] = useState(false);
+    const [isPending, startTransition] = useTransition();
+    const [applied, setApplied] = useState(!!alreadyApplied);
+    const router = useRouter();
+    const canApply = status === "authenticated" && !applied;
+
+    const handleApply = () => {
+        if (status !== "authenticated") {
+            toast.info("Necesitas iniciar sesión para postular");
+            // redirige o invoca next-auth
+            router.push('/login') //signIn(); // o 
+            return;
+        }
+        setOpen(true);
+    };
+
+    const confirmApply = () => {
+        startTransition(async () => {
+            try {
+                const res = await axios.post("/api/postulaciones", { ofertaId: id });
+                console.log(res.data);
+                if (res.status === 201) {
+                    setApplied(true);
+                    toast.success("Postulación enviada correctamente");
+                }
+            } catch (err) {
+                if (axios.isAxiosError(err)) {
+                    toast.error(err.response?.data?.message || "No se pudo postular");
+                } else {
+                    toast.error("Error de red al postular");
+                }
+            } finally {
+                setOpen(false);
+            }
+        });
+    };
+
     return (
         <Card className="h-full border-slate-200 flex flex-col">
             <CardHeader className="pb-0">
@@ -31,7 +86,13 @@ export default function JobCard({ puesto, area, ubicacionDepartamento, ubicacion
                     <Badge variant="secondary" className="rounded-full">{department}</Badge>
                 </div> */}
                 <div className="flex gap-2 pt-1">
-                    <Button className="w-full">Aplicar ahora</Button>
+                    <Button
+                        className="w-full"
+                        onClick={handleApply}
+                        disabled={isPending || !canApply}
+                    >
+                        {applied ? "Ya postulaste" : "Aplicar ahora"}
+                    </Button>
                 </div>
                 <div className="flex gap-2 pt-1 text-sm text-slate-500 justify-end">
                     <span>Publicada{" "}
@@ -41,6 +102,24 @@ export default function JobCard({ puesto, area, ubicacionDepartamento, ubicacion
                         })}</span>
                 </div>
             </CardContent>
+            {/* Modal de confirmación */}
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Confirmás tu postulación?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Se enviará tu perfil al reclutador de <strong>{empresa}</strong> para el puesto <strong>{puesto}</strong>.
+                            Podrás ver el estado en tu panel de postulaciones.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmApply} disabled={isPending}>
+                            {isPending ? "Enviando..." : "Confirmar postulación"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     );
 }

@@ -5,6 +5,8 @@ import z from "zod"
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth/auth";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request, { params }: { params: { id: string } }
 ) {
     try {

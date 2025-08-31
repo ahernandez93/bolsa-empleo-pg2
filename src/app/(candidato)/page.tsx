@@ -2,13 +2,12 @@
 
 // import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+// import { Input } from "@/components/ui/input";
+// import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, /* AvatarImage */ } from "@/components/ui/avatar";
 import { MapPin, Search, User, Globe } from "lucide-react";
 import { getOFertasLaboralesAbiertas } from "../actions/ofertas-actions";
-import Image from "next/image";
 import JobsCarousel from "@/components/jobcarousel";
 import Link from "next/link";
 
@@ -87,6 +86,7 @@ const testimonios = [
 ];
 
 const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas();
+console.log(ofertasLaboralesAbiertas);
 
 export default async function HomePage() {
   return (
@@ -131,7 +131,7 @@ export default async function HomePage() {
   );
 }
 
-function Hero() {
+/* function Hero() {
   return (
     <section className="pt-8">
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Construye tu futuro con EmpresaX</h1>
@@ -161,7 +161,7 @@ function Hero() {
       </Card>
     </section>
   );
-}
+} */
 
 function ImpactStats() {
   const stats = [
