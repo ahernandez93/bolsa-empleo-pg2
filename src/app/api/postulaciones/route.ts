@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth";
+import { sendEstadoPostulacionEmail } from "@/lib/mailer"
 
 export async function GET() {
     try {
@@ -85,7 +86,41 @@ export async function POST(req: Request) {
                 cvSnapshotUrl: perfil.cvUrl,
                 cvSnapshotKey: perfil.cvKey,
             },
+            select: {
+                id: true,
+                estado: true,
+                oferta: { select: { puesto: true } },
+                perfil: {
+                    select: {
+                        usuario: {
+                            select: {
+                                email: true,
+                                // si tienes relación Usuario -> Persona:
+                                persona: { select: { nombre: true, apellido: true } },
+                            },
+                        },
+                    },
+                },
+            },
         });
+
+        try {
+            const correo = nueva.perfil.usuario.email
+            const nombrePersona = nueva.perfil.usuario.persona
+                ? `${nueva.perfil.usuario.persona.nombre} ${nueva.perfil.usuario.persona.apellido}`
+                : "Candidato"
+            const puesto = nueva.oferta.puesto
+
+            await sendEstadoPostulacionEmail({
+                to: correo,
+                nombre: nombrePersona,
+                puesto,
+                estadoNuevo: "SOLICITUD",
+            })
+        } catch (mailErr) {
+            console.error("[postulacion:email] error enviando correo:", mailErr)
+            // opcional: guardar log/flag para reintentar luego
+        }
 
         return NextResponse.json({ message: "Postulación enviada", postulacion: nueva }, { status: 201 });
     } catch (e) {

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
+import { EstadoSelect } from "./EstadoSelect"
 
 export type PostulacionConDatos = {
   id: string
@@ -14,7 +15,7 @@ export type PostulacionConDatos = {
   ofertaUbicacionCiudad: string
   ofertaUbicacionDepartamento: string
   fechaPostulacion: string
-  estado: string
+  estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
 }
 interface GetColumnsProps {
   onEdit: (postulacion: PostulacionConDatos) => void
@@ -113,15 +114,17 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
     accessorKey: "estado",
     header: "Estado",
     cell: ({ row }) => {
-      if (row.original.estado === "ABIERTA") {
-        return <Badge variant="default">Abierta</Badge>
-      } else if (row.original.estado === "RECHAZADA") {
-        return <Badge variant="destructive">Rechazada</Badge>
-      } else if (row.original.estado === "CERRADA") {
-        return <Badge variant="secondary">Cerrada</Badge>
-      } else {
-        return <Badge variant="secondary">Solicitud</Badge>
-      }
+      const p = row.original
+      return (
+        <EstadoSelect
+          id={p.id}
+          value={p.estado}
+          onCommitted={(nuevo) => {
+            // si necesitas reflejar en tu store/table sin re-fetch
+            row.original.estado = nuevo
+          }}
+        />
+      )
     },
   },
   {

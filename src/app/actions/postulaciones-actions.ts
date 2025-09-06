@@ -35,6 +35,9 @@ export const getPostulaciones = async () => {
                     },
                 },
             },
+            orderBy: {
+                fechaPostulacion: "desc",
+            },
         });
 
         const data = postulaciones.map(postulacion => ({

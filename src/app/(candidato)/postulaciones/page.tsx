@@ -39,19 +39,19 @@ const fetcher = (url: string) => axios.get(url).then(res => res.data);
 function estadoBadgeVariant(estado: EstadoPostulacion) {
     switch (estado) {
         case "SOLICITUD":
-            return "secondary";
+            return "bg-muted text-foreground"; //"secondary";
         case "ENTREVISTA":
-            return "outline";
+            return "bg-blue-600 text-white"; //"outline";
         case "EVALUACIONES":
-            return "default";
+            return "bg-yellow-500 text-white"; //"default";
         case "CONTRATACION":
-            return "default";
+            return "bg-green-600 text-white"; //"default";
         case "RECHAZADA":
-            return "destructive";
+            return "bg-red-600 text-white"; //"destructive";
         case "RETIRADA":
-            return "secondary";
+            return "bg-muted text-foreground"; //"secondary";
         default:
-            return "secondary";
+            return "bg-muted text-foreground"; //"secondary";
     }
 }
 
@@ -130,7 +130,7 @@ export default function PanelPostulaciones() {
                                         {p.oferta.ubicacionCiudad} - {p.oferta.ubicacionDepartamento}
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={estadoBadgeVariant(p.estado)}>
+                                        <Badge className={estadoBadgeVariant(p.estado)}>
                                             {p.estado.replace("_", " ")}
                                         </Badge>
                                     </TableCell>
