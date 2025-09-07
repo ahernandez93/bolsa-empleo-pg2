@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react"
 import { Session } from "next-auth"
 import { signOut } from "next-auth/react"
+import Link from "next/link"
 
 export default function NavUserCandidato({ session }: { session: Session | null }) {
     const closeSession = async () => {
@@ -50,10 +51,12 @@ export default function NavUserCandidato({ session }: { session: Session | null 
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                            <BadgeCheck />
-                            Perfil
-                        </DropdownMenuItem>
+                        <Link href="/perfil">
+                            <DropdownMenuItem>
+                                <BadgeCheck />
+                                Perfil
+                            </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuItem>
                             <Bell />
                             Notificaciones
