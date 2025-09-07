@@ -10,7 +10,7 @@ export function HeaderPostulaciones() {
         <div className="flex justify-between items-center px-4">
             <h2 className="text-2xl">Listado de Postulaciones</h2>
 
-            <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
+            {/* <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
                 <DialogTrigger asChild>
                     <Button>Agregar Postulación</Button>
                 </DialogTrigger>
@@ -23,7 +23,7 @@ export function HeaderPostulaciones() {
                         </DialogDescription>
                     </DialogHeader>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
         </div>
     );
 }

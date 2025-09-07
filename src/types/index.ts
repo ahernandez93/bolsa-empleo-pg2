@@ -1,4 +1,4 @@
-import { OfertaLaboral } from "@prisma/client";
+import { OfertaLaboral, Postulacion } from "@prisma/client";
 
 export type EmpleadoCompleto = {
     id: string
@@ -67,4 +67,17 @@ export type OfertaLaboralCompleta = {
 }
 
 export type InitialDataUpdateOfertaLaboral = Pick<OfertaLaboral, "id" | "puesto" | "descripcionPuesto" | "area" | "ubicacionPais" | "ubicacionDepartamento" | "ubicacionCiudad" | "empresa" | "nivelAcademico" | "experienciaLaboral" | "tipoTrabajo" | "modalidad" | "salario" | "estado">;
+
+export type InitialDataUpdatePostulacion = {
+    id: string
+    estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
+    notasInternas: string | null
+
+    // Solo lectura para el formulario
+    fechaPostulacion: string            // ISO string
+    ofertaPuesto: string
+    candidatoNombre: string | null
+    candidatoEmail: string
+}
+
 

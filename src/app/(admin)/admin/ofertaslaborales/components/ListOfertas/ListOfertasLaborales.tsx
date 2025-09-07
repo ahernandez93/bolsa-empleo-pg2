@@ -27,8 +27,8 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
             setEditingOferta(ofertaLaboralCompleta)
             setOpenModalCreate(true)
         } catch (error) {
-            console.error("Error al obtener detalles del empleado:", error)
-            toast.error("Error al obtener detalles del empleado")
+            console.error("Error al obtener detalles de la oferta laboral:", error)
+            toast.error("Error al obtener detalles de la oferta laboral")
         }
     }
 
@@ -39,8 +39,8 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
                 toast.success("Oferta Laboral eliminada correctamente");
                 router.refresh();
             } catch (error) {
-                console.error("Error al eliminar el empleado:", error);
-                toast.error("Hubo un error al eliminar el empleado");
+                console.error("Error al eliminar la oferta laboral:", error);
+                toast.error("Hubo un error al eliminar la oferta laboral");
             }
         }
 

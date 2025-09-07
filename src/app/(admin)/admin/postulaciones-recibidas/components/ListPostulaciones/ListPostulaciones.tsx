@@ -7,16 +7,24 @@ import axios from "axios"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-// import { OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
-import { InitialDataUpdateOfertaLaboral } from "@/types"
+import { InitialDataUpdatePostulacion } from "@/types"
+import { FormEditPostulacion } from "../FormCreatePostulacion"
 
 interface ListPostulacionesProps {
     postulaciones: PostulacionConDatos[]
 }
 
 export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
-    const [editingPostulacion, setEditingPostulacion] = useState<InitialDataUpdateOfertaLaboral | null>(null)
-    const [openModalCreate, setOpenModalCreate] = useState(false);
+    const [editingPostulacion, setEditingPostulacion] = useState<InitialDataUpdatePostulacion>({
+        id: "",
+        estado: "SOLICITUD",
+        notasInternas: "",
+        fechaPostulacion: "",
+        ofertaPuesto: "",
+        candidatoNombre: "",
+        candidatoEmail: "",
+    })
+    const [openModalEdit, setOpenModalEdit] = useState(false);
     const router = useRouter()
 
     const handleEdit = async (postulacion: PostulacionConDatos) => {
@@ -24,7 +32,7 @@ export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
             const res = await axios.get(`/api/postulaciones/${postulacion.id}`)
             const postulacionCompleta = res.data
             setEditingPostulacion(postulacionCompleta)
-            setOpenModalCreate(true)
+            setOpenModalEdit(true)
         } catch (error) {
             console.error("Error al obtener detalles del empleado:", error)
             toast.error("Error al obtener detalles del empleado")
@@ -38,8 +46,8 @@ export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
                 toast.success("Postulación eliminada correctamente");
                 router.refresh();
             } catch (error) {
-                console.error("Error al eliminar el empleado:", error);
-                toast.error("Hubo un error al eliminar el empleado");
+                console.error("Error al eliminar la postulación:", error);
+                toast.error("Hubo un error al eliminar la postulación");
             }
         }
 
@@ -64,7 +72,7 @@ export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
         <>
             <DataTable columns={columns} data={postulaciones} />
 
-            <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
+            <Dialog open={openModalEdit} onOpenChange={setOpenModalEdit}>
                 <DialogContent className="sm:max-w-[625px]">
                     <DialogHeader>
                         <DialogTitle>
@@ -74,6 +82,10 @@ export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
                             {editingPostulacion ? "Actualice los datos de la postulación" : "Ingrese los datos de la nueva postulación"}
                         </DialogDescription>
                     </DialogHeader>
+                    <FormEditPostulacion
+                        initialData={editingPostulacion}
+                        setOpenModalEdit={setOpenModalEdit}
+                    />
                 </DialogContent>
             </Dialog>
         </>
