@@ -66,7 +66,7 @@ export type OfertaLaboralCompleta = {
     updatedAt: string
 }
 
-export type InitialDataUpdateOfertaLaboral = Pick<OfertaLaboral, "id" | "puesto" | "descripcionPuesto" | "area" | "ubicacionPais" | "ubicacionDepartamento" | "ubicacionCiudad" | "empresa" | "nivelAcademico" | "experienciaLaboral" | "tipoTrabajo" | "modalidad" | "salario" | "estado">;
+export type InitialDataUpdateOfertaLaboral = Pick<OfertaLaboral, "id" | "puesto" | "descripcionPuesto" | "area" | "ubicacionDepartamentoId" | "ubicacionCiudadId" | "empresa" | "nivelAcademico" | "experienciaLaboral" | "tipoTrabajo" | "modalidad" | "salario" | "estado">;
 
 export type InitialDataUpdatePostulacion = {
     id: string

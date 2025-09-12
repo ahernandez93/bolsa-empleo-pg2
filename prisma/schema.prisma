@@ -15,18 +15,63 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Persona {
-  id              String    @id @default(uuid())
-  nombre          String
-  apellido        String
-  telefono        String?
-  direccion       String?
-  fechaNacimiento DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+/**
+ * ===========================
+ * GEO: UBICACIONES (NUEVO)
+ * ===========================
+ */
+
+model UbicacionDepartamento {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relaciones
-  usuario Usuario?
+  ciudades UbicacionCiudad[]
+  personas Persona[]
+  ofertas  OfertaLaboral[]
+
+  @@unique([nombre])
+}
+
+model UbicacionCiudad {
+  id             Int                   @id @default(autoincrement())
+  nombre         String
+  departamentoId Int
+  departamento   UbicacionDepartamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  // Relaciones
+  personas Persona[]
+  ofertas  OfertaLaboral[]
+
+  @@unique([departamentoId, nombre]) // No repetir ciudad dentro del mismo departamento
+}
+
+/**
+ * ===========================
+ * PERSONAS / USUARIOS
+ * ===========================
+ */
+model Persona {
+  id                      String    @id @default(uuid())
+  nombre                  String
+  apellido                String
+  telefono                String?
+  direccion               String?
+  fechaNacimiento         DateTime?
+  genero                  Genero?
+  ubicacionDepartamentoId Int?
+  ubicacionCiudadId       Int?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  // Relaciones
+  usuario               Usuario?
+  ubicacionDepartamento UbicacionDepartamento? @relation(fields: [ubicacionDepartamentoId], references: [id], onDelete: SetNull)
+  ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: SetNull)
 }
 
 model Usuario {
@@ -88,39 +133,51 @@ model Cargo {
   empleados Empleado[]
 }
 
+/**
+ * ===========================
+ * OFERTA LABORAL
+ * ===========================
+ */
 model OfertaLaboral {
-  id                    String      @id @default(uuid())
-  puesto                String
-  descripcionPuesto     String
-  area                  String
-  ubicacionPais         String
-  ubicacionDepartamento String
-  ubicacionCiudad       String
-  empresa               String
-  nivelAcademico        String
-  experienciaLaboral    String
-  tipoTrabajo           TipoTrabajo
-  modalidad             Modalidad
-  salario               Float
-
-  reclutadorId     String?
-  agregadoPorId    String
-  actualizadoPorId String?
-  aprobadoPorId    String?
-
-  fechaCreacion      DateTime     @default(now())
-  fechaActualizacion DateTime     @updatedAt
-  estado             EstadoOferta @default(PENDIENTE)
+  id                      String       @id @default(uuid())
+  puesto                  String
+  descripcionPuesto       String
+  area                    String
+  ubicacionDepartamentoId Int
+  ubicacionCiudadId       Int
+  empresa                 String
+  nivelAcademico          String
+  experienciaLaboral      String
+  tipoTrabajo             TipoTrabajo
+  modalidad               Modalidad
+  salario                 Float
+  reclutadorId            String?
+  agregadoPorId           String
+  actualizadoPorId        String?
+  aprobadoPorId           String?
+  fechaCreacion           DateTime     @default(now())
+  fechaActualizacion      DateTime     @updatedAt
+  estado                  EstadoOferta @default(PENDIENTE)
 
   reclutador     Usuario? @relation("OfertasAsignadas", fields: [reclutadorId], references: [id])
   agregadoPor    Usuario  @relation("OfertasPublicadas", fields: [agregadoPorId], references: [id])
   actualizadoPor Usuario? @relation("OfertasActualizadas", fields: [actualizadoPorId], references: [id])
   aprobadoPor    Usuario? @relation("OfertasAprobadas", fields: [aprobadoPorId], references: [id])
 
-  habilidades   OfertaHabilidad[]
-  postulaciones Postulacion[]
+  habilidades           OfertaHabilidad[]
+  postulaciones         Postulacion[]
+  ubicacionDepartamento UbicacionDepartamento? @relation(fields: [ubicacionDepartamentoId], references: [id], onDelete: Restrict)
+  ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: Restrict)
+
+  @@index([ubicacionDepartamentoId])
+  @@index([ubicacionCiudadId])
 }
 
+/**
+ * ===========================
+ * HABILIDADES / PERFIL CANDIDATO
+ * ===========================
+ */
 model Habilidad {
   id        Int      @id @default(autoincrement())
   nombre    String   @unique
@@ -143,25 +200,20 @@ model OfertaHabilidad {
 }
 
 model PerfilCandidato {
-  id        String @id @default(uuid())
-  usuarioId String @unique
-
-  // Datos profesionales del candidato
-  resumen             String?
-  tituloProfesional   String?
-  experienciaTotal    Int? // años de experiencia total
-  nivelAcademico      String?
-  expectativaSalarial Float?
-  disponibilidad      String? // ej. "INMEDIATA", "1 MES"
-  movilidad           Boolean @default(false)
-
-  // CV (archivo)
-  cvUrl      String? // URL pública o ruta accesible
-  cvKey      String? // S3 key o nombre de archivo local
-  cvMimeType String?
-  cvSize     Int?
-
-  fechaActualizacion DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  usuarioId            String   @unique
+  resumen              String?
+  tituloProfesional    String?
+  disponibilidad       String? // ej. "INMEDIATA", "1 MES"
+  disponibilidadViajar Boolean  @default(false)
+  cambioResidencia     Boolean  @default(false)
+  poseeVehiculo        Boolean  @default(false)
+  cvUrl                String? // URL pública o ruta accesible
+  cvKey                String? // S3 key o nombre de archivo local
+  cvMimeType           String?
+  cvSize               Int?
+  fechaCreacion        DateTime @default(now())
+  fechaActualizacion   DateTime @updatedAt
 
   // Relaciones
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
@@ -211,16 +263,18 @@ model ExperienciaLaboral {
   @@index([perfilCandidatoId])
 }
 
+/**
+ * ===========================
+ * POSTULACIONES
+ * ===========================
+ */
 model Postulacion {
-  id                String @id @default(uuid())
-  ofertaLaboralId   String
-  perfilCandidatoId String
-
+  id                 String            @id @default(uuid())
+  ofertaLaboralId    String
+  perfilCandidatoId  String
   estado             EstadoPostulacion @default(SOLICITUD)
-  // cartaPresentacion String? // texto opcional que escribe el candidato
   cvSnapshotUrl      String? // URL del CV al momento de postular (snapshot)
   cvSnapshotKey      String? // key/filename del snapshot (para borrar si reemplazas)
-  // calificacion      Int? // puntuación interna (1-5, por ejemplo)
   notasInternas      String? // notas del reclutador
   fechaPostulacion   DateTime          @default(now())
   fechaActualizacion DateTime          @updatedAt
@@ -235,6 +289,16 @@ model Postulacion {
   @@index([ofertaLaboralId])
   @@index([perfilCandidatoId])
   @@index([estado])
+}
+
+/**
+ * ===========================
+ * ENUMS
+ * ===========================
+ */
+enum Genero {
+  MASCULINO
+  FEMENINO
 }
 
 enum RolUsuario {

@@ -3,24 +3,39 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { RolUsuario } from "@prisma/client";
 
+// Helpers: crean si no existen y devuelven el id
+async function getOrCreateDepartamento(descripcion: string) {
+    const existing = await prisma.departamento.findFirst({ where: { descripcion }, select: { id: true } });
+    if (existing) return existing.id;
+    const created = await prisma.departamento.create({ data: { descripcion } });
+    return created.id;
+}
+
+async function getOrCreateCargo(descripcion: string) {
+    const existing = await prisma.cargo.findFirst({ where: { descripcion }, select: { id: true } });
+    if (existing) return existing.id;
+    const created = await prisma.cargo.create({ data: { descripcion } });
+    return created.id;
+}
+
 export async function GET() {
     try {
         // Datos de prueba
         const personasData = [
             {
-                nombre: "Juan",
-                apellido: "Pérez",
-                telefono: "123456789",
+                nombre: "Allan",
+                apellido: "Hernandez",
+                telefono: "95560225",
                 direccion: "Calle 1",
                 fechaNacimiento: new Date("1990-01-01"),
                 usuario: {
-                    email: "juan@example.com",
-                    password: "123456",
+                    email: "allan_hc@outlook.com",
+                    password: "12345678",
                     rol: RolUsuario.ADMIN,
                 },
                 empleado: {
                     departamento: "Recursos Humanos",
-                    cargo: "Coordinador",
+                    cargo: "Coordinador de Reclutamiento",
                 },
             },
             {
@@ -31,12 +46,12 @@ export async function GET() {
                 fechaNacimiento: new Date("1995-05-15"),
                 usuario: {
                     email: "maria@example.com",
-                    password: "123456",
+                    password: "12345678",
                     rol: RolUsuario.RECLUTADOR,
                 },
                 empleado: {
                     departamento: "Recursos Humanos",
-                    cargo: "Reclutadora",
+                    cargo: "Oficial de Reclutamiento",
                 },
             },
             {
@@ -47,17 +62,33 @@ export async function GET() {
                 fechaNacimiento: new Date("1998-09-20"),
                 usuario: {
                     email: "pedro@example.com",
-                    password: "123456",
+                    password: "12345678",
                     rol: RolUsuario.RECLUTADOR,
                 },
                 empleado: {
                     departamento: "Recursos Humanos",
-                    cargo: "Reclutador",
+                    cargo: "Oficial de Reclutamiento",
                 },
             },
         ];
 
         const resultados = [];
+
+        // Pre-crear/asegurar catálogos requeridos (evita carreras y repeticiones)
+        const deptoSet = new Set(personasData.map(p => p.empleado.departamento));
+        const cargoSet = new Set(personasData.map(p => p.empleado.cargo));
+
+        const deptoMap = new Map<string, number>();
+        for (const d of deptoSet) {
+            const id = await getOrCreateDepartamento(d);
+            deptoMap.set(d, id);
+        }
+
+        const cargoMap = new Map<string, number>();
+        for (const c of cargoSet) {
+            const id = await getOrCreateCargo(c);
+            cargoMap.set(c, id);
+        }
 
         for (const p of personasData) {
             // Verificar si ya existe un usuario con ese email
@@ -68,13 +99,17 @@ export async function GET() {
 
             if (existe) {
                 resultados.push({ mensaje: `Usuario ${p.usuario.email} ya existe`, data: existe });
-                continue; // saltar creación
+                continue;
             }
 
             // Hashear password
             const passwordHash = await bcrypt.hash(p.usuario.password, 10);
 
-            // Crear persona con usuario y empleado
+            // Mapear IDs normalizados
+            const departamentoId = deptoMap.get(p.empleado.departamento)!;
+            const cargoId = cargoMap.get(p.empleado.cargo)!;
+
+            // Crear persona con usuario y empleado (usando IDs)
             const personaCreada = await prisma.persona.create({
                 data: {
                     nombre: p.nombre,
@@ -88,10 +123,11 @@ export async function GET() {
                             passwordHash,
                             rol: p.usuario.rol,
                             emailVerificado: true,
+                            activo: true,
                             empleado: {
                                 create: {
-                                    departamento: p.empleado.departamento,
-                                    cargo: p.empleado.cargo,
+                                    departamentoId,
+                                    cargoId,
                                 },
                             },
                         },
@@ -100,7 +136,12 @@ export async function GET() {
                 include: {
                     usuario: {
                         include: {
-                            empleado: true,
+                            empleado: {
+                                include: {
+                                    departamento: true,
+                                    cargo: true,
+                                },
+                            },
                         },
                     },
                 },

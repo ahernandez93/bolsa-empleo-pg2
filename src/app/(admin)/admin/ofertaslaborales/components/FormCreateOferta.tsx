@@ -33,9 +33,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         puesto: initialData.puesto,
         descripcionPuesto: initialData.descripcionPuesto,
         area: initialData.area || "",
-        ubicacionPais: initialData.ubicacionPais,
-        ubicacionDepartamento: initialData.ubicacionDepartamento,
-        ubicacionCiudad: initialData.ubicacionCiudad,
+        ubicacionDepartamentoId: initialData.ubicacionDepartamentoId,
+        ubicacionCiudadId: initialData.ubicacionCiudadId,
         empresa: initialData.empresa,
         nivelAcademico: initialData.nivelAcademico,
         experienciaLaboral: initialData.experienciaLaboral,
@@ -47,9 +46,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         puesto: "",
         descripcionPuesto: "",
         area: "",
-        ubicacionPais: "",
-        ubicacionDepartamento: "",
-        ubicacionCiudad: "",
+        ubicacionDepartamentoId: undefined,
+        ubicacionCiudadId: undefined,
         empresa: "",
         nivelAcademico: "",
         experienciaLaboral: "",
@@ -71,9 +69,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 puesto: initialData.puesto,
                 descripcionPuesto: initialData.descripcionPuesto,
                 area: initialData.area || "",
-                ubicacionPais: initialData.ubicacionPais,
-                ubicacionDepartamento: initialData.ubicacionDepartamento ?? "",
-                ubicacionCiudad: initialData.ubicacionCiudad ?? "",
+                ubicacionDepartamentoId: initialData.ubicacionDepartamentoId ?? undefined,
+                ubicacionCiudadId: initialData.ubicacionCiudadId ?? undefined,
                 empresa: initialData.empresa,
                 nivelAcademico: initialData.nivelAcademico,
                 experienciaLaboral: initialData.experienciaLaboral,
@@ -87,9 +84,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 puesto: "",
                 descripcionPuesto: "",
                 area: "",
-                ubicacionPais: "",
-                ubicacionDepartamento: "",
-                ubicacionCiudad: "",
+                ubicacionDepartamentoId: undefined,
+                ubicacionCiudadId: undefined,
                 empresa: "",
                 nivelAcademico: "",
                 experienciaLaboral: "",
@@ -239,7 +235,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 )}
                             />
 
-                            <FormField
+                            {/* <FormField
                                 name="ubicacionPais"
                                 control={form.control}
                                 render={({ field }) => (
@@ -267,7 +263,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                         <FormMessage />
                                     </FormItem>
                                 )}
-                            />
+                            /> */}
 
                             {paisSeleccionado === "Honduras" && (
                                 <FormField

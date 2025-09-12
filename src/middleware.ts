@@ -11,6 +11,7 @@ const publicRoutes = [
   "/ofertas", // Vacantes
   "/api/auth/register",
   "/api/auth",
+  "/api/seed",
   "/reset-password",
   "/verify-email",
   "/error",
