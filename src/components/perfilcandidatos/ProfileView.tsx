@@ -11,8 +11,8 @@ export default function ProfileView({ data }: { data: PerfilCandidatoFormValues 
                 <div className="flex items-start gap-4">
                     <div className="h-16 w-16 rounded-full bg-emerald-200" />
                     <div className="min-w-0">
-                        <h2 className="text-lg font-semibold text-slate-900">{data.firstName} {data.lastName}</h2>
-                        <p className="text-sm text-slate-500">{data.headline}</p>
+                        <h2 className="text-lg font-semibold text-slate-900">{data.nombre} {data.apellido}</h2>
+                        <p className="text-sm text-slate-500">{data.tituloProfesional}</p>
                     </div>
                 </div>
             </Card>
@@ -21,26 +21,26 @@ export default function ProfileView({ data }: { data: PerfilCandidatoFormValues 
             {/* Datos personales */}
             <Section title="Datos personales" icon={<User className="h-4 w-4" />}>
                 <Row icon={<Mail className="h-4 w-4" />} label="Correo" value={data.email} />
-                {data.phone && <Row icon={<Phone className="h-4 w-4" />} label="Teléfono" value={data.phone} />}
-                {data.location && <Row icon={<MapPin className="h-4 w-4" />} label="Ubicación" value={data.location} />}
+                {data.telefono && <Row icon={<Phone className="h-4 w-4" />} label="Teléfono" value={data.telefono} />}
+                {data.ubicacionCiudadId && <Row icon={<MapPin className="h-4 w-4" />} label="Ubicación" value={data.ubicacionCiudad + ", " + data.ubicacionDepartamento} />}
             </Section>
 
 
             {/* Resumen */}
-            {data.summary && (
+            {data.resumen && (
                 <Section title="Resumen profesional" icon={<BadgeCheck className="h-4 w-4" />}>
-                    <p className="text-sm text-slate-700">{data.summary}</p>
+                    <p className="text-sm text-slate-700">{data.resumen}</p>
                 </Section>
             )}
 
 
             {/* Experiencia */}
             <Section title="Experiencia laboral" icon={<Briefcase className="h-4 w-4" />}>
-                {data.experience.map((exp, i) => (
+                {data.experiencia.map((exp, i) => (
                     <div key={i} className="rounded-lg border p-3">
-                        <p className="text-sm font-medium text-slate-900">{exp.company} — {exp.role}</p>
-                        <p className="text-xs text-slate-500">{exp.startDate} — {exp.endDate || "Actual"}</p>
-                        {exp.description && <p className="mt-1 text-sm text-slate-700">{exp.description}</p>}
+                        <p className="text-sm font-medium text-slate-900">{exp.empresa} — {exp.puesto}</p>
+                        <p className="text-xs text-slate-500">{exp.fechaInicio} — {exp.fechaFin || "Actual"}</p>
+                        {exp.descripcion && <p className="mt-1 text-sm text-slate-700">{exp.descripcion}</p>}
                     </div>
                 ))}
             </Section>
@@ -48,20 +48,20 @@ export default function ProfileView({ data }: { data: PerfilCandidatoFormValues 
 
             {/* Educación */}
             <Section title="Formación académica" icon={<GraduationCap className="h-4 w-4" />}>
-                {data.education.map((ed, i) => (
+                {data.educacion.map((ed, i) => (
                     <div key={i} className="rounded-lg border p-3">
-                        <p className="text-sm font-medium text-slate-900">{ed.institution} — {ed.degree}</p>
-                        <p className="text-xs text-slate-500">{ed.graduationYear || ""} {ed.location ? `• ${ed.location}` : ""}</p>
+                        <p className="text-sm font-medium text-slate-900">{ed.institucion} — {ed.titulo}</p>
+                        <p className="text-xs text-slate-500">{ed.fechaFin || ""} {/* {ed.location ? `• ${ed.location}` : ""} */}</p>
                     </div>
                 ))}
             </Section>
 
 
             {/* Habilidades */}
-            {data.skills.length > 0 && (
+            {data.habilidades.length > 0 && (
                 <Section title="Habilidades" icon={<BadgeCheck className="h-4 w-4" />}>
                     <div className="flex flex-wrap gap-2">
-                        {data.skills.map((s) => (
+                        {data.habilidades.map((s) => (
                             <span key={s} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">{s}</span>
                         ))}
                     </div>

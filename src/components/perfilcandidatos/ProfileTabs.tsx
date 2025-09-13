@@ -49,11 +49,11 @@ function PreviewCard({ data }: { data: PerfilCandidatoFormValues }) {
             <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-emerald-200" />
                 <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-900">{data.firstName} {data.lastName}</p>
-                    <p className="truncate text-sm text-slate-500">{data.headline || "Perfil profesional"}</p>
+                    <p className="truncate font-medium text-slate-900">{data.nombre} {data.apellido}</p>
+                    <p className="truncate text-sm text-slate-500">{data.tituloProfesional || "Perfil profesional"}</p>
                 </div>
             </div>
-            <p className="mt-3 text-sm text-slate-600 line-clamp-4">{data.summary}</p>
+            <p className="mt-3 text-sm text-slate-600 line-clamp-4">{data.resumen}</p>
         </div>
     );
 }
