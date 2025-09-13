@@ -27,7 +27,16 @@ export async function GET() {
                     select: {
                         id: true, puesto: true, empresa: true,
                         modalidad: true, tipoTrabajo: true,
-                        ubicacionCiudad: true, ubicacionDepartamento: true,
+                        ubicacionDepartamento: {
+                            select: {
+                                nombre: true,
+                            },
+                        },
+                        ubicacionCiudad: {
+                            select: {
+                                nombre: true,
+                            },
+                        },
                     }
                 }
             }

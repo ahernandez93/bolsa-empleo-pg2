@@ -13,15 +13,20 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, OfertaLaboralFormData, OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types";
-
+import useSWR from "swr";
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
     initialData?: InitialDataUpdateOfertaLaboral | null,
     isEditMode: boolean
 }
+
+type FormBase = z.infer<typeof ofertaLaboralFormSchema> & Partial<Pick<z.infer<typeof ofertaLaboralUpdateSchema>, "estado">>;
+
+const fetcher = (url: string) => axios.get(url).then((r) => r.data);
 
 export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode = false }: FormCreateProps) {
 
@@ -33,8 +38,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         puesto: initialData.puesto,
         descripcionPuesto: initialData.descripcionPuesto,
         area: initialData.area || "",
-        ubicacionDepartamentoId: initialData.ubicacionDepartamentoId,
-        ubicacionCiudadId: initialData.ubicacionCiudadId,
+        ubicacionDepartamentoId: initialData.ubicacionDepartamentoId ?? undefined,
+        ubicacionCiudadId: initialData.ubicacionCiudadId ?? undefined,
         empresa: initialData.empresa,
         nivelAcademico: initialData.nivelAcademico,
         experienciaLaboral: initialData.experienciaLaboral,
@@ -53,10 +58,12 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         experienciaLaboral: "",
         tipoTrabajo: undefined,
         modalidad: undefined,
-        salario: undefined,
+        salario: 0,
     };
-    const form = useForm<OfertaLaboralFormData | OfertaLaboralUpdateData>({
-        resolver: zodResolver(isEditMode ? ofertaLaboralUpdateSchema : ofertaLaboralFormSchema),
+
+    const form = useForm<FormBase>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(isEditMode ? ofertaLaboralUpdateSchema : ofertaLaboralFormSchema) as any,
         defaultValues: defaultValues,
         mode: "onChange",
         reValidateMode: "onChange",
@@ -78,7 +85,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 modalidad: initialData.modalidad,
                 salario: initialData.salario,
                 estado: initialData.estado,
-            } satisfies Partial<OfertaLaboralUpdateData>);
+            } satisfies Partial<FormBase>);
         } else if (!isEditMode) {
             form.reset({
                 puesto: "",
@@ -89,7 +96,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 empresa: "",
                 nivelAcademico: "",
                 experienciaLaboral: "",
-            } satisfies Partial<OfertaLaboralFormData>);
+            } satisfies Partial<FormBase>);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditMode, initialData]);
@@ -115,25 +122,38 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         "Dirección General"
     ];
 
-    const paises = ["Honduras", "El Salvador", "Guatemala", "Nicaragua", "Costa Rica"];
+    // const paises = ["Honduras", "El Salvador", "Guatemala", "Nicaragua", "Costa Rica"];
 
-    const departamentos = [
-        "Atlántida", "Colón", "Comayagua", "Copán", "Cortés", "Choluteca",
-        "El Paraíso", "Francisco Morazán", "Gracias a Dios", "Intibucá",
-        "Islas de la Bahía", "La Paz", "Lempira", "Ocotepeque",
-        "Olancho", "Santa Bárbara", "Valle", "Yoro"
-    ];
+    // const departamentos = [
+    //     "Atlántida", "Colón", "Comayagua", "Copán", "Cortés", "Choluteca",
+    //     "El Paraíso", "Francisco Morazán", "Gracias a Dios", "Intibucá",
+    //     "Islas de la Bahía", "La Paz", "Lempira", "Ocotepeque",
+    //     "Olancho", "Santa Bárbara", "Valle", "Yoro"
+    // ];
 
-    const ciudadesPorDepartamento: Record<string, string[]> = {
-        "Francisco Morazán": ["Tegucigalpa", "Valle de Ángeles", "Santa Lucía"],
-        "Cortés": ["San Pedro Sula", "Puerto Cortés", "Choloma"],
-        "Atlántida": ["La Ceiba", "Tela", "Jutiapa"],
-        "Yoro": ["El Progreso", "Yoro", "Olanchito"],
-        "Choluteca": ["Choluteca", "San Marcos de Colón"],
-    };
+    // const ciudadesPorDepartamento: Record<string, string[]> = {
+    //     "Francisco Morazán": ["Tegucigalpa", "Valle de Ángeles", "Santa Lucía"],
+    //     "Cortés": ["San Pedro Sula", "Puerto Cortés", "Choloma"],
+    //     "Atlántida": ["La Ceiba", "Tela", "Jutiapa"],
+    //     "Yoro": ["El Progreso", "Yoro", "Olanchito"],
+    //     "Choluteca": ["Choluteca", "San Marcos de Colón"],
+    // };
 
-    const paisSeleccionado = form.watch("ubicacionPais");
-    const deptoSeleccionado = form.watch("ubicacionDepartamento");
+    // const paisSeleccionado = form.watch("ubicacionPais");
+    // const deptoSeleccionado = form.watch("ubicacionDepartamento");
+
+    // Departamentos
+    const { data: departamentos, isLoading: loadingDeptos } = useSWR<{ id: number; nombre: string }[]>(
+        "/api/ubicaciones/departamentos",
+        fetcher
+    );
+
+    // Ciudades dependientes del departamento seleccionado
+    const deptoId = form.watch("ubicacionDepartamentoId");
+    const { data: ciudades, isLoading: loadingCiudades } = useSWR<{ id: number; nombre: string }[]>(
+        typeof deptoId === "number" ? `/api/ubicaciones/ciudades?departamentoId=${deptoId}` : null,
+        fetcher
+    );
 
     const onSubmit = async (data: OfertaLaboralFormData | OfertaLaboralUpdateData) => {
         setError(null);
@@ -172,8 +192,8 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
     }
     /* console.log(form.formState.isValid)
     console.log(form.formState.errors) */
- /*    console.log("Errores del formulario:", form.formState.errors);
-    console.log("Valores actuales:", form.getValues()); */
+    /*    console.log("Errores del formulario:", form.formState.errors);
+       console.log("Valores actuales:", form.getValues()); */
     return (
         <div className="max-w-4xl mx-auto h-[80vh] overflow-y-auto p-0">
             <Form {...form}>
@@ -235,87 +255,35 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 )}
                             />
 
-                            {/* <FormField
-                                name="ubicacionPais"
-                                control={form.control}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>País</FormLabel>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                field.onChange(value);
-                                                form.setValue("ubicacionDepartamento", "");
-                                                form.setValue("ubicacionCiudad", "");
-                                            }}
-                                            value={field.value || ""}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccione un país" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {paises.map((pais) => (
-                                                    <SelectItem key={pais} value={pais}>
-                                                        {pais}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            /> */}
-
-                            {paisSeleccionado === "Honduras" && (
-                                <FormField
-                                    name="ubicacionDepartamento"
-                                    control={form.control}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Departamento</FormLabel>
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    field.onChange(value);
-                                                    form.setValue("ubicacionCiudad", "");
-                                                }}
-                                                value={field.value || ""}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccione un departamento" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {departamentos.map((dep) => (
-                                                        <SelectItem key={dep} value={dep}>
-                                                            {dep}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            )}
-
-                            {paisSeleccionado === "Honduras" &&
-                                deptoSeleccionado &&
-                                ciudadesPorDepartamento[deptoSeleccionado] && (
+                            {/* Fila de ubicación: 2 columnas limpias, ocupa todo el ancho de la tarjeta */}
+                            <div className="col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Departamento */}
+                                <div className="min-w-2">
                                     <Controller
-                                        name="ubicacionCiudad"
+                                        name="ubicacionDepartamentoId"
                                         control={form.control}
                                         render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Ciudad</FormLabel>
+                                            <FormItem className="w-full">
+                                                <FormLabel>Departamento</FormLabel>
                                                 <Select
-                                                    onValueChange={field.onChange}
-                                                    value={field.value || ""}
+                                                    value={field.value?.toString() ?? ""}
+                                                    onValueChange={(v) => {
+                                                        field.onChange(Number(v));
+                                                        // reset ciudad sin pelear con TS (asumiendo FormBase permite undefined)
+                                                        form.setValue("ubicacionCiudadId", undefined as unknown as number, {
+                                                            shouldValidate: true,
+                                                            shouldDirty: true,
+                                                        });
+                                                    }}
+                                                    disabled={loadingDeptos}
                                                 >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Seleccione una ciudad" />
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue placeholder={loadingDeptos ? "Cargando..." : "Seleccione un departamento"} />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {ciudadesPorDepartamento[deptoSeleccionado].map((ciudad) => (
-                                                            <SelectItem key={ciudad} value={ciudad}>
-                                                                {ciudad}
+                                                        {(departamentos ?? []).map((d) => (
+                                                            <SelectItem key={d.id} value={d.id.toString()}>
+                                                                {d.nombre}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
@@ -324,7 +292,51 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                             </FormItem>
                                         )}
                                     />
-                                )}
+                                </div>
+
+                                {/* Ciudad: siempre ocupa su celda; si no hay depto, muestro un select deshabilitado
+      para que NO cambie el layout ni se monte con el de la izquierda */}
+                                <div className="min-w-0">
+                                    {form.watch("ubicacionDepartamentoId") ? (
+                                        <Controller
+                                            name="ubicacionCiudadId"
+                                            control={form.control}
+                                            render={({ field }) => (
+                                                <FormItem className="w-full">
+                                                    <FormLabel>Ciudad</FormLabel>
+                                                    <Select
+                                                        value={field.value?.toString() ?? ""}
+                                                        onValueChange={(v) => field.onChange(Number(v))}
+                                                        disabled={loadingCiudades}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder={loadingCiudades ? "Cargando..." : "Seleccione una ciudad"} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {(ciudades ?? []).map((c) => (
+                                                                <SelectItem key={c.id} value={c.id.toString()}>
+                                                                    {c.nombre}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    ) : (
+                                        <FormItem className="w-full">
+                                            <FormLabel>Ciudad</FormLabel>
+                                            <Select disabled>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Seleccione primero un departamento" />
+                                                </SelectTrigger>
+                                            </Select>
+                                        </FormItem>
+                                    )}
+                                </div>
+                            </div>
+
 
                             <FormField
                                 control={form.control}
@@ -445,7 +457,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 )}
                             />
 
-                            <FormField
+                            <Controller
                                 control={form.control}
                                 name="salario"
                                 render={({ field }) => (
@@ -454,9 +466,11 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                         <FormControl>
                                             <Input
                                                 type="number"
+                                                inputMode="decimal"
+                                                min={0}
+                                                step="0.01"
                                                 placeholder="Ej. 5000"
-                                                {...field}
-                                                value={field.value ?? 0}
+                                                value={Number.isFinite(field.value as number) ? (field.value as number) : 0}
                                                 onChange={(e) => field.onChange(e.target.valueAsNumber)}
                                             />
                                         </FormControl>
@@ -464,30 +478,31 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     </FormItem>
                                 )}
                             />
+
                             {isEditMode && (
-                            <FormField
-                                control={form.control}
-                                name="estado"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Estado</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || ""}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccione estado" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                                                <SelectItem value="ABIERTA">Abierta</SelectItem>
-                                                <SelectItem value="RECHAZADA">Rechazada</SelectItem>
-                                                <SelectItem value="CERRADA">Cerrada</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                <FormField
+                                    control={form.control}
+                                    name="estado"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Estado</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value || ""}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccione estado" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="PENDIENTE">Pendiente</SelectItem>
+                                                    <SelectItem value="ABIERTA">Abierta</SelectItem>
+                                                    <SelectItem value="RECHAZADA">Rechazada</SelectItem>
+                                                    <SelectItem value="CERRADA">Cerrada</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             )}
                         </CardContent>
                     </Card>

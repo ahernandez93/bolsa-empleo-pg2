@@ -11,9 +11,10 @@ export type OfertaLaboralConDatos = {
   puesto: string
   area: string
   empresa: string
-  ubicacionPais: string
-  ubicacionDepartamento: string
-  ubicacionCiudad: string
+  ubicacionDepartamentoId: number
+  ubicacionDepartamentoDescripcion: string | undefined
+  ubicacionCiudadId: number
+  ubicacionCiudadDescripcion: string | undefined
   agregadoPorId: string
   agregadoPorUsuario: string
   estado: string
@@ -77,7 +78,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
     header: "Empresa",
   },
   {
-    accessorKey: "ubicacionPais",
+    accessorKey: "ubicacionDepartamentoDescripcion",
     header: ({ column }) => {
       const sort = column.getIsSorted() ?? false
       return (
@@ -92,7 +93,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
       )
     },
     cell: ({ row }) => (
-      <span className="font-medium">{row.original.ubicacionPais} - {row.original.ubicacionDepartamento} - {row.original.ubicacionCiudad}</span>
+      <span className="font-medium">{row.original.ubicacionDepartamentoDescripcion} - {row.original.ubicacionCiudadDescripcion}</span>
     ),
   },
   {

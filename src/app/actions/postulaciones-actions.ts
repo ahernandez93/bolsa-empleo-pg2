@@ -45,8 +45,8 @@ export const getPostulaciones = async () => {
             perfilUsuarioNombre: postulacion.perfil.usuario.persona.nombre,
             perfilUsuarioApellido: postulacion.perfil.usuario.persona.apellido,
             ofertaPuesto: postulacion.oferta.puesto,
-            ofertaUbicacionCiudad: postulacion.oferta.ubicacionCiudad,
-            ofertaUbicacionDepartamento: postulacion.oferta.ubicacionDepartamento,
+            ofertaUbicacionCiudad: postulacion.oferta.ubicacionCiudad?.nombre,
+            ofertaUbicacionDepartamento: postulacion.oferta.ubicacionDepartamento?.nombre,
             fechaPostulacion: postulacion.fechaPostulacion.toISOString(),
             estado: postulacion.estado,
         }));

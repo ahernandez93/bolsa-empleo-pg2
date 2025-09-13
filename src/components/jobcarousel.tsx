@@ -11,9 +11,10 @@ export type JobCardProps = {
     puesto: string;
     descripcionPuesto: string;
     area: string;
-    ubicacionPais: string;
-    ubicacionDepartamento: string;
-    ubicacionCiudad: string;
+    ubicacionDepartamentoId: number;
+    ubicacionDepartamentoDescripcion: string | undefined;
+    ubicacionCiudadId: number;
+    ubicacionCiudadDescripcion: string | undefined;
     empresa: string;
     nivelAcademico: string;
     experienciaLaboral: string;

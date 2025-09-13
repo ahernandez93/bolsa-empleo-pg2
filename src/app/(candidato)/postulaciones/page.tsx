@@ -29,8 +29,8 @@ type PostulacionItem = {
         empresa: string;
         modalidad: string;
         tipoTrabajo: string;
-        ubicacionCiudad: string;
-        ubicacionDepartamento: string;
+        ubicacionCiudad: { nombre: string };
+        ubicacionDepartamento: { nombre: string };
     }
 };
 
@@ -127,7 +127,7 @@ export default function PanelPostulaciones() {
                                     <TableCell className="font-medium">{p.oferta.puesto}</TableCell>
                                     <TableCell>{p.oferta.empresa}</TableCell>
                                     <TableCell>
-                                        {p.oferta.ubicacionCiudad} - {p.oferta.ubicacionDepartamento}
+                                        {p.oferta.ubicacionCiudad.nombre} - {p.oferta.ubicacionDepartamento.nombre}
                                     </TableCell>
                                     <TableCell>
                                         <Badge className={estadoBadgeVariant(p.estado)}>

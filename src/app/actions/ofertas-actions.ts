@@ -11,6 +11,8 @@ export const getOfertasLaborales = async () => {
                         persona: true,
                     },
                 },
+                ubicacionDepartamento: true,
+                ubicacionCiudad: true,
             },
 
         });
@@ -19,9 +21,10 @@ export const getOfertasLaborales = async () => {
             puesto: ofertaLaboral.puesto,
             descripcionPuesto: ofertaLaboral.descripcionPuesto,
             area: ofertaLaboral.area,
-            ubicacionPais: ofertaLaboral.ubicacionPais,
-            ubicacionDepartamento: ofertaLaboral.ubicacionDepartamento,
-            ubicacionCiudad: ofertaLaboral.ubicacionCiudad,
+            ubicacionDepartamentoId: ofertaLaboral.ubicacionDepartamentoId,
+            ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre,
+            ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
+            ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre,
             empresa: ofertaLaboral.empresa,
             nivelAcademico: ofertaLaboral.nivelAcademico,
             experienciaLaboral: ofertaLaboral.experienciaLaboral,
@@ -50,15 +53,20 @@ export const getOFertasLaboralesAbiertas = async () => {
             orderBy: {
                 fechaCreacion: "desc",
             },
+            include: {
+                ubicacionDepartamento: true,
+                ubicacionCiudad: true,
+            },
         });
         const data = ofertasLaboralesAbiertas.map(ofertaLaboral => ({
             id: ofertaLaboral.id,
             puesto: ofertaLaboral.puesto,
             descripcionPuesto: ofertaLaboral.descripcionPuesto,
             area: ofertaLaboral.area,
-            ubicacionPais: ofertaLaboral.ubicacionPais,
-            ubicacionDepartamento: ofertaLaboral.ubicacionDepartamento,
-            ubicacionCiudad: ofertaLaboral.ubicacionCiudad,
+            ubicacionDepartamentoId: ofertaLaboral.ubicacionDepartamentoId,
+            ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre,
+            ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
+            ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre,
             empresa: ofertaLaboral.empresa,
             nivelAcademico: ofertaLaboral.nivelAcademico,
             experienciaLaboral: ofertaLaboral.experienciaLaboral,

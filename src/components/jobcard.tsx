@@ -21,7 +21,7 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-export default function JobCard({ id, puesto, area, ubicacionDepartamento, ubicacionCiudad, empresa, tipoTrabajo, modalidad, fechaCreacion, alreadyApplied }: JobCardProps) {
+export default function JobCard({ id, puesto, area, ubicacionDepartamentoId, ubicacionDepartamentoDescripcion, ubicacionCiudadId, ubicacionCiudadDescripcion, empresa, tipoTrabajo, modalidad, fechaCreacion, alreadyApplied }: JobCardProps) {
 
     const { status } = useSession(); // "authenticated" | "unauthenticated" | "loading"
     const [open, setOpen] = useState(false);
@@ -76,7 +76,7 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamento, ubica
             </CardHeader>
             <CardContent className="flex flex-1 flex-col justify-between space-y-3">
                 <div className="grid grid-cols-1 text-sm text-slate-600">
-                    <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ubicacionCiudad} - {ubicacionDepartamento}</span>
+                    <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{ubicacionCiudadDescripcion} - {ubicacionDepartamentoDescripcion}</span>
                     <span className="inline-flex items-center gap-1"><Building2 className="h-3.5 w-3.5" />{modalidad}</span>
                     <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" />{tipoTrabajo}</span>
                 </div>

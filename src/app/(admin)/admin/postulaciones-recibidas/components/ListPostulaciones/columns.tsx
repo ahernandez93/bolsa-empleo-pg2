@@ -12,8 +12,8 @@ export type PostulacionConDatos = {
   perfilUsuarioNombre: string
   perfilUsuarioApellido: string
   ofertaPuesto: string
-  ofertaUbicacionCiudad: string
-  ofertaUbicacionDepartamento: string
+  ofertaUbicacionCiudad: string | undefined
+  ofertaUbicacionDepartamento: string | undefined
   fechaPostulacion: string
   estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
 }
