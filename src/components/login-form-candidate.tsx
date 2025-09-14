@@ -40,7 +40,9 @@ export function LoginFormCandidate({ className, ...props }: React.ComponentProps
 
     if (res.success) {
       toast.success("Inicio de sesión exitoso");
-      router.push("/");
+      window.location.href = "/";
+      // router.push("/");
+      router.replace("/?ts=" + Date.now());
       router.refresh();
     } else {
       setError(res.error);

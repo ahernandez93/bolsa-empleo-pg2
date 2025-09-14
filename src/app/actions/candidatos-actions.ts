@@ -7,7 +7,12 @@ export const getCandidatos = async () => {
             include: {
                 usuario: {
                     include: {
-                        persona: true,
+                        persona: {
+                            include: {
+                                ubicacionDepartamento: true,
+                                ubicacionCiudad: true,
+                            },
+                        },
                     },
                 },
             },
@@ -26,6 +31,8 @@ export const getCandidatos = async () => {
             email: emp.usuario.email,
             direccion: emp.usuario.persona.direccion,
             telefono: emp.usuario.persona.telefono,
+            ubicacionDepartamento: emp.usuario.persona.ubicacionDepartamento?.nombre ?? "",
+            ubicacionCiudad: emp.usuario.persona.ubicacionCiudad?.nombre ?? "",
             createdAt: emp.usuario.persona.createdAt.toISOString(),
         }));
 

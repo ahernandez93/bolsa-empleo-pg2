@@ -12,6 +12,8 @@ export type CandidatoConDatos = {
   email: string
   direccion: string | null
   telefono: string | null
+  ubicacionDepartamento: string | undefined
+  ubicacionCiudad: string | undefined
   createdAt: string
 }
 interface GetColumnsProps {
@@ -68,8 +70,17 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
     },
   },
   {
-    accessorKey: "direccion",
-    header: "Dirección",
+    accessorKey: "ubicacionDepartamento",
+    header: "Ubicación",
+    cell: ({ row }) => {
+      const ubicacionDepartamento = row.original.ubicacionDepartamento
+      const ubicacionCiudad = row.original.ubicacionCiudad
+      return (
+        <span className="font-medium">
+          {ubicacionDepartamento} , {ubicacionCiudad}
+        </span>
+      )
+    },
   },
   {
     accessorKey: "telefono",

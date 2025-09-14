@@ -1,60 +1,12 @@
-// "use client";
-
-// import { useRef } from "react";
 import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, /* AvatarImage */ } from "@/components/ui/avatar";
 import { MapPin, Search, User, Globe } from "lucide-react";
 import { getOFertasLaboralesAbiertas } from "../actions/ofertas-actions";
 import JobsCarousel from "@/components/jobcarousel";
 import Link from "next/link";
-
-
-/* const jobs: JobCardProps[] = [
-  {
-    title: "Desarrollador Backend",
-    company: "EmpresaX",
-    location: "Madrid",
-    modality: "Remoto",
-    contract: "Indefinido",
-    department: "Tecnología",
-  },
-  {
-    title: "Analista de Datos",
-    company: "EmpresaX",
-    location: "Barcelona",
-    modality: "Híbrido",
-    contract: "Temporal",
-    department: "Business Intelligence",
-  },
-  {
-    title: "Diseñador UX/UI",
-    company: "EmpresaX",
-    location: "Remoto",
-    modality: "Remoto",
-    contract: "Indefinido",
-    department: "Producto",
-  },
-  {
-    title: "Project Manager",
-    company: "EmpresaX",
-    location: "Valencia",
-    modality: "Presencial",
-    contract: "Indefinido",
-    department: "Operaciones",
-  },
-  {
-    title: "QA Engineer",
-    company: "EmpresaX",
-    location: "Sevilla",
-    modality: "Híbrido",
-    contract: "Indefinido",
-    department: "Calidad",
-  },
-]; */
-
+import { auth } from "@/lib/auth/auth";
+import { unstable_noStore as noStore } from "next/cache";
 
 const categories = [
   { name: "Tecnología", icon: <Globe className="h-4 w-4" /> },
@@ -85,10 +37,16 @@ const testimonios = [
   },
 ];
 
-const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas();
-console.log(ofertasLaboralesAbiertas);
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  noStore();
+
+  const session = await auth();
+  const userId = session?.user?.id as string | undefined;
+
+  const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas(userId);
+
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16">
       {/* <Hero /> */}

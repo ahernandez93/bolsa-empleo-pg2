@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useCallback, useState, useEffect } from "react";
+import { useRef, useCallback, useState, useEffect, useMemo } from "react";
 import { Modalidad, TipoTrabajo } from "@prisma/client";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import JobCard from "@/components/jobcard";
+import { useSavedMap } from "@/hooks/use-saved-map";
 
 export type JobCardProps = {
     id: string;
@@ -22,12 +23,16 @@ export type JobCardProps = {
     modalidad: Modalidad;
     fechaCreacion: Date;
     alreadyApplied?: boolean;
+    isSaved?: boolean;
 };
 
 export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
     const ref = useRef<HTMLDivElement>(null);
     const [atStart, setAtStart] = useState(true);
     const [atEnd, setAtEnd] = useState(false);
+
+    const ids = useMemo(() => jobs.map(j => j.id), [jobs]);
+    const { savedMap, mutate } = useSavedMap(ids);
 
     const updateEdges = useCallback(() => {
         const el = ref.current;
@@ -94,11 +99,21 @@ export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
                 style={{ scrollBehavior: "smooth" }}
                 aria-label="Ofertas destacadas"
             >
-                {jobs.map((job) => (
-                    <div key={job.id} className="min-w-[300px] max-w-[320px] snap-start">
-                        <JobCard {...job} />
-                    </div>
-                ))}
+                {jobs.map((job) => {
+                    const effectiveSaved = savedMap[job.id] ?? job.isSaved; // SWR > SSR
+                    return (
+                        <div key={job.id} className="min-w-[300px] max-w-[320px] snap-start">
+                            <JobCard
+                                {...job}
+                                isSaved={effectiveSaved}
+                                onToggleSaved={(next) => {
+                                    // Actualiza SWR al instante sin revalidar
+                                    mutate((prev) => ({ ...(prev ?? {}), [job.id]: next }), { revalidate: false });
+                                }}
+                            />
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -39,16 +39,8 @@ export const navigationData: NavItem[] = [
         isActive: true,
         items: [
             {
-                title: "Panel1",
+                title: "Dashboard",
                 url: "/admin",
-            },
-            {
-                title: "Panel2",
-                url: "/admin/panel2",
-            },
-            {
-                title: "Panel3",
-                url: "/admin/panel3",
             },
         ],
     },
@@ -95,25 +87,13 @@ export const navigationData: NavItem[] = [
         ],
     },
     {
-        title: "Configuraciones",
+        title: "Ajustes",
         url: "#",
         icon: Settings2,
         items: [
             {
-                title: "Configuracion1",
-                url: "/configuracion1",
-            },
-            {
-                title: "Configuracion2",
-                url: "/configuracion2",
-            },
-            {
-                title: "Configuracion3",
-                url: "/configuracion3",
-            },
-            {
-                title: "Configuracion4",
-                url: "/configuracion4",
+                title: "Configuraciones de la empresa",
+                url: "/configuraciones",
             },
         ],
     },

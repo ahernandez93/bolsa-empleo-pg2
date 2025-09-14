@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,8 +22,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { BotonGuardarOferta } from "@/components/ofertas/BotonGuardarOferta";
 
-export default function JobCard({ id, puesto, area, ubicacionDepartamentoId, ubicacionDepartamentoDescripcion, ubicacionCiudadId, ubicacionCiudadDescripcion, empresa, tipoTrabajo, modalidad, fechaCreacion, alreadyApplied }: JobCardProps) {
+type Props = JobCardProps & {
+    onToggleSaved?: (next: boolean) => void;
+};
+
+
+export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescripcion, ubicacionCiudadDescripcion, empresa, tipoTrabajo, modalidad, fechaCreacion, alreadyApplied, isSaved, onToggleSaved }: Props) {
 
     const { status } = useSession(); // "authenticated" | "unauthenticated" | "loading"
     const [open, setOpen] = useState(false);
@@ -44,7 +52,6 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoId, ubi
         startTransition(async () => {
             try {
                 const res = await axios.post("/api/postulaciones", { ofertaId: id });
-                console.log(res.data);
                 if (res.status === 201) {
                     setApplied(true);
                     toast.success("Postulación enviada correctamente");
@@ -62,7 +69,14 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoId, ubi
     };
 
     return (
-        <Card className="h-full border-slate-200 flex flex-col">
+        <Card className="relative h-full border-slate-200 flex flex-col">
+            <div className="absolute top-2 right-2">
+                <BotonGuardarOferta 
+                    ofertaId={id} 
+                    initialSaved={!!isSaved} 
+                    onChange={onToggleSaved} 
+                />
+            </div>
             <CardHeader className="pb-0">
                 <div className="flex items-center gap-2">
                     {/* <Avatar className="h-8 w-8">

@@ -9,7 +9,7 @@ import Link from "next/link"
 
 export default function NavUserCandidato({ session }: { session: Session | null }) {
     const closeSession = async () => {
-        await signOut()
+        await signOut({ callbackUrl: "/" })
     }
     const user = session?.user;
     const initials = user?.name?.split(' ').map((n) => n[0]).join('') || "";
@@ -57,10 +57,10 @@ export default function NavUserCandidato({ session }: { session: Session | null 
                                 Perfil
                             </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem>
+                       {/*  <DropdownMenuItem>
                             <Bell />
                             Notificaciones
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={closeSession}>

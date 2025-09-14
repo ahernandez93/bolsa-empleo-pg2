@@ -91,10 +91,11 @@ model Usuario {
   perfilCandidato PerfilCandidato?
 
   // Relaciones con ofertas
-  ofertasAsignadas    OfertaLaboral[] @relation("OfertasAsignadas")
-  ofertasPublicadas   OfertaLaboral[] @relation("OfertasPublicadas")
-  ofertasAprobadas    OfertaLaboral[] @relation("OfertasAprobadas")
-  ofertasActualizadas OfertaLaboral[] @relation("OfertasActualizadas")
+  ofertasAsignadas    OfertaLaboral[]  @relation("OfertasAsignadas")
+  ofertasPublicadas   OfertaLaboral[]  @relation("OfertasPublicadas")
+  ofertasAprobadas    OfertaLaboral[]  @relation("OfertasAprobadas")
+  ofertasActualizadas OfertaLaboral[]  @relation("OfertasActualizadas")
+  guardados           GuardadoOferta[]
 }
 
 model Empleado {
@@ -168,9 +169,24 @@ model OfertaLaboral {
   postulaciones         Postulacion[]
   ubicacionDepartamento UbicacionDepartamento? @relation(fields: [ubicacionDepartamentoId], references: [id], onDelete: Restrict)
   ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: Restrict)
+  guardados             GuardadoOferta[]
 
   @@index([ubicacionDepartamentoId])
   @@index([ubicacionCiudadId])
+}
+
+model GuardadoOferta {
+  id              String   @id @default(uuid())
+  userId          String
+  ofertaLaboralId String
+  createdAt       DateTime @default(now())
+
+  usuario Usuario       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  oferta  OfertaLaboral @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, ofertaLaboralId], name: "user_offer_unique")
+  @@index([userId])
+  @@index([ofertaLaboralId])
 }
 
 /**

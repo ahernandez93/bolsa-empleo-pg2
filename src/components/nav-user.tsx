@@ -65,12 +65,12 @@ export function NavUser({ session }: { session: Session | null }) {
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Cuenta
+                Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Bell />
                 Notificaciones
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={closeSession}>

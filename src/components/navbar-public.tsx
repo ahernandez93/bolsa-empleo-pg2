@@ -28,7 +28,7 @@ export default function NavbarPublic({ session }: { session: Session | null }) {
                     <Link className="font-medium hover:text-slate-900" href="/ofertas">Ofertas</Link>
                     {session ? (
                         <>
-                            <Link className="font-medium hover:text-slate-900" href="#">Guardados</Link>
+                            <Link className="font-medium hover:text-slate-900" href="/guardados">Guardados</Link>
                             <Link className="font-medium hover:text-slate-900" href="/postulaciones">Mis Postulaciones</Link>
                             <div className="flex items-center gap-3">
                                 <NavUserCandidato session={session} />

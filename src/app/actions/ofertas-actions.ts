@@ -44,7 +44,7 @@ export const getOfertasLaborales = async () => {
     }
 }
 
-export const getOFertasLaboralesAbiertas = async () => {
+export const getOFertasLaboralesAbiertas = async (userId?: string) => {
     try {
         const ofertasLaboralesAbiertas = await prisma.ofertaLaboral.findMany({
             where: {
@@ -56,6 +56,16 @@ export const getOFertasLaboralesAbiertas = async () => {
             include: {
                 ubicacionDepartamento: true,
                 ubicacionCiudad: true,
+                guardados: userId
+                    ? {
+                        where: {
+                            userId,
+                        },
+                        select: {
+                            userId: true,
+                        },
+                    }
+                    : {},
             },
         });
         const data = ofertasLaboralesAbiertas.map(ofertaLaboral => ({
@@ -73,6 +83,8 @@ export const getOFertasLaboralesAbiertas = async () => {
             tipoTrabajo: ofertaLaboral.tipoTrabajo,
             modalidad: ofertaLaboral.modalidad,
             fechaCreacion: ofertaLaboral.fechaCreacion,
+            isSaved: Array.isArray(ofertaLaboral.guardados) ? ofertaLaboral.guardados.length > 0 : false,
+            guardados: undefined,
         }));
 
         return data;
