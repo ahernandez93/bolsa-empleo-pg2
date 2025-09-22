@@ -10,13 +10,14 @@ export type OfertaLaboralConDatos = {
   id: string
   puesto: string
   area: string
-  empresa: string
+  empresaId: string
+  empresaNombre: string | undefined
   ubicacionDepartamentoId: number
   ubicacionDepartamentoDescripcion: string | undefined
   ubicacionCiudadId: number
   ubicacionCiudadDescripcion: string | undefined
   agregadoPorId: string
-  agregadoPorUsuario: string
+  agregadoPorUsuario: string | undefined
   estado: string
 }
 interface GetColumnsProps {
@@ -74,8 +75,11 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
     },
   },
   {
-    accessorKey: "empresa",
+    accessorKey: "empresaId",
     header: "Empresa",
+    cell: ({ row }) => (
+      <span className="font-medium">{row.original.empresaNombre}</span>
+    ),
   },
   {
     accessorKey: "ubicacionDepartamentoDescripcion",
