@@ -17,7 +17,7 @@ export type OfertaLaboralConDatos = {
   ubicacionCiudadId: number
   ubicacionCiudadDescripcion: string | undefined
   agregadoPorId: string
-  agregadoPorUsuario: string | undefined
+  agregadoPorUsuario: string
   estado: string
 }
 interface GetColumnsProps {

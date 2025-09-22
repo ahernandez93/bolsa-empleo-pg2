@@ -5,6 +5,13 @@ import { AuthError } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { registroEmpresaSchema, type RegistroEmpresaValues } from "@/lib/schemas/registroEmpresaSchema"
+
+function addMonths(date: Date, months: number) {
+    const d = new Date(date)
+    d.setMonth(d.getMonth() + months)
+    return d
+}
 
 export const LoginAction = async (email: string, password: string) => {
     try {
@@ -141,8 +148,8 @@ export const RegisterCandidateAction = async (input: RegisterCandidateInput) => 
             return [persona, usuario, perfil] as const;
         });
 
-        return { 
-            success: true, 
+        return {
+            success: true,
             error: null,
             // útil si quieres redirigir o cachear
             ids: { personaId: persona.id, usuarioId: usuario.id, perfilId: perfil.id },
@@ -155,5 +162,105 @@ export const RegisterCandidateAction = async (input: RegisterCandidateInput) => 
             return { success: false, error: error.message } as const;
         }
         return { success: false, error: 'Error desconocido al registrar' } as const;
+    }
+}
+
+export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
+    try {
+        const data = registroEmpresaSchema.parse(input)
+
+        const email = data.usuario.email.trim().toLowerCase()
+        const empresaNombre = data.empresa.nombre.trim()
+
+        const [emailExists, empresaExists] = await Promise.all([
+            prisma.usuario.findUnique({ where: { email } }),
+            prisma.empresa.findUnique({ where: { nombre: empresaNombre } }),
+        ])
+
+        if (emailExists) {
+            return { success: false, error: "El correo ya está registrado" } as const
+        }
+        if (empresaExists) {
+            return { success: false, error: "Ya existe una empresa con ese nombre" } as const
+        }
+
+        const plan = await prisma.plan.findUnique({
+            where: { nombre: data.planNombre },
+        })
+        if (!plan) {
+            return { success: false, error: `No existe el plan ${data.planNombre}` } as const
+        }
+
+        const passwordHash = await bcrypt.hash(data.usuario.password, 10)
+        const now = new Date()
+
+        const [empresa, persona, usuario] = await prisma.$transaction(async (tx) => {
+            const empresa = await tx.empresa.create({
+                data: {
+                    nombre: empresaNombre,
+                    telefono: data.empresa.telefono ?? null,
+                    sitioWeb: data.empresa.sitioWeb ?? null,
+                    descripcion: data.empresa.descripcion ?? null,
+                    ubicacionDepartamentoId: data.empresa.ubicacionDepartamentoId ?? null,
+                    ubicacionCiudadId: data.empresa.ubicacionCiudadId ?? null,
+                },
+            })
+
+            const persona = await tx.persona.create({
+                data: {
+                    nombre: data.usuario.nombre.trim(),
+                    apellido: data.usuario.apellido.trim(),
+                },
+            })
+
+            const usuario = await tx.usuario.create({
+                data: {
+                    personaId: persona.id,
+                    email,
+                    passwordHash,
+                    rol: "ADMIN",             
+                    empresaId: empresa.id,    
+                    emailVerificado: true,    
+                    activo: true,
+                },
+            })
+
+            await tx.suscripcion.create({
+                data: {
+                    empresaId: empresa.id,
+                    planId: plan.id,
+                    fechaInicio: now,
+                    fechaFin: addMonths(now, plan.duracionMeses ?? 1),
+                    activa: true,
+                },
+            })
+
+            return [empresa, persona, usuario] as const
+        })
+
+        return {
+            success: true,
+            error: null,
+            ids: { empresaId: empresa.id, personaId: persona.id, usuarioId: usuario.id },
+        } as const
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+        if (err instanceof z.ZodError) {
+            return {
+                success: false,
+                error: err.issues?.[0]?.message ?? "Datos inválidos",
+            } as const
+        }
+
+        if (err?.code === "P2002") {
+            const trg = Array.isArray(err?.meta?.target) ? err.meta.target.join(",") : err?.meta?.target
+            const readable =
+                trg?.includes("email") ? "El correo ya está registrado" :
+                    trg?.includes("nombre") ? "Ya existe una empresa con ese nombre" :
+                        "Registro duplicado"
+            return { success: false, error: readable } as const
+        }
+
+        return { success: false, error: err?.message ?? "Error desconocido" } as const
     }
 }

@@ -11,6 +11,9 @@ import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { usePlanActual } from "@/hooks/use-plan-actual";
+import BadgePlan from "@/components/planes/badge-plan";
+import BannerExpiracion from "@/components/planes/banner-expiracion";
 
 const fetcher = (url: string) => axios.get(url).then(r => r.data);
 
@@ -54,7 +57,7 @@ function BreakdownList({ title, items, total }: { title: string; items: Record<s
 }
 
 export default function DashboardAdmin() {
-    // rango simple: últimos 30 días; podés agregar un DateRangePicker luego
+    const { plan, meta } = usePlanActual();
     const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
         const to = new Date();
         const from = addDays(to, -30);
@@ -73,6 +76,29 @@ export default function DashboardAdmin() {
 
     return (
         <div className="flex flex-col gap-4">
+            {/* Header del plan */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Plan actual:</span>
+                    <BadgePlan nombre={plan?.nombre ?? null} />
+                    {meta && (
+                        <span className="text-xs text-muted-foreground">
+                            • {meta.ofertasActivas}/{plan?.maxOfertasActivas ?? 0} ofertas activas
+                            {typeof meta.restantes === "number" ? ` • ${meta.restantes} restantes` : null}
+                        </span>
+                    )}
+                </div>
+                <Link href="/admin/planes"><Button variant="secondary" size="sm">Cambiar plan</Button></Link>
+            </div>
+
+            {/* Banner de expiración */}
+            {meta && (
+                <BannerExpiracion
+                    diasParaVencer={meta.diasParaVencer}
+                    vencePronto={meta.vencePronto}
+                    expirada={meta.expirada}
+                />
+            )}
             {/* Toolbar: rango + acciones rápidas */}
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-2">
@@ -150,7 +176,7 @@ export default function DashboardAdmin() {
                                     {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
                                     {data.alerts.ofertasSinPostulaciones14d.map((o: any) => (
                                         <li key={o.id} className="text-sm">
-                                            <span className="font-medium">{o.puesto}</span> — {o.empresa} <span className="text-muted-foreground">
+                                            <span className="font-medium">{o.puesto}</span> — {o.empresa?.nombre} <span className="text-muted-foreground">
                                                 (sin postulaciones en 14 días; creada {format(new Date(o.fechaCreacion), "dd MMM yyyy", { locale: es })})
                                             </span>
                                         </li>
@@ -169,7 +195,7 @@ export default function DashboardAdmin() {
                                     {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
                                     {data.actividad.ultimasOfertas.map((o: any) => (
                                         <li key={o.id} className="flex items-center justify-between">
-                                            <span className="truncate">{o.puesto} — <span className="text-muted-foreground">{o.empresa}</span></span>
+                                            <span className="truncate">{o.puesto} — <span className="text-muted-foreground">{o.empresa?.nombre}</span></span>
                                             <span className="text-muted-foreground">{format(new Date(o.fechaCreacion), "dd MMM", { locale: es })}</span>
                                         </li>
                                     ))}
@@ -184,7 +210,7 @@ export default function DashboardAdmin() {
                                     {/*eslint-disable-next-line @typescript-eslint/no-explicit-any*/}
                                     {data.actividad.ultimasPostulaciones.map((p: any) => (
                                         <li key={p.id} className="flex items-center justify-between">
-                                            <span className="truncate">{p.oferta.puesto} — <span className="text-muted-foreground">{p.oferta.empresa}</span></span>
+                                            <span className="truncate">{p.oferta.puesto} — <span className="text-muted-foreground">{p.oferta.empresa?.nombre}</span></span>
                                             <Badge>{p.estado}</Badge>
                                         </li>
                                     ))}

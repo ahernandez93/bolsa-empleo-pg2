@@ -40,7 +40,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         area: initialData.area || "",
         ubicacionDepartamentoId: initialData.ubicacionDepartamentoId ?? undefined,
         ubicacionCiudadId: initialData.ubicacionCiudadId ?? undefined,
-        empresa: initialData.empresa,
         nivelAcademico: initialData.nivelAcademico,
         experienciaLaboral: initialData.experienciaLaboral,
         tipoTrabajo: initialData.tipoTrabajo,
@@ -53,7 +52,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         area: "",
         ubicacionDepartamentoId: undefined,
         ubicacionCiudadId: undefined,
-        empresa: "",
         nivelAcademico: "",
         experienciaLaboral: "",
         tipoTrabajo: undefined,
@@ -69,7 +67,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         reValidateMode: "onChange",
     });
 
-    // Mantener el formulario sincronizado cuando cambie initialData o el modo
     useEffect(() => {
         if (isEditMode && initialData) {
             form.reset({
@@ -78,7 +75,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 area: initialData.area || "",
                 ubicacionDepartamentoId: initialData.ubicacionDepartamentoId ?? undefined,
                 ubicacionCiudadId: initialData.ubicacionCiudadId ?? undefined,
-                empresa: initialData.empresa,
                 nivelAcademico: initialData.nivelAcademico,
                 experienciaLaboral: initialData.experienciaLaboral,
                 tipoTrabajo: initialData.tipoTrabajo,
@@ -93,7 +89,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 area: "",
                 ubicacionDepartamentoId: undefined,
                 ubicacionCiudadId: undefined,
-                empresa: "",
                 nivelAcademico: "",
                 experienciaLaboral: "",
             } satisfies Partial<FormBase>);
@@ -122,33 +117,11 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         "Dirección General"
     ];
 
-    // const paises = ["Honduras", "El Salvador", "Guatemala", "Nicaragua", "Costa Rica"];
-
-    // const departamentos = [
-    //     "Atlántida", "Colón", "Comayagua", "Copán", "Cortés", "Choluteca",
-    //     "El Paraíso", "Francisco Morazán", "Gracias a Dios", "Intibucá",
-    //     "Islas de la Bahía", "La Paz", "Lempira", "Ocotepeque",
-    //     "Olancho", "Santa Bárbara", "Valle", "Yoro"
-    // ];
-
-    // const ciudadesPorDepartamento: Record<string, string[]> = {
-    //     "Francisco Morazán": ["Tegucigalpa", "Valle de Ángeles", "Santa Lucía"],
-    //     "Cortés": ["San Pedro Sula", "Puerto Cortés", "Choloma"],
-    //     "Atlántida": ["La Ceiba", "Tela", "Jutiapa"],
-    //     "Yoro": ["El Progreso", "Yoro", "Olanchito"],
-    //     "Choluteca": ["Choluteca", "San Marcos de Colón"],
-    // };
-
-    // const paisSeleccionado = form.watch("ubicacionPais");
-    // const deptoSeleccionado = form.watch("ubicacionDepartamento");
-
-    // Departamentos
     const { data: departamentos, isLoading: loadingDeptos } = useSWR<{ id: number; nombre: string }[]>(
         "/api/ubicaciones/departamentos",
         fetcher
     );
 
-    // Ciudades dependientes del departamento seleccionado
     const deptoId = form.watch("ubicacionDepartamentoId");
     const { data: ciudades, isLoading: loadingCiudades } = useSWR<{ id: number; nombre: string }[]>(
         typeof deptoId === "number" ? `/api/ubicaciones/ciudades?departamentoId=${deptoId}` : null,
@@ -161,13 +134,11 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
 
         try {
             if (isEditMode) {
-                // En edición, usar el estado elegido en el formulario
                 const payload = data as OfertaLaboralUpdateData;
                 await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
                 toast.success("Oferta Laboral actualizada correctamente")
                 console.log("Oferta Laboral actualizada correctamente", payload)
             } else {
-                // En creación, el backend asigna estado por defecto (PENDIENTE)
                 const payload = data as OfertaLaboralFormData;
                 await axios.post("/api/ofertaslaborales", payload)
                 toast.success("Oferta Laboral creada exitosamente")
@@ -203,7 +174,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                         <CardHeader>
                             <CardTitle>Datos Generales del Puesto</CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-3 gap-4">
+                        <CardContent className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
                                 name="puesto"
@@ -220,26 +191,12 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
 
                             <FormField
                                 control={form.control}
-                                name="empresa"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Empresa</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Nombre de la empresa" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
                                 name="area"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Área</FormLabel>
                                         <Select onValueChange={field.onChange} value={field.value || ""}>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="w-full">
                                                 <SelectValue placeholder="Seleccione un área" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -294,8 +251,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     />
                                 </div>
 
-                                {/* Ciudad: siempre ocupa su celda; si no hay depto, muestro un select deshabilitado
-      para que NO cambie el layout ni se monte con el de la izquierda */}
                                 <div className="min-w-0">
                                     {form.watch("ubicacionDepartamentoId") ? (
                                         <Controller

@@ -31,6 +31,7 @@ model UbicacionDepartamento {
   ciudades UbicacionCiudad[]
   personas Persona[]
   ofertas  OfertaLaboral[]
+  empresas Empresa[]
 
   @@unique([nombre])
 }
@@ -46,8 +47,70 @@ model UbicacionCiudad {
   // Relaciones
   personas Persona[]
   ofertas  OfertaLaboral[]
+  empresas Empresa[]
 
   @@unique([departamentoId, nombre]) // No repetir ciudad dentro del mismo departamento
+}
+
+// ===========================
+// EMPRESAS
+// ===========================
+model Empresa {
+  id                      String   @id @default(uuid())
+  nombre                  String
+  rtn                     String? // o NIF/RFC según país
+  sitioWeb                String?
+  telefono                String?
+  descripcion             String?
+  ubicacionDepartamentoId Int?
+  ubicacionCiudadId       Int?
+  activa                  Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // Relaciones
+  ubicacionDepartamento UbicacionDepartamento? @relation(fields: [ubicacionDepartamentoId], references: [id], onDelete: SetNull)
+  ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: SetNull)
+
+  usuarios      Usuario[] // reclutadores ligados a la empresa
+  empleados     Empleado[] // si seguís usando "Empleado" como staff interno ligado a Empresa
+  ofertas       OfertaLaboral[]
+  suscripciones Suscripcion[]
+
+  @@unique([nombre])
+}
+
+// ===========================
+// PLANES Y SUSCRIPCIONES
+// ===========================
+model Plan {
+  id                String   @id @default(uuid())
+  nombre            String   @unique // "Gratis" | "Básico" | "Premium"
+  descripcion       String?
+  precioMensual     Float // en centavos (mejor práctica) o Float si querés
+  duracionMeses     Int // 1 = mensual, 12 = anual, etc.
+  maxOfertasActivas Int // límite de ofertas activas por empresa
+  incluyeDestacado  Boolean  @default(false) // si permite marcar ofertas como destacadas
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  suscripciones Suscripcion[]
+}
+
+model Suscripcion {
+  id          String    @id @default(uuid())
+  empresaId   String
+  planId      String
+  fechaInicio DateTime  @default(now())
+  fechaFin    DateTime
+  activa      Boolean   @default(true)
+  canceladaEn DateTime?
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([empresaId])
+  @@index([planId])
 }
 
 /**
@@ -82,6 +145,7 @@ model Usuario {
   rol             RolUsuario
   emailVerificado Boolean    @default(false)
   activo          Boolean    @default(true)
+  empresaId       String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
@@ -96,6 +160,9 @@ model Usuario {
   ofertasAprobadas    OfertaLaboral[]  @relation("OfertasAprobadas")
   ofertasActualizadas OfertaLaboral[]  @relation("OfertasActualizadas")
   guardados           GuardadoOferta[]
+  empresa             Empresa?         @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+
+  @@index([empresaId])
 }
 
 model Empleado {
@@ -103,6 +170,7 @@ model Empleado {
   usuarioId      String   @unique
   departamentoId Int
   cargoId        Int
+  empresaId      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -110,6 +178,9 @@ model Empleado {
   usuario      Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   departamento Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
   cargo        Cargo        @relation(fields: [cargoId], references: [id], onDelete: Restrict)
+  empresa      Empresa?     @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+
+  @@index([empresaId])
 }
 
 model Departamento {
@@ -141,12 +212,12 @@ model Cargo {
  */
 model OfertaLaboral {
   id                      String       @id @default(uuid())
+  empresaId               String
   puesto                  String
   descripcionPuesto       String
   area                    String
   ubicacionDepartamentoId Int
   ubicacionCiudadId       Int
-  empresa                 String
   nivelAcademico          String
   experienciaLaboral      String
   tipoTrabajo             TipoTrabajo
@@ -159,7 +230,9 @@ model OfertaLaboral {
   fechaCreacion           DateTime     @default(now())
   fechaActualizacion      DateTime     @updatedAt
   estado                  EstadoOferta @default(PENDIENTE)
+  destacada               Boolean      @default(false)
 
+  empresa        Empresa? @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   reclutador     Usuario? @relation("OfertasAsignadas", fields: [reclutadorId], references: [id])
   agregadoPor    Usuario  @relation("OfertasPublicadas", fields: [agregadoPorId], references: [id])
   actualizadoPor Usuario? @relation("OfertasActualizadas", fields: [actualizadoPorId], references: [id])
@@ -171,6 +244,7 @@ model OfertaLaboral {
   ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: Restrict)
   guardados             GuardadoOferta[]
 
+  @@index([empresaId])
   @@index([ubicacionDepartamentoId])
   @@index([ubicacionCiudadId])
 }
@@ -321,6 +395,7 @@ enum RolUsuario {
   CANDIDATO
   RECLUTADOR
   ADMIN
+  SUPERADMIN
 }
 
 enum TipoTrabajo {

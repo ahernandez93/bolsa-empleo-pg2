@@ -7,6 +7,7 @@ const { auth: middleware } = NextAuth(authOptions);
 const publicRoutes = [
   "/login", // Login candidatos (raíz)
   "/admin/login", // Login administradores
+  "/admin/registro", // Registro administradores
   "/registrar", // Registro candidatos
   "/ofertas", // Vacantes
   "/api/auth/register",

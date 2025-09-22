@@ -13,6 +13,7 @@ export const getOfertasLaborales = async () => {
                 },
                 ubicacionDepartamento: true,
                 ubicacionCiudad: true,
+                empresa: true,
             },
 
         });
@@ -25,7 +26,8 @@ export const getOfertasLaborales = async () => {
             ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre,
             ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
             ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre,
-            empresa: ofertaLaboral.empresa,
+            empresaId: ofertaLaboral.empresaId,
+            empresaNombre: ofertaLaboral.empresa?.nombre,
             nivelAcademico: ofertaLaboral.nivelAcademico,
             experienciaLaboral: ofertaLaboral.experienciaLaboral,
             tipoTrabajo: ofertaLaboral.tipoTrabajo,
@@ -56,6 +58,7 @@ export const getOFertasLaboralesAbiertas = async (userId?: string) => {
             include: {
                 ubicacionDepartamento: true,
                 ubicacionCiudad: true,
+                empresa: true,
                 guardados: userId
                     ? {
                         where: {
@@ -77,7 +80,8 @@ export const getOFertasLaboralesAbiertas = async (userId?: string) => {
             ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre,
             ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
             ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre,
-            empresa: ofertaLaboral.empresa,
+            empresaId: ofertaLaboral.empresaId,
+            empresaNombre: ofertaLaboral.empresa?.nombre,
             nivelAcademico: ofertaLaboral.nivelAcademico,
             experienciaLaboral: ofertaLaboral.experienciaLaboral,
             tipoTrabajo: ofertaLaboral.tipoTrabajo,

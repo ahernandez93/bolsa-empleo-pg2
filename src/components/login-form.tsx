@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
 import { LoginAction } from "@/app/actions/auth-action"
+import Link from "next/link"
 
 const loginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -121,9 +122,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
 
                 <div className="text-center text-sm">
                   ¿No tienes una cuenta?{" "}
-                  <a href="#" className="underline underline-offset-4">
+                  <Link href="/admin/registro" className="underline underline-offset-4">
                     Regístrate
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>

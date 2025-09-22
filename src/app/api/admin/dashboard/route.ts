@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/lib/auth/auth";
+import { requireEmpresaSession } from "@/lib/auth/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +18,11 @@ function rangeFromQuery(q: z.infer<typeof querySchema>) {
 
 export async function GET(req: Request) {
     try {
-        const session = await auth();
-        if (!session?.user?.id) {
-            return NextResponse.json({ message: "No autenticado" }, { status: 401 });
+        const { empresaId } = await requireEmpresaSession();
+
+        if (!empresaId) {
+            return NextResponse.json({ message: "No autorizado" }, { status: 403 });
         }
-        // opcional: valida rol
-        // if (session.user.rol !== "ADMIN" && session.user.rol !== "RECLUTADOR") return NextResponse.json({ message: "No autorizado" }, { status: 403 });
 
         const url = new URL(req.url);
         const parsed = querySchema.safeParse({
@@ -39,7 +38,7 @@ export async function GET(req: Request) {
         const ofertasPorEstado = await prisma.ofertaLaboral.groupBy({
             by: ["estado"],
             _count: { _all: true },
-            where: { fechaCreacion: { gte: from, lte: to } },
+            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
         });
 
         const totalOfertas = ofertasPorEstado.reduce((acc, r) => acc + r._count._all, 0);
@@ -48,7 +47,7 @@ export async function GET(req: Request) {
         const postulacionesPorEstado = await prisma.postulacion.groupBy({
             by: ["estado"],
             _count: { _all: true },
-            where: { fechaPostulacion: { gte: from, lte: to } },
+            where: { fechaPostulacion: { gte: from, lte: to }, oferta: { empresaId } },
         });
 
         const totalPostulaciones = postulacionesPorEstado.reduce((acc, r) => acc + r._count._all, 0);
@@ -57,7 +56,7 @@ export async function GET(req: Request) {
         const topCiudadesGrp = await prisma.ofertaLaboral.groupBy({
             by: ["ubicacionCiudadId"],
             _count: { _all: true },
-            where: { fechaCreacion: { gte: from, lte: to } },
+            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
             orderBy: { _count: { id: "desc" } },
             take: 5,
         });
@@ -77,31 +76,31 @@ export async function GET(req: Request) {
         const cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - 14);
         const ofertasAbiertas = await prisma.ofertaLaboral.findMany({
-            where: { estado: "ABIERTA" },
-            select: { id: true, puesto: true, empresa: true, fechaCreacion: true, postulaciones: { select: { id: true }, where: { fechaPostulacion: { gte: cutoff } } } },
+            where: { estado: "ABIERTA", empresaId },
+            select: { id: true, puesto: true, empresa: { select: { nombre: true } }, fechaCreacion: true, postulaciones: { select: { id: true }, where: { fechaPostulacion: { gte: cutoff } } } },
             orderBy: { fechaCreacion: "desc" },
             take: 50,
         });
         const ofertasSinPost = ofertasAbiertas
             .filter((o) => o.postulaciones.length === 0 && o.fechaCreacion <= cutoff)
-            .map((o) => ({ id: o.id, puesto: o.puesto, empresa: o.empresa, fechaCreacion: o.fechaCreacion }));
+            .map((o) => ({ id: o.id, puesto: o.puesto, empresa: o.empresa?.nombre, fechaCreacion: o.fechaCreacion }));
 
         // Actividad reciente
         const ultimasOfertas = await prisma.ofertaLaboral.findMany({
-            where: { fechaCreacion: { gte: from, lte: to } },
+            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
             orderBy: { fechaCreacion: "desc" },
-            select: { id: true, puesto: true, empresa: true, fechaCreacion: true },
+            select: { id: true, puesto: true, empresa: { select: { nombre: true } }, fechaCreacion: true },
             take: 5,
         });
 
         const ultimasPostulaciones = await prisma.postulacion.findMany({
-            where: { fechaActualizacion: { gte: from, lte: to } },
+            where: { fechaActualizacion: { gte: from, lte: to }, oferta: { empresaId } },
             orderBy: { fechaActualizacion: "desc" },
             select: {
                 id: true,
                 estado: true,
                 fechaActualizacion: true,
-                oferta: { select: { id: true, puesto: true, empresa: true } },
+                oferta: { select: { id: true, puesto: true, empresa: { select: { nombre: true } } } },
             },
             take: 5,
         });
@@ -127,8 +126,11 @@ export async function GET(req: Request) {
             alerts: { ofertasSinPostulaciones14d: ofertasSinPost },
             actividad: { ultimasOfertas, ultimasPostulaciones },
         });
-    } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
         console.error("GET /api/admin/dashboard error:", e);
-        return NextResponse.json({ message: "Error interno" }, { status: 500 });
+        const msg = e?.message || "No autorizado";
+        const code = msg.includes("No autenticado") ? 401 : 403;
+        return NextResponse.json({ message: msg }, { status: code });
     }
 }

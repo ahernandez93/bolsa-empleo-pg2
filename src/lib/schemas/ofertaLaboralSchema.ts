@@ -11,7 +11,7 @@ export const ofertaLaboralFormSchema = z.object({
     area: z.string().min(2, "El área es obligatoria"),
     ubicacionDepartamentoId: IdInt,
     ubicacionCiudadId: IdInt,
-    empresa: z.string().min(2, "El nombre de la empresa es obligatorio"),
+    // empresaId: z.string().min(2, "La empresa es obligatoria"),
     nivelAcademico: z.string().min(1, "El nivel académico es obligatorio"),
     experienciaLaboral: z.string().min(1, "La experiencia laboral es obligatoria"),
     // habilidadesIds: z.array(z.string().uuid()).optional(),
