@@ -1,45 +1,110 @@
 import type { PerfilCandidatoFormValues } from "@/lib/schemas/perfilCandidatoSchema";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mapPerfilToFormValues(perfil: any): PerfilCandidatoFormValues {
-    const persona = perfil?.usuario?.persona;
+export type PerfilApiResponse = {
+    id: string;
+    usuarioId: string;
+    resumen: string | null;
+    tituloProfesional: string | null;
+    disponibilidad: string | null;
+    disponibilidadViajar: boolean;
+    cambioResidencia: boolean;
+    poseeVehiculo: boolean;
+    cvUrl: string | null;
+    cvKey: string | null;
+    cvMimeType: string | null;
+    cvSize: number | null;
+    fechaCreacion: string;
+    fechaActualizacion: string;
+    usuario: {
+        id: string;
+        personaId: string;
+        email: string;
+        rol: "ADMIN" | "RECLUTADOR" | "CANDIDATO";
+        emailVerificado: boolean;
+        activo: boolean;
+        empresaId: string | null;
+        createdAt: string;
+        updatedAt: string;
+        persona: {
+            id: string;
+            nombre: string;
+            apellido: string;
+            telefono: string | null;
+            direccion: string | null;
+            fechaNacimiento: string | null;
+            genero: "MASCULINO" | "FEMENINO" | "OTRO" | null;
+            ubicacionDepartamentoId: number | null;
+            ubicacionCiudadId: number | null;
+            createdAt: string;
+            updatedAt: string;
+            ubicacionDepartamento: { id: number; nombre: string } | null;
+            ubicacionCiudad: { id: number; nombre: string } | null;
+        };
+    };
+    habilidades: { habilidad: { id: number; nombre: string } }[];
+    educacion: {
+        institucion: string;
+        titulo: string;
+        nivelAcademico?: string | null;
+        fechaInicio: string | null;
+        fechaFin: string | null;
+    }[];
+    experiencia: {
+        empresa: string;
+        puesto: string;
+        descripcion: string | null;
+        fechaInicio: string;
+        fechaFin: string | null;
+        actualmenteTrabajando?: boolean;
+    }[];
+};
 
-    /* const location = [
-        persona?.ubicacionCiudad?.nombre,
-        persona?.ubicacionDepartamento?.nombre,
-        // si quieres país, agréguenlo cuando lo modelen
-    ].filter(Boolean).join(", "); */
+const toYmd = (s?: string | null) => (s ? new Date(s).toISOString().slice(0, 10) : undefined);
+
+export function mapPerfilToFormValues(api: PerfilApiResponse): PerfilCandidatoFormValues {
+    const p = api.usuario.persona;
 
     return {
-        nombre: persona?.nombre ?? "",
-        apellido: persona?.apellido ?? "",
-        tituloProfesional: perfil?.tituloProfesional ?? "",
-        email: perfil?.usuario?.email ?? "",
-        telefono: persona?.telefono ?? "",
-        ubicacionDepartamentoId: persona?.ubicacionDepartamentoId ?? undefined,
-        ubicacionDepartamento: persona?.ubicacionDepartamento?.nombre ?? "",
-        ubicacionCiudadId: persona?.ubicacionCiudadId ?? undefined,
-        ubicacionCiudad: persona?.ubicacionCiudad?.nombre ?? "",
-        resumen: perfil?.resumen ?? "",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        experiencia: (perfil?.experiencia ?? []).map((exp: any) => ({
-            empresa: exp.empresa,
-            puesto: exp.puesto,
-            fechaInicio: exp.fechaInicio ? String(new Date(exp.fechaInicio).getFullYear()) : "",
-            fechaFin: exp.actualmenteTrabajando
-                ? "Presente"
-                : exp.fechaFin
-                    ? String(new Date(exp.fechaFin).getFullYear())
-                    : "",
-            descripcion: exp.descripcion ?? "",
+        // Persona + Usuario (PLANO)
+        nombre: p.nombre,
+        apellido: p.apellido,
+        email: api.usuario.email,
+        telefono: p.telefono ?? undefined,
+        direccion: p.direccion ?? undefined,
+        fechaNacimiento: toYmd(p.fechaNacimiento),
+        genero: p.genero ?? undefined,
+        ubicacionDepartamentoId: p.ubicacionDepartamentoId ?? undefined,
+        ubicacionDepartamento: p.ubicacionDepartamento?.nombre ?? undefined,
+        ubicacionCiudadId: p.ubicacionCiudadId ?? undefined,
+        ubicacionCiudad: p.ubicacionCiudad?.nombre ?? undefined,
+
+        // PerfilCandidato
+        tituloProfesional: api.tituloProfesional ?? undefined,
+        resumen: api.resumen ?? undefined,
+        disponibilidad: api.disponibilidad ?? undefined,
+        disponibilidadViajar: api.disponibilidadViajar,
+        cambioResidencia: api.cambioResidencia,
+        poseeVehiculo: api.poseeVehiculo,
+
+        // CV
+        cvUrl: api.cvUrl ?? undefined,
+        cvMimeType: api.cvMimeType ?? undefined,
+        cvSize: api.cvSize ?? undefined,
+
+        // Colecciones
+        experiencia: (api.experiencia ?? []).map((e) => ({
+            empresa: e.empresa,
+            puesto: e.puesto,
+            fechaInicio: toYmd(e.fechaInicio)!,      // requerido
+            fechaFin: toYmd(e.fechaFin),
+            descripcion: e.descripcion ?? undefined,
         })),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        educacion: (perfil?.educacion ?? []).map((ed: any) => ({
+        educacion: (api.educacion ?? []).map((ed) => ({
             institucion: ed.institucion,
             titulo: ed.titulo,
-            fechaFin: ed.fechaFin ? String(new Date(ed.fechaFin).getFullYear()) : "",
+            fechaInicio: toYmd(ed.fechaInicio),
+            fechaFin: toYmd(ed.fechaFin),
         })),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        habilidades: (perfil?.habilidades ?? []).map((h: any) => h.habilidad?.nombre).filter(Boolean),
+        habilidades: (api.habilidades ?? []).map((h) => h.habilidad.nombre),
     };
 }

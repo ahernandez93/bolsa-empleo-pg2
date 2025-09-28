@@ -12,8 +12,8 @@ export default function NavbarPublic({ session }: { session: Session | null }) {
                         className="flex items-center gap-3 flex-1"
                         href="/"
                     >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">X</div>
-                        <span className="font-bold text-lg">EmpresaX</span>
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">PIE</div>
+                        <span className="font-bold text-lg">Plataforma Integral de Empleabilidad</span>
                     </Link>
                     {/* <Link href="/admin" className="flex items-center gap-3 flex-1">
                             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">

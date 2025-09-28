@@ -2,7 +2,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth/auth";
-import z from "zod";
+import { Prisma, Genero } from "@prisma/client";
+import { z } from "zod";
+
+const urlOrPath = z.string().refine(
+    (v) => /^https?:\/\//.test(v) || v.startsWith("/"),
+    "Debe ser URL http(s) o ruta que empiece con /"
+);
 
 export async function GET() {
     try {
@@ -12,7 +18,6 @@ export async function GET() {
             return NextResponse.json({ message: "No autenticado" }, { status: 401 });
         }
 
-        // Perfil por usuarioId (PerfilCandidato.usuarioId es unique)
         const perfil = await prisma.perfilCandidato.findUnique({
             where: { usuarioId: userId },
             include: {
@@ -40,10 +45,12 @@ export async function GET() {
 
         return NextResponse.json(perfil);
     } catch (err) {
-        console.error("GET /api/perfil-candidato/me", err);
+        console.error("GET /api/candidatos/perfil", err);
         return NextResponse.json({ message: "Error del servidor" }, { status: 500 });
     }
 }
+
+const toDateOrNull = (s?: string | null) => (s ? new Date(`${s}T00:00:00Z`) : null);
 
 const experienciaItem = z.object({
     empresa: z.string().min(1),
@@ -58,39 +65,46 @@ const educacionItem = z.object({
     titulo: z.string().min(1),
     fechaInicio: z.string().min(1),
     fechaFin: z.string().optional(),
+    nivelAcademico: z.string().optional(),
 });
 
-const perfilUpdateSchema = z.object({
+export const perfilUpdateSchema = z.object({
     // Persona + Usuario
-    nombre: z.string().min(1),
-    apellido: z.string().min(1),
-    email: z.string().email(),
+    nombre: z.string().min(1).optional(),
+    apellido: z.string().min(1).optional(),
+    email: z.string().email().optional(),
     telefono: z.string().optional(),
+    direccion: z.string().optional(),
+    fechaNacimiento: z.string().optional(),
+    genero: z.nativeEnum(Genero).nullable().optional(),
+
+    // Ubicación
+    ubicacionDepartamentoId: z.coerce.number().int().positive().optional(),
+    ubicacionCiudadId: z.coerce.number().int().positive().optional(),
 
     // PerfilCandidato
     tituloProfesional: z.string().optional(),
     resumen: z.string().max(600).optional(),
-
-    ubicacionDepartamentoId: z.number().int().positive().optional(),
-    ubicacionCiudadId: z.number().int().positive().optional(),
-
-    // Flags (ajústalos si los usas en tu UI)
     disponibilidad: z.string().optional(),
     disponibilidadViajar: z.boolean().optional(),
     cambioResidencia: z.boolean().optional(),
     poseeVehiculo: z.boolean().optional(),
 
-    // Colecciones
-    experiencia: z.array(experienciaItem).default([]),
-    educacion: z.array(educacionItem).default([]),
+    // CV
+    cvUrl: urlOrPath.optional(),
+    cvMimeType: z.string().optional(),
+    cvSize: z.coerce.number().int().nonnegative().optional(),
 
-    // Skills como strings (nombres)
-    skills: z.array(z.string().min(1)).default([]),
-});
+    // Colecciones (solo si vienen)
+    experiencia: z.array(experienciaItem).optional(),
+    educacion: z.array(educacionItem).optional(),
+    habilidades: z.array(z.string().min(1)).optional(),
+})
+    .partial()
+    .passthrough();
 
 export async function PUT(req: Request) {
     try {
-
         // 1) Auth
         const session = await auth();
         const userId = session?.user?.id;
@@ -98,192 +112,174 @@ export async function PUT(req: Request) {
             return NextResponse.json({ message: "No autenticado" }, { status: 401 });
         }
 
-        // 2) Parse body
-        const body = await req.json();
-        const data = perfilUpdateSchema.parse(body);
+        // 2) Parse body (parcial)
+        const raw = await req.json();
+        const data = perfilUpdateSchema.parse(raw);
 
-        // 3) Cargar perfil y verificar autorización (dueño o ADMIN)
+        // 3) Cargar perfil + autorización
         const perfil = await prisma.perfilCandidato.findUnique({
             where: { usuarioId: userId },
-            include: {
-                usuario: true, // para ver id/rol/email actual
-            },
+            include: { usuario: true },
         });
-
         if (!perfil) {
             return NextResponse.json({ message: "Perfil no encontrado" }, { status: 404 });
         }
-
-        // ¿Es dueño del perfil?
-        const isOwner = perfil.usuarioId === session?.user?.id;
-        // ¿Es admin?
+        const isOwner = perfil.usuarioId === userId;
         const isAdmin = perfil.usuario.rol === "ADMIN";
-
         if (!isOwner && !isAdmin) {
             return NextResponse.json({ message: "No autorizado" }, { status: 403 });
         }
 
-        // 4) Preparar operaciones dentro de una transacción
+        // 4) Transacción: actualiza SOLO lo que viene en el body
         const updated = await prisma.$transaction(async (tx) => {
-            // 4.1) Actualizar Persona y Usuario (email)
-            // Encontrar usuario vinculado para llegar a persona
+            // 4.1) Usuario + Persona (solo campos presentes)
             const usuario = await tx.usuario.findUnique({
                 where: { id: perfil.usuarioId },
                 include: { persona: true },
             });
             if (!usuario) throw new Error("Usuario del perfil no encontrado");
 
-            // Actualizar Persona
-            await tx.persona.update({
-                where: { id: usuario.personaId },
-                data: {
-                    nombre: data.nombre,
-                    apellido: data.apellido,
-                    telefono: data.telefono ?? null,
-                    ubicacionDepartamentoId: data.ubicacionDepartamentoId ?? null,
-                    ubicacionCiudadId: data.ubicacionCiudadId ?? null,
-                },
-            });
+            const personaData: Prisma.PersonaUpdateInput = {};
+            if (data.nombre !== undefined) personaData.nombre = data.nombre;
+            if (data.apellido !== undefined) personaData.apellido = data.apellido;
+            if (data.telefono !== undefined) personaData.telefono = data.telefono ?? null;
+            if (data.direccion !== undefined) personaData.direccion = data.direccion ?? null;
+            if (data.fechaNacimiento !== undefined) personaData.fechaNacimiento = toDateOrNull(data.fechaNacimiento);
+            if (data.genero !== undefined) personaData.genero = data.genero ?? null;
+            if (data.ubicacionDepartamentoId !== undefined) {
+                personaData.ubicacionDepartamento = data.ubicacionDepartamentoId
+                    ? { connect: { id: data.ubicacionDepartamentoId } }
+                    : { disconnect: true };
+            }
+            if (data.ubicacionCiudadId !== undefined) {
+                personaData.ubicacionCiudad = data.ubicacionCiudadId
+                    ? { connect: { id: data.ubicacionCiudadId } }
+                    : { disconnect: true };
+            }
 
-            // Si cambia el email, actualizar Usuario.email (único)
-            if (data.email && data.email !== usuario.email) {
-                // Chequear colisión
+            if (Object.keys(personaData).length > 0) {
+                await tx.persona.update({ where: { id: usuario.personaId }, data: personaData });
+            }
+
+            if (data.email !== undefined && data.email !== usuario.email) {
                 const collision = await tx.usuario.findUnique({ where: { email: data.email } });
                 if (collision && collision.id !== usuario.id) {
                     throw new Error("El correo ya está en uso por otro usuario");
                 }
-                await tx.usuario.update({
-                    where: { id: usuario.id },
-                    data: { email: data.email },
-                });
+                await tx.usuario.update({ where: { id: usuario.id }, data: { email: data.email } });
             }
 
-            // 4.2) Actualizar datos base del PerfilCandidato
-            await tx.perfilCandidato.update({
-                where: { id: perfil.id },
-                data: {
-                    tituloProfesional: data.tituloProfesional ?? null,
-                    resumen: data.resumen ?? null,
-                    disponibilidad: data.disponibilidad ?? null,
-                    disponibilidadViajar: data.disponibilidadViajar ?? false,
-                    cambioResidencia: data.cambioResidencia ?? false,
-                    poseeVehiculo: data.poseeVehiculo ?? false,
-                },
-            });
+            // 4.2) PerfilCandidato base + CV (solo campos presentes)
+            const perfilData: Prisma.PerfilCandidatoUpdateInput = {};
+            if (data.tituloProfesional !== undefined) perfilData.tituloProfesional = data.tituloProfesional ?? null;
+            if (data.resumen !== undefined) perfilData.resumen = data.resumen ?? null;
+            if (data.disponibilidad !== undefined) perfilData.disponibilidad = data.disponibilidad ?? null;
+            if (data.disponibilidadViajar !== undefined) perfilData.disponibilidadViajar = !!data.disponibilidadViajar;
+            if (data.cambioResidencia !== undefined) perfilData.cambioResidencia = !!data.cambioResidencia;
+            if (data.poseeVehiculo !== undefined) perfilData.poseeVehiculo = !!data.poseeVehiculo;
 
-            // 4.3) Reemplazar experiencia: deleteMany + createMany
-            await tx.experienciaLaboral.deleteMany({
-                where: { perfilCandidatoId: perfil.id },
-            });
+            // CV (persistir al subir)
+            if (data.cvUrl !== undefined) perfilData.cvUrl = data.cvUrl ?? null;
+            if (data.cvMimeType !== undefined) perfilData.cvMimeType = data.cvMimeType ?? null;
+            if (data.cvSize !== undefined) perfilData.cvSize = data.cvSize ?? null;
 
-            if (data.experiencia.length > 0) {
-                await tx.experienciaLaboral.createMany({
-                    data: data.experiencia.map((e) => ({
-                        perfilCandidatoId: perfil.id,
-                        empresa: e.empresa,
-                        puesto: e.puesto,
-                        descripcion: e.descripcion ?? null,
-                        // si luego cambias a Date, conviértelo aquí
-                        fechaInicio: new Date(e.fechaInicio),
-                        fechaFin: e.fechaFin ? new Date(e.fechaFin) : null,
-                    })),
-                });
+            if (Object.keys(perfilData).length > 0) {
+                await tx.perfilCandidato.update({ where: { id: perfil.id }, data: perfilData });
             }
 
-            // 4.4) Reemplazar educación
-            await tx.educacion.deleteMany({
-                where: { perfilCandidatoId: perfil.id },
-            });
-
-            if (data.educacion.length > 0) {
-                await tx.educacion.createMany({
-                    data: data.educacion.map((ed) => ({
-                        perfilCandidatoId: perfil.id,
-                        institucion: ed.institucion,
-                        titulo: ed.titulo,
-                        nivelAcademico: "", // si lo usas, agrega al form/schema
-                        fechaInicio: ed.fechaInicio ? new Date(ed.fechaInicio) : null,
-                        fechaFin: ed.fechaFin ? new Date(ed.fechaFin) : null,
-                    })),
-                });
+            // 4.3) Experiencia (solo si viene la propiedad en el body)
+            if (data.experiencia !== undefined) {
+                await tx.experienciaLaboral.deleteMany({ where: { perfilCandidatoId: perfil.id } });
+                if (data.experiencia?.length) {
+                    await tx.experienciaLaboral.createMany({
+                        data: data.experiencia.map((e) => ({
+                            perfilCandidatoId: perfil.id,
+                            empresa: e.empresa,
+                            puesto: e.puesto,
+                            descripcion: e.descripcion ?? null,
+                            fechaInicio: toDateOrNull(e.fechaInicio)!, // requerido si viene
+                            fechaFin: toDateOrNull(e.fechaFin),
+                        })),
+                    });
+                }
             }
 
-            // 4.5) Sincronizar skills
-            //  a) Normalizar nombres (trim) y quitar duplicados vacíos
-            const skillNames = Array.from(new Set(data.skills.map((s) => s.trim()).filter(Boolean)));
-
-            //  b) Upsert de habilidades por nombre
-            const habilidades = await Promise.all(
-                skillNames.map((nombre) =>
-                    tx.habilidad.upsert({
-                        where: { nombre },
-                        update: {},
-                        create: { nombre },
-                    })
-                )
-            );
-            const habilidadIds = habilidades.map((h) => h.id);
-
-            //  c) Eliminar relaciones que ya no estén
-            await tx.perfilCandidatoHabilidad.deleteMany({
-                where: {
-                    perfilCandidatoId: perfil.id,
-                    NOT: { habilidadId: { in: habilidadIds } },
-                },
-            });
-
-            //  d) Crear las que falten
-            // Buscar las existentes para no violar unique
-            const existentes = await tx.perfilCandidatoHabilidad.findMany({
-                where: { perfilCandidatoId: perfil.id },
-                select: { habilidadId: true },
-            });
-            const existentesSet = new Set(existentes.map((e) => e.habilidadId));
-            const faltantes = habilidadIds.filter((hid) => !existentesSet.has(hid));
-
-            if (faltantes.length > 0) {
-                await tx.perfilCandidatoHabilidad.createMany({
-                    data: faltantes.map((hid) => ({
-                        perfilCandidatoId: perfil.id,
-                        habilidadId: hid,
-                    })),
-                });
+            // 4.4) Educación (solo si viene la propiedad en el body)
+            if (data.educacion !== undefined) {
+                await tx.educacion.deleteMany({ where: { perfilCandidatoId: perfil.id } });
+                if (data.educacion?.length) {
+                    await tx.educacion.createMany({
+                        data: data.educacion.map((ed) => ({
+                            perfilCandidatoId: perfil.id,
+                            institucion: ed.institucion,
+                            titulo: ed.titulo,
+                            nivelAcademico: ed.nivelAcademico ?? "",
+                            fechaInicio: toDateOrNull(ed.fechaInicio),
+                            fechaFin: toDateOrNull(ed.fechaFin),
+                        })),
+                    });
+                }
             }
 
-            // 4.6) Devolver perfil actualizado con relaciones
-            const refreshed = await tx.perfilCandidato.findUnique({
+            // 4.5) Habilidades (solo si viene la propiedad en el body)
+            if (data.habilidades !== undefined) {
+                const skillNames = Array.from(new Set((data.habilidades ?? []).map((s) => s.trim()).filter(Boolean)));
+                if (skillNames.length) {
+                    const existentes = await tx.habilidad.findMany({
+                        where: { nombre: { in: skillNames } },
+                        select: { id: true, nombre: true },
+                    });
+                    const existentesSet = new Set(existentes.map((e) => e.nombre));
+                    const porCrear = skillNames.filter((n) => !existentesSet.has(n));
+                    if (porCrear.length) {
+                        await tx.habilidad.createMany({ data: porCrear.map((nombre) => ({ nombre })) });
+                    }
+                    const todas = await tx.habilidad.findMany({
+                        where: { nombre: { in: skillNames } },
+                        select: { id: true },
+                    });
+                    await tx.perfilCandidatoHabilidad.deleteMany({ where: { perfilCandidatoId: perfil.id } });
+                    if (todas.length) {
+                        await tx.perfilCandidatoHabilidad.createMany({
+                            data: todas.map((h) => ({ perfilCandidatoId: perfil.id, habilidadId: h.id })),
+                        });
+                    }
+                } else {
+                    // si mandaste habilidades: [] → limpia todas
+                    await tx.perfilCandidatoHabilidad.deleteMany({ where: { perfilCandidatoId: perfil.id } });
+                }
+            }
+
+            // 4.6) Devolver perfil actualizado con relaciones (ANIDADO)
+            return tx.perfilCandidato.findUnique({
                 where: { id: perfil.id },
                 include: {
                     usuario: {
-                        include: { persona: { include: { ubicacionDepartamento: true, ubicacionCiudad: true } } },
+                        include: {
+                            persona: {
+                                include: {
+                                    ubicacionDepartamento: { select: { id: true, nombre: true } },
+                                    ubicacionCiudad: { select: { id: true, nombre: true } },
+                                },
+                            },
+                        },
                     },
                     experiencia: true,
                     educacion: true,
-                    habilidades: {
-                        include: { habilidad: true },
-                    },
+                    habilidades: { include: { habilidad: true } },
                 },
             });
-
-            return refreshed;
         });
 
         return NextResponse.json(updated, { status: 200 });
     } catch (err) {
-        // Zod
+        console.error("PUT /api/candidatos/perfil ERROR →", err);
         if (err instanceof z.ZodError) {
-            return NextResponse.json(
-                { message: "Datos inválidos", errors: err.flatten() },
-                { status: 400 }
-            );
+            return NextResponse.json({ message: "Datos inválidos", errors: err.issues }, { status: 400 });
         }
-        // Prisma known errors (opcional)
-        // if (err instanceof Prisma.PrismaClientKnownRequestError) { ... }
-
-        // Otros
-        return NextResponse.json(
-            { message: (err as Error).message ?? "Error del servidor" },
-            { status: 500 }
-        );
+        if (err instanceof Prisma.PrismaClientKnownRequestError) {
+            return NextResponse.json({ message: "Prisma error", code: err.code, meta: err.meta }, { status: 400 });
+        }
+        return NextResponse.json({ message: (err as Error).message ?? "Error del servidor" }, { status: 500 });
     }
 }

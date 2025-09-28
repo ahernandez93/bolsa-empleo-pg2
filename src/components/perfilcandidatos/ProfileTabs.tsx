@@ -4,8 +4,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileView from "@/components/perfilcandidatos/ProfileView";
 import ProfileEditForm from "@/components/perfilcandidatos/ProfileEditForm";
 import type { PerfilCandidatoFormValues } from "@/lib/schemas/perfilCandidatoSchema";
+import { useState, useEffect } from "react";
+import useSWR from "swr";
+import axios from "axios";
 
-export default function ProfileTabs({ initialData }: { initialData: PerfilCandidatoFormValues }) {
+export default function ProfileTabs({ initialData, onSaved }: { initialData: PerfilCandidatoFormValues; onSaved?: (updated: PerfilCandidatoFormValues) => void }) {
+    const [viewData, setViewData] = useState<PerfilCandidatoFormValues>(initialData);
+
+    // Si initialData cambia (por ejemplo, si la página re-carga), sincrónizalo:
+    useEffect(() => {
+        setViewData(initialData);
+    }, [initialData]);
+
+    const handleSaved = (updated: PerfilCandidatoFormValues) => {
+        setViewData(updated);     // refresca las vistas locales (ProfileView, PreviewCard)
+        onSaved?.(updated);       // notifica a la página
+    };
+
     return (
         <Tabs defaultValue="view" className="md:col-span-2">
             <div className="flex items-center justify-between">
@@ -19,9 +34,9 @@ export default function ProfileTabs({ initialData }: { initialData: PerfilCandid
             <div className="grid gap-4 md:grid-cols-[1fr_320px]">
                 <TabsContent value="view" className="md:col-span-2">
                     <div className="grid gap-4 md:grid-cols-[1fr_320px]">
-                        <ProfileView data={initialData} />
+                        <ProfileView data={viewData} />
                         <aside className="space-y-4">
-                            <PreviewCard data={initialData} />
+                            <PreviewCard data={viewData} />
                             <MetricsCard />
                         </aside>
                     </div>
@@ -30,9 +45,9 @@ export default function ProfileTabs({ initialData }: { initialData: PerfilCandid
 
                 <TabsContent value="edit" className="md:col-span-2">
                     <div className="grid gap-4 md:grid-cols-[1fr_320px]">
-                        <ProfileEditForm initialData={initialData} />
+                        <ProfileEditForm initialData={viewData} onSaved={handleSaved} />
                         <aside className="space-y-4">
-                            <PreviewCard data={initialData} />
+                            <PreviewCard data={viewData} />
                             <MetricsCard />
                         </aside>
                     </div>
@@ -59,24 +74,49 @@ function PreviewCard({ data }: { data: PerfilCandidatoFormValues }) {
 }
 
 function MetricsCard() {
-    // Puedes traer esto de tu API (postulaciones/guardados/entrevistas)
+    const fetcher = (url: string) => axios.get(url).then(r => r.data as {
+        aplicadas: number;
+        guardadas: number;
+        entrevistas: number;
+        ofertas: number;
+    });
+
+    const { data, isLoading, error } = useSWR("/api/candidatos/metrics", fetcher, {
+        revalidateOnFocus: false,
+    });
+
     const metrics = [
-        { label: "Aplicadas", value: 12 },
-        { label: "Guardadas", value: 7 },
-        { label: "Entrevistas", value: 3 },
-        { label: "Ofertas", value: 1 },
+        { label: "Aplicadas", value: data?.aplicadas ?? 0 },
+        { label: "Guardadas", value: data?.guardadas ?? 0 },
+        { label: "Entrevistas", value: data?.entrevistas ?? 0 },
+        { label: "Ofertas", value: data?.ofertas ?? 0 },
     ];
+
     return (
         <div className="rounded-xl border bg-white p-4">
             <h3 className="mb-2 text-sm font-semibold text-slate-900">Métricas</h3>
-            <div className="grid grid-cols-2 gap-3">
-                {metrics.map((m) => (
-                    <div key={m.label} className="rounded-lg border bg-slate-50 p-3 text-center">
-                        <p className="text-lg font-semibold text-slate-900">{m.value}</p>
-                        <p className="text-xs text-slate-500">{m.label}</p>
-                    </div>
-                ))}
-            </div>
+
+            {isLoading ? (
+                <div className="grid grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="rounded-lg border bg-slate-50 p-3">
+                            <div className="h-5 w-10 animate-pulse rounded bg-slate-200" />
+                            <div className="mt-1 h-4 w-24 animate-pulse rounded bg-slate-200" />
+                        </div>
+                    ))}
+                </div>
+            ) : error ? (
+                <p className="text-xs text-red-600">No se pudieron cargar las métricas.</p>
+            ) : (
+                <div className="grid grid-cols-2 gap-3">
+                    {metrics.map((m) => (
+                        <div key={m.label} className="rounded-lg border bg-slate-50 p-3 text-center">
+                            <p className="text-lg font-semibold text-slate-900">{m.value}</p>
+                            <p className="text-xs text-slate-500">{m.label}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

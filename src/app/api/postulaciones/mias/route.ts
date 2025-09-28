@@ -25,7 +25,11 @@ export async function GET() {
             include: {
                 oferta: {
                     select: {
-                        id: true, puesto: true, empresa: true,
+                        id: true, puesto: true, empresa: {
+                            select: {
+                                nombre: true,
+                            },
+                        },
                         modalidad: true, tipoTrabajo: true,
                         ubicacionDepartamento: {
                             select: {

@@ -37,7 +37,7 @@ export default function EmpresaConfigView() {
                             <div className="font-medium flex items-center gap-2">
                                 <Badge>{empresa.plan.nombre}</Badge>
                                 <span className="text-xs text-muted-foreground">
-                                    Límite: {empresa.plan.maxOfertasActivas} | Destacado: {empresa.plan.incluyeDestacado ? "Sí" : "No"}
+                                    Límite de ofertas laborales: {empresa.plan.maxOfertasActivas} | Ofertas laborales Destacadas: {empresa.plan.incluyeDestacado ? "Sí" : "No"}
                                 </span>
                             </div>
                         ) : (

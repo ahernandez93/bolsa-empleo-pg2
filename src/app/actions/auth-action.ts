@@ -194,7 +194,7 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
         const passwordHash = await bcrypt.hash(data.usuario.password, 10)
         const now = new Date()
 
-        const [empresa, persona, usuario] = await prisma.$transaction(async (tx) => {
+        const [empresa, persona, usuario, /* empleado */] = await prisma.$transaction(async (tx) => {
             const empresa = await tx.empresa.create({
                 data: {
                     nombre: empresaNombre,
@@ -218,12 +218,23 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                     personaId: persona.id,
                     email,
                     passwordHash,
-                    rol: "ADMIN",             
-                    empresaId: empresa.id,    
-                    emailVerificado: true,    
+                    rol: "ADMIN",
+                    empresaId: empresa.id,
+                    emailVerificado: true,
                     activo: true,
                 },
             })
+
+            /* const empleado = await tx.empleado.create({
+                data: {
+                    usuarioId: usuario.id,
+                    empresaId: empresa.id,
+                    // Si tu modelo requiere más campos, agrega aquí:
+                    // cargo: "ADMINISTRADOR",
+                    // activo: true,
+                    // fechaIngreso: now,
+                },
+            }) */
 
             await tx.suscripcion.create({
                 data: {
@@ -235,15 +246,15 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                 },
             })
 
-            return [empresa, persona, usuario] as const
+            return [empresa, persona, usuario, /* empleado */] as const
         })
 
         return {
             success: true,
             error: null,
-            ids: { empresaId: empresa.id, personaId: persona.id, usuarioId: usuario.id },
+            ids: { empresaId: empresa.id, personaId: persona.id, usuarioId: usuario.id, /* empleadoId: empleado.id */ },
         } as const
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
         if (err instanceof z.ZodError) {
             return {

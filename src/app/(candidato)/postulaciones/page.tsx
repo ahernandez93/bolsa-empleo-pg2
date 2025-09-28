@@ -22,7 +22,7 @@ type PostulacionItem = {
     oferta: {
         id: string;
         puesto: string;
-        empresa: string;
+        empresa: { nombre: string };
         modalidad: string;
         tipoTrabajo: string;
         ubicacionCiudad: { nombre: string };
@@ -142,7 +142,7 @@ export default function PanelPostulaciones() {
                                 oferta={{
                                     id: p.oferta.id,
                                     puesto: p.oferta.puesto,
-                                    empresa: p.oferta.empresa,
+                                    empresa: p.oferta.empresa.nombre,
                                     modalidad: p.oferta.modalidad,
                                     tipoTrabajo: p.oferta.tipoTrabajo,
                                     ubicacionCiudadNombre: p.oferta.ubicacionCiudad?.nombre ?? "",

@@ -24,9 +24,9 @@ export const getEmpleados = async () => {
             email: emp.usuario.email,
             rol: emp.usuario.rol,
             departamentoId: emp.departamentoId,
-            departamentodescripcion: emp.departamento.descripcion,
+            departamentodescripcion: emp.departamento?.descripcion,
             cargoId: emp.cargoId,
-            cargodescripcion: emp.cargo.descripcion,
+            cargodescripcion: emp.cargo?.descripcion,
             activo: emp.usuario.activo,
             createdAt: emp.createdAt.toISOString(),
         }));

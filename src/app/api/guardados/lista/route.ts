@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
         const orderBy =
             order === "empresa"
-                ? [{ oferta: { empresa: "asc" as const } }]
+                ? [{ oferta: { empresa: { nombre: "asc" as const } } }]
                 : order === "ciudad"
                     ? [{ oferta: { ubicacionCiudad: { nombre: "asc" as const } } }]
                     : [{ createdAt: "desc" as const }];
@@ -45,7 +45,7 @@ export async function GET(req: Request) {
                         oferta: {
                             OR: [
                                 { puesto: { contains: q, mode: "insensitive" } },
-                                { empresa: { contains: q, mode: "insensitive" } },
+                                { empresa: { nombre: { contains: q, mode: "insensitive" } } },
                                 { ubicacionCiudad: { nombre: { contains: q, mode: "insensitive" } } },
                                 { ubicacionDepartamento: { nombre: { contains: q, mode: "insensitive" } } },
                             ],
@@ -60,7 +60,11 @@ export async function GET(req: Request) {
                     select: {
                         id: true,
                         puesto: true,
-                        empresa: true,
+                        empresa: {
+                            select: {
+                                nombre: true,
+                            },
+                        },
                         ubicacionCiudad: {
                             select: {
                                 nombre: true,
@@ -83,7 +87,7 @@ export async function GET(req: Request) {
         const data = items.map((g) => ({
             id: g.oferta.id,
             puesto: g.oferta.puesto,
-            empresa: g.oferta.empresa ?? "",
+            empresa: g.oferta.empresa?.nombre ?? "—",
             ubicacionCiudadDescripcion: g.oferta.ubicacionCiudad?.nombre ?? "",
             ubicacionDepartamentoDescripcion: g.oferta.ubicacionDepartamento?.nombre ?? "",
             modalidad: g.oferta.modalidad,

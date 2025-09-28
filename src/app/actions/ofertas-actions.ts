@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { JobCardProps } from "@/components/jobcarousel";
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +47,7 @@ export const getOfertasLaborales = async () => {
     }
 }
 
-export const getOFertasLaboralesAbiertas = async (userId?: string) => {
+export const getOFertasLaboralesAbiertas = async (userId?: string): Promise<JobCardProps[]> => {
     try {
         const ofertasLaboralesAbiertas = await prisma.ofertaLaboral.findMany({
             where: {
@@ -56,9 +57,9 @@ export const getOFertasLaboralesAbiertas = async (userId?: string) => {
                 fechaCreacion: "desc",
             },
             include: {
-                ubicacionDepartamento: true,
-                ubicacionCiudad: true,
-                empresa: true,
+                ubicacionDepartamento: { select: { nombre: true } },
+                ubicacionCiudad: { select: { nombre: true } },
+                empresa: { select: { nombre: true } },
                 guardados: userId
                     ? {
                         where: {
@@ -71,7 +72,7 @@ export const getOFertasLaboralesAbiertas = async (userId?: string) => {
                     : {},
             },
         });
-        const data = ofertasLaboralesAbiertas.map(ofertaLaboral => ({
+        const data: JobCardProps[] = ofertasLaboralesAbiertas.map(ofertaLaboral => ({
             id: ofertaLaboral.id,
             puesto: ofertaLaboral.puesto,
             descripcionPuesto: ofertaLaboral.descripcionPuesto,
@@ -81,7 +82,7 @@ export const getOFertasLaboralesAbiertas = async (userId?: string) => {
             ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
             ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre,
             empresaId: ofertaLaboral.empresaId,
-            empresaNombre: ofertaLaboral.empresa?.nombre,
+            empresa: ofertaLaboral.empresa?.nombre ?? "—",
             nivelAcademico: ofertaLaboral.nivelAcademico,
             experienciaLaboral: ofertaLaboral.experienciaLaboral,
             tipoTrabajo: ofertaLaboral.tipoTrabajo,
