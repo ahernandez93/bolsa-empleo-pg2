@@ -80,10 +80,6 @@ export const navigationData: NavItem[] = [
                 title: "Candidatos Registrados",
                 url: "/admin/candidatos",
             },
-            {
-                title: "Reportes",
-                url: "/admin/reportes",
-            },
         ],
     },
     {
@@ -93,7 +89,7 @@ export const navigationData: NavItem[] = [
         items: [
             {
                 title: "Configuraciones de la empresa",
-                url: "/configuraciones",
+                url: "/admin/config-empresa",
             },
         ],
     },

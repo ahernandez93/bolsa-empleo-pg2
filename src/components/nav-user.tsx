@@ -7,6 +7,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
 import { signOut } from "next-auth/react"
 import type { Session } from "next-auth"
+import Link from "next/link"
+
 
 export function NavUser({ session }: { session: Session | null }) {
   const { isMobile } = useSidebar()
@@ -63,10 +65,12 @@ export function NavUser({ session }: { session: Session | null }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Perfil
-              </DropdownMenuItem>
+              <Link href="/admin/perfil">
+                <DropdownMenuItem>
+                  <BadgeCheck />
+                  Perfil
+                </DropdownMenuItem>
+              </Link>
               {/* <DropdownMenuItem>
                 <Bell />
                 Notificaciones

@@ -1,4 +1,4 @@
-import { OfertaLaboral, Postulacion } from "@prisma/client";
+import { OfertaLaboral } from "@prisma/client";
 
 export type EmpleadoCompleto = {
     id: string
@@ -79,5 +79,52 @@ export type InitialDataUpdatePostulacion = {
     candidatoNombre: string | null
     candidatoEmail: string
 }
+
+export type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
+
+export type Genero = "MASCULINO" | "FEMENINO" | ""; // "" cuando el form no tiene selección
+
+export type EmpresaLite = {
+    id: string;
+    nombre: string;
+};
+
+export type EmpleadoPerfilDTO = {
+    id: string;
+    nombre: string;
+    apellido: string;
+    telefono: string;                       // cadena para form
+    direccion: string;
+    fechaNacimiento: string;                // YYYY-MM-DD o ""
+    genero: Genero;
+    ubicacionDepartamentoId?: number;
+    ubicacionCiudadId?: number;
+    email: string;
+    empresa: EmpresaLite | null;
+    role: RolUsuario;
+};
+
+export type ApiErrorResponse = { message: string };
+
+export type EmpresaPlanLite = {
+    id: string;
+    nombre: "Gratis" | "Básico" | "Premium" | string;
+    maxOfertasActivas: number;
+    incluyeDestacado: boolean;
+    vence: string;
+};
+
+export type EmpresaConfigDTO = {
+    id: string;
+    nombre: string;
+    rtn: string;
+    sitioWeb: string;
+    telefono: string;
+    descripcion: string;
+    ubicacionDepartamentoId?: number;
+    ubicacionCiudadId?: number;
+    activa: boolean;
+    plan: EmpresaPlanLite | null;
+};
 
 
