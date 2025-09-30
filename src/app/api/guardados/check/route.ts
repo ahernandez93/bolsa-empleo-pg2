@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     }
 
     const { ids } = await req.json();
-    const ofertaIds: string[] = Array.isArray(ids) ? ids : [];
+    const ofertaIds: string[] = Array.isArray(ids) ? ids.map(String) : [];
     if (ofertaIds.length === 0) return NextResponse.json({ saved: {} });
 
     const rows = await prisma.guardadoOferta.findMany({
@@ -19,8 +19,7 @@ export async function POST(req: Request) {
         select: { ofertaLaboralId: true },
     });
 
-    const saved: Record<string, boolean> = {};
-    for (const r of rows) saved[r.ofertaLaboralId] = true;
+    const saved = Object.fromEntries(rows.map(r => [String(r.ofertaLaboralId), true]));
 
     return NextResponse.json({ saved });
 }

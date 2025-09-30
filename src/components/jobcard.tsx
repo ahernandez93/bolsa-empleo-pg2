@@ -73,7 +73,7 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
             <div className="absolute top-2 right-2">
                 <BotonGuardarOferta 
                     ofertaId={id} 
-                    initialSaved={!!isSaved} 
+                    saved={!!isSaved} 
                     onChange={onToggleSaved} 
                 />
             </div>

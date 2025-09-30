@@ -13,8 +13,13 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import JobCard from "@/components/jobcard";
 import type { JobCardProps } from "@/components/jobcarousel";
 import { useSavedMap } from "@/hooks/use-saved-map";
+import { useSession } from "next-auth/react";
 
 export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLaboralesAbiertas: JobCardProps[] }) {
+
+    const { status, data } = useSession(); // "authenticated" | "unauthenticated" | "loading"
+    const authed = status === "authenticated";
+    const userId = authed ? (data?.user?.id ?? "anon") : "anon";
 
     const [query, setQuery] = useState("");
     const [category, setCategory] = useState<string>("");
@@ -22,7 +27,7 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
     const [modality, setModality] = useState<string>("");
 
     const ids = useMemo(() => ofertasLaboralesAbiertas.map(j => j.id), [ofertasLaboralesAbiertas]);
-    const { savedMap, mutate } = useSavedMap(ids);
+    const { savedMap, mutate, isLoading } = useSavedMap(ids, userId);
 
     const filtered = useMemo(() => {
         return ofertasLaboralesAbiertas.filter((j) => {
@@ -79,13 +84,19 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
                 {/* Grid de ofertas */}
                 <section className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {filtered.map((job) => {
-                        const effectiveSaved = savedMap[job.id] ?? job.isSaved;
+                        const key = String(job.id);
+                        // 🔑 Política:
+                        // - sin sesión o cargando: false
+                        // - con sesión: solo SWR; si aún no llegó, false
+                        const effectiveSaved = authed && !isLoading ? !!savedMap[key] : false;
+
                         return (
-                            <JobCard key={job.id}
+                            <JobCard key={key}
                                 {...job}
                                 isSaved={effectiveSaved}
                                 onToggleSaved={(next) => {
-                                    mutate((prev) => ({ ...(prev ?? {}), [job.id]: next }), { revalidate: false });
+                                    if (!authed) return;
+                                    mutate((prev) => ({ ...(prev ?? {}), [key]: next }), { revalidate: false });
                                 }} />
                         )
                     })}

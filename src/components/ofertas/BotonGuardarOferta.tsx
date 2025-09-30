@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useTransition } from "react";
 import axios from "axios";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,24 +11,24 @@ import { cn } from "@/lib/utils";
 
 type Props = {
     ofertaId: string;
-    initialSaved?: boolean;
+    saved: boolean;
     className?: string;
     onChange?(saved: boolean): void;
 };
 
-export function BotonGuardarOferta({ ofertaId, initialSaved = false, className, onChange }: Props) {
+export function BotonGuardarOferta({ ofertaId, saved = false, className, onChange }: Props) {
     const { status } = useSession();
     const router = useRouter();
-    const [saved, setSaved] = useState(!!initialSaved);
+    // const [saved, setSaved] = useState(!!saved);
     const [pending, startTransition] = useTransition();
 
-    useEffect(() => {
+    /* useEffect(() => {
         if (status === "authenticated") {
             setSaved(!!initialSaved);
         } else if (status === "unauthenticated") {
             setSaved(false);
         }
-    }, [status, initialSaved]);
+    }, [status, initialSaved]); */
 
     const onClick = () => {
         // Requiere login
@@ -39,22 +39,25 @@ export function BotonGuardarOferta({ ofertaId, initialSaved = false, className, 
         }
 
         // UI optimista
-        setSaved((s) => !s);
+        // setSaved((s) => !s);
+
+        const next = !saved;
+        // UI optimista: actualiza arriba
+        onChange?.(next);
 
         startTransition(async () => {
             try {
                 const { data } = await axios.post("/api/guardados", { ofertaId });
-                const v = Boolean(data?.saved);
-                setSaved(v);
-                onChange?.(v);
-                toast.success(v ? "Oferta guardada" : "Quitada de guardados");
+                const serverValue = Boolean(data?.saved);
+
+                // Si el servidor difiere, sincroniza
+                if (serverValue !== next) {
+                    onChange?.(serverValue);
+                }
+                toast.success(serverValue ? "Oferta guardada" : "Quitada de guardados");
             } catch (err) {
-                // revierte optimismo
-                setSaved((s) => {
-                    const v = !s;           // revertir
-                    onChange?.(v);
-                    return v;
-                });
+                // Revertir optimismo
+                onChange?.(!next);
 
                 if (axios.isAxiosError(err)) {
                     if (err.response?.status === 401) {
