@@ -4,7 +4,7 @@ import { authOptions } from "./lib/auth/authOptions";
 
 const { auth: middleware } = NextAuth(authOptions);
 
-const publicRoutes = [
+const PUBLIC_EXACT = [
   "/login", // Login candidatos (raíz)
   "/admin/login", // Login administradores
   "/admin/registro", // Registro administradores
@@ -19,12 +19,20 @@ const publicRoutes = [
   "/"
 ];
 
+const PUBLIC_PREFIXES = [
+  "/ofertas",        // incluye /ofertas/[id]
+];
+
+// APIs públicas (solo GET)
+const PUBLIC_API_PREFIXES_GET = [
+  "/api/ofertas",    // /api/ofertas y /api/ofertas/[id]
+];
+
 export default middleware((req) => {
   const { nextUrl, auth } = req;
   const pathname = nextUrl.pathname;
   const isLoggedIn = !!auth?.user;
   const role = (auth?.user as { role?: string } | undefined)?.role;
-
   const isApiAuthRoute = pathname.startsWith("/api/auth");
 
   // Permite que las rutas de la API de NextAuth pasen siempre
@@ -33,7 +41,19 @@ export default middleware((req) => {
   }
 
   // Permitir rutas públicas
-  if (publicRoutes.includes(pathname)) {
+  if (PUBLIC_EXACT.includes(pathname)) {
+    return NextResponse.next();
+  }
+
+  if (PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
+  // APIs públicas GET (detalle de oferta sin sesión)
+  if (
+    req.method === "GET" &&
+    PUBLIC_API_PREFIXES_GET.some((p) => pathname.startsWith(p))
+  ) {
     return NextResponse.next();
   }
 

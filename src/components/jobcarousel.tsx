@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import JobCard from "@/components/jobcard";
 import { useSavedMap } from "@/hooks/use-saved-map";
+import { useSession } from "next-auth/react";
 
 export type JobCardProps = {
     id: string;
@@ -31,8 +32,13 @@ export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
     const [atStart, setAtStart] = useState(true);
     const [atEnd, setAtEnd] = useState(false);
 
-    const ids = useMemo(() => jobs.map(j => j.id), [jobs]);
-    const { savedMap, mutate } = useSavedMap(ids);
+    const { status, data } = useSession(); // "authenticated" | "unauthenticated" | "loading"
+    const authed = status === "authenticated";
+    const userId = authed ? (data?.user?.id as string) : "anon";
+
+    const strIds = useMemo(() => jobs.map((j) => String(j.id)), [jobs]);
+
+    const { savedMap, mutate, isLoading } = useSavedMap(strIds, userId);
 
     const updateEdges = useCallback(() => {
         const el = ref.current;
@@ -100,15 +106,23 @@ export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
                 aria-label="Ofertas destacadas"
             >
                 {jobs.map((job) => {
-                    const effectiveSaved = savedMap[job.id] ?? job.isSaved; // SWR > SSR
+                    const key = String(job.id);
+
+                    // ⚖️ Regla:
+                    // - sin sesión o cargando: siempre false
+                    // - con sesión: savedMap manda; si no hay entry aún, podés caer a job.isSaved
+                    const effectiveSaved = authed && !isLoading ? (savedMap[key] ?? !!job.isSaved) : false;
+
                     return (
-                        <div key={job.id} className="min-w-[300px] max-w-[320px] snap-start">
+                        <div key={key} className="min-w-[300px] max-w-[320px] snap-start">
                             <JobCard
                                 {...job}
+                                // Asegúrate de que JobCard -> BotonGuardarOferta sea CONTROLADO (saved prop)
                                 isSaved={effectiveSaved}
                                 onToggleSaved={(next) => {
-                                    // Actualiza SWR al instante sin revalidar
-                                    mutate((prev) => ({ ...(prev ?? {}), [job.id]: next }), { revalidate: false });
+                                    if (!authed) return; // por seguridad
+                                    // Mantén las keys como string
+                                    mutate((prev) => ({ ...(prev ?? {}), [key]: next }), { revalidate: false });
                                 }}
                             />
                         </div>

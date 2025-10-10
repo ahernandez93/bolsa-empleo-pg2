@@ -97,7 +97,8 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
                                 onToggleSaved={(next) => {
                                     if (!authed) return;
                                     mutate((prev) => ({ ...(prev ?? {}), [key]: next }), { revalidate: false });
-                                }} />
+                                }}
+                            />
                         )
                     })}
                 </section>

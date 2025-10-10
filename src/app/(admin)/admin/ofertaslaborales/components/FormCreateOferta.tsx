@@ -17,6 +17,11 @@ import { z } from "zod";
 import { ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, OfertaLaboralFormData, OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types";
 import useSWR from "swr";
+import { DescripcionPuestoField } from "./DescripcionPuestoField";
+import dynamic from "next/dynamic";
+// evita SSR del editor
+const Wysiwyg = dynamic(() => import("@/components/richtext/Wysiwyg"), { ssr: false });
+
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
@@ -299,17 +304,23 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 render={({ field }) => (
                                     <FormItem className="col-span-3">
                                         <FormLabel>Descripción del Puesto</FormLabel>
-                                        <FormControl>
+                                        {/* <FormControl>
                                             <Textarea
                                                 placeholder="Describe detalladamente el puesto, responsabilidades y expectativas..."
                                                 {...field}
                                                 rows={5}
                                             />
-                                        </FormControl>
+                                        </FormControl> */}
+                                        <Wysiwyg
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Describe detalladamente el puesto responsabilidades, requisitos, beneficios..."
+                                        />
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+                            {/* <DescripcionPuestoField form={form} /> */}
                         </CardContent>
                     </Card>
 

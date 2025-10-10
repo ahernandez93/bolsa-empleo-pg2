@@ -23,6 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { BotonGuardarOferta } from "@/components/ofertas/BotonGuardarOferta";
+import { VerDetalleOfertaQuickView } from "@/app/(candidato)/ofertas/VerDetalleOfertaQuickView";
 
 type Props = JobCardProps & {
     onToggleSaved?: (next: boolean) => void;
@@ -71,10 +72,10 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
     return (
         <Card className="relative h-full border-slate-200 flex flex-col">
             <div className="absolute top-2 right-2">
-                <BotonGuardarOferta 
-                    ofertaId={id} 
-                    saved={!!isSaved} 
-                    onChange={onToggleSaved} 
+                <BotonGuardarOferta
+                    ofertaId={id}
+                    saved={!!isSaved}
+                    onChange={onToggleSaved}
                 />
             </div>
             <CardHeader className="pb-0">
@@ -99,7 +100,12 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
                     <Badge variant="secondary" className="rounded-full">{contract}</Badge>
                     <Badge variant="secondary" className="rounded-full">{department}</Badge>
                 </div> */}
-                <div className="flex gap-2 pt-1">
+                <div className="pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="min-w-0">
+                        <div className="w-full">
+                            <VerDetalleOfertaQuickView ofertaId={id} />
+                        </div>
+                    </div>
                     <Button
                         className="w-full"
                         onClick={handleApply}

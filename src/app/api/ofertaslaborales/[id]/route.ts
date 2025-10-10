@@ -13,13 +13,50 @@ export async function GET(request: Request, { params }: { params: { id: string }
         const { id } = await params
         const ofertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },
+            select: {
+                id: true,
+                puesto: true,
+                descripcionPuesto: true,
+                area: true,
+                nivelAcademico: true,
+                experienciaLaboral: true,
+                modalidad: true,
+                tipoTrabajo: true,
+                salario: true,
+                estado: true,
+                fechaCreacion: true,
+                empresa: { select: { nombre: true } },
+                ubicacionCiudadId: true,
+                ubicacionDepartamentoId: true,
+                ubicacionCiudad: { select: { nombre: true } },
+                ubicacionDepartamento: { select: { nombre: true } },
+            },
         })
 
         if (!ofertaLaboral) {
             return NextResponse.json({ message: "Oferta laboral no encontrada" }, { status: 404 })
         }
 
-        return NextResponse.json(ofertaLaboral)
+        const dto = {
+            id: ofertaLaboral.id,
+            puesto: ofertaLaboral.puesto,
+            descripcionPuesto: ofertaLaboral.descripcionPuesto,
+            area: ofertaLaboral.area,
+            nivelAcademico: ofertaLaboral.nivelAcademico,
+            experienciaLaboral: ofertaLaboral.experienciaLaboral,
+            modalidad: ofertaLaboral.modalidad,
+            tipoTrabajo: ofertaLaboral.tipoTrabajo,
+            salario: ofertaLaboral.salario,
+            estado: ofertaLaboral.estado,
+            fechaCreacion: ofertaLaboral.fechaCreacion?.toISOString?.() ?? ofertaLaboral.fechaCreacion,
+            empresa: ofertaLaboral.empresa?.nombre ?? "", // ← string
+            ubicacionCiudadId: ofertaLaboral.ubicacionCiudadId,
+            ubicacionDepartamentoId: ofertaLaboral.ubicacionDepartamentoId,
+            ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre ?? null,
+            ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre ?? null,
+        };
+
+        return NextResponse.json(dto)
     } catch (error) {
         console.error("Error al obtener oferta laboral:", error)
         return NextResponse.json({ message: "Error del servidor" }, { status: 500 })
@@ -48,7 +85,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             area: validatedData.area,
             ubicacionDepartamento: { connect: { id: validatedData.ubicacionDepartamentoId } },
             ubicacionCiudad: { connect: { id: validatedData.ubicacionCiudadId } },
-            empresa: validatedData.empresa,
+            //empresa: validatedData.empresa,
             nivelAcademico: validatedData.nivelAcademico,
             experienciaLaboral: validatedData.experienciaLaboral,
             tipoTrabajo: validatedData.tipoTrabajo,
