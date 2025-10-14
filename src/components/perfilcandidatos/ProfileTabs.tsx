@@ -78,7 +78,9 @@ function MetricsCard() {
         aplicadas: number;
         guardadas: number;
         entrevistas: number;
-        ofertas: number;
+        evaluaciones: number;
+        contratacion: number;
+        rechazada: number;
     });
 
     const { data, isLoading, error } = useSWR("/api/candidatos/metrics", fetcher, {
@@ -86,10 +88,12 @@ function MetricsCard() {
     });
 
     const metrics = [
-        { label: "Aplicadas", value: data?.aplicadas ?? 0 },
         { label: "Guardadas", value: data?.guardadas ?? 0 },
+        { label: "Aplicadas", value: data?.aplicadas ?? 0 },
         { label: "Entrevistas", value: data?.entrevistas ?? 0 },
-        { label: "Ofertas", value: data?.ofertas ?? 0 },
+        { label: "Evaluaciones", value: data?.evaluaciones ?? 0 },
+        { label: "Contrataciones", value: data?.contratacion ?? 0 },
+        { label: "Rechazadas", value: data?.rechazada ?? 0 },
     ];
 
     return (

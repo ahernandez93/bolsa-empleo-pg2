@@ -24,12 +24,14 @@ export async function GET() {
                 aplicadas: 0,
                 guardadas: 0,
                 entrevistas: 0,
-                ofertas: 0,
+                evaluaciones: 0,
+                contratacion: 0,
+                rechazada: 0,
             });
         }
 
         // ⚠️ Ajusta los valores de estado si tu modelo usa otros nombres
-        const [aplicadas, guardadas, entrevistas, ofertas] = await Promise.all([
+        const [aplicadas, guardadas, entrevistas, evaluaciones, contratacion, rechazada] = await Promise.all([
             prisma.postulacion.count({
                 where: { perfilCandidatoId: perfil.id },
             }),
@@ -40,11 +42,17 @@ export async function GET() {
                 where: { perfilCandidatoId: perfil.id, estado: "ENTREVISTA" },
             }),
             prisma.postulacion.count({
-                where: { perfilCandidatoId: perfil.id, estado: "SOLICITUD" },
+                where: { perfilCandidatoId: perfil.id, estado: "EVALUACIONES" },
+            }),
+            prisma.postulacion.count({
+                where: { perfilCandidatoId: perfil.id, estado: "CONTRATACION" },
+            }),
+            prisma.postulacion.count({
+                where: { perfilCandidatoId: perfil.id, estado: "RECHAZADA" },
             }),
         ]);
 
-        return NextResponse.json({ aplicadas, guardadas, entrevistas, ofertas });
+        return NextResponse.json({ aplicadas, guardadas, entrevistas, evaluaciones, contratacion, rechazada });
     } catch (e) {
         console.error("GET /api/candidatos/metrics error →", e);
         return NextResponse.json(

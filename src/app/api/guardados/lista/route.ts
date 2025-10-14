@@ -60,6 +60,7 @@ export async function GET(req: Request) {
                     select: {
                         id: true,
                         puesto: true,
+                        area: true,
                         empresa: {
                             select: {
                                 nombre: true,
@@ -87,6 +88,7 @@ export async function GET(req: Request) {
         const data = items.map((g) => ({
             id: g.oferta.id,
             puesto: g.oferta.puesto,
+            area: g.oferta.area,
             empresa: g.oferta.empresa?.nombre ?? "—",
             ubicacionCiudadDescripcion: g.oferta.ubicacionCiudad?.nombre ?? "",
             ubicacionDepartamentoDescripcion: g.oferta.ubicacionDepartamento?.nombre ?? "",

@@ -83,7 +83,9 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
                     {/* <Avatar className="h-8 w-8">
                         <AvatarFallback>{empresa[0]}</AvatarFallback>
                     </Avatar> */}
+                    
                     <div className="min-w-0">
+                        <div className="text-sm text-muted-foreground">{empresa}</div>
                         <CardTitle className="truncate text-lg">{puesto}</CardTitle>
                         <p className="truncate text-xs text-slate-500">{area}</p>
                     </div>

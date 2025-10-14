@@ -1,9 +1,12 @@
 import { getOFertasLaboralesAbiertas } from "../../actions/ofertas-actions";
 import OffersCatalog from "./OffersCatalog";
+import { auth } from "@/lib/auth/auth";
 
-const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas();
+export default async function OffersCatalogPage() {
+    const session = await auth();
+    const userId = session?.user?.id as string | undefined;
+    const ofertasLaboralesAbiertas = await getOFertasLaboralesAbiertas(userId);
 
-export default function OffersCatalogPage() {
     return (
         <OffersCatalog ofertasLaboralesAbiertas={ofertasLaboralesAbiertas} />
     );

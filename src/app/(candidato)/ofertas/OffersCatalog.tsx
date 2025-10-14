@@ -6,6 +6,7 @@ import { useSavedMap } from "@/hooks/use-saved-map";
 import { useSession } from "next-auth/react";
 import FiltersBar from "./FiltersBar";
 import PaginationBar from "./PaginationBar";
+import { Modalidad } from "@prisma/client";
 
 export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLaboralesAbiertas: JobCardProps[] }) {
 
@@ -16,19 +17,40 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
     const [query, setQuery] = useState("");
     const [category, setCategory] = useState<string>("");
     const [location, setLocation] = useState<string>("");
-    const [modality, setModality] = useState<string>("");
+    const [modality, setModality] = useState<Modalidad | "">("");
 
-    const ids = useMemo(() => ofertasLaboralesAbiertas.map(j => j.id), [ofertasLaboralesAbiertas]);
+    const areaOptions = useMemo(() => {
+        const set = new Set<string>();
+        for (const j of ofertasLaboralesAbiertas) if (j.area) set.add(j.area);
+        return Array.from(set).sort((a, b) => a.localeCompare(b));
+    }, [ofertasLaboralesAbiertas]);
+
+    const cityOptions = useMemo(() => {
+        const set = new Set<string>();
+        for (const j of ofertasLaboralesAbiertas) {
+            if (j.ubicacionCiudadDescripcion) set.add(j.ubicacionCiudadDescripcion);
+        }
+        return Array.from(set).sort((a, b) => a.localeCompare(b));
+    }, [ofertasLaboralesAbiertas]);
+
+    const modalityOptions = useMemo(() => {
+        const set = new Set<Modalidad>();
+        for (const j of ofertasLaboralesAbiertas) if (j.modalidad) set.add(j.modalidad);
+        return Array.from(set).sort();
+    }, [ofertasLaboralesAbiertas]);
+
+    const ids = useMemo(() => ofertasLaboralesAbiertas.map((j) => String(j.id)), [ofertasLaboralesAbiertas]);
     const { savedMap, mutate, isLoading } = useSavedMap(ids, userId);
 
     const filtered = useMemo(() => {
         return ofertasLaboralesAbiertas.filter((j) => {
-            const q = query.toLowerCase();
+            const q = query.toLowerCase().trim();
             const matchesQuery = !q ||
                 j.puesto.toLowerCase().includes(q) ||
                 j.empresa.toLowerCase().includes(q);
             const matchesCat = !category || j.area === category;
-            const matchesLoc = !location || j.ubicacionCiudadDescripcion?.toLowerCase().includes(location.toLowerCase());
+            const city = j.ubicacionCiudadDescripcion?.toLowerCase() ?? "";
+            const matchesLoc = !location || city === location.toLowerCase();
             const matchesMod = !modality || j.modalidad === modality;
             return matchesQuery && matchesCat && matchesLoc && matchesMod;
         });
@@ -46,6 +68,9 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
                     onLocation={setLocation}
                     modality={modality}
                     onModality={setModality}
+                    areaOptions={areaOptions}
+                    cityOptions={cityOptions}
+                    modalityOptions={modalityOptions}
                 />}
 
                 {/* Chips rápidos */}
