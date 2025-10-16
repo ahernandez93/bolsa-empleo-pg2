@@ -66,7 +66,7 @@ export function ListEmpleados({ empleados, departamentos, cargos }: ListEmpleado
 
     return (
         <>
-            <DataTable columns={columns} data={empleados} departamentos={departamentos} />
+            <DataTable columns={columns} data={empleados} departamentos={departamentos} cargos={cargos} />
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
                 <DialogContent className="sm:max-w-[625px]">

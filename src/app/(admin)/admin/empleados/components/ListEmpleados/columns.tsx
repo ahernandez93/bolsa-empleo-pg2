@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
+import { arrayIncludes } from "@/helpers/filters"
 
 export type EmpleadoConDatos = {
   id: string
@@ -46,7 +47,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Nombre
           <SortIcon sort={sort} />
@@ -65,7 +66,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Correo
           <SortIcon sort={sort} />
@@ -76,23 +77,29 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
   {
     accessorKey: "departamentodescripcion",
     header: "Departamento",
+    filterFn: arrayIncludes,
   },
   {
     accessorKey: "cargodescripcion",
     header: "Cargo",
+    filterFn: arrayIncludes,
   },
   {
     accessorKey: "rol",
     header: "Rol",
+    filterFn: arrayIncludes,
   },
   {
-    accessorKey: "activo",
+    id: "activo",
+    accessorFn: (row) => String(row.activo),
     header: "Estado",
-    cell: ({ row }) => (
-      row.original.activo
+    filterFn: arrayIncludes,
+    cell: ({ row }) => {
+      const isActive = (row.original as EmpleadoConDatos).activo;
+      return isActive
         ? <Badge variant="default">Activo</Badge>
-        : <Badge variant="destructive">Inactivo</Badge>
-    ),
+        : <Badge variant="destructive">Inactivo</Badge>;
+    },
   },
   {
     accessorKey: "createdAt",
@@ -102,7 +109,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Emp
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Creado
           <SortIcon sort={sort} />

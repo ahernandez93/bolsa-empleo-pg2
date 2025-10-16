@@ -1,19 +1,21 @@
 "use client"
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, SortingState, } from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, getFacetedRowModel, getFacetedUniqueValues, SortingState, } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { DataTableToolbar } from "./data-table-toolbar"
 import { useState } from "react"
 import { DepartamentoItem } from "@/app/actions/departamentos-actions"
+import { CargoItem } from "@/app/actions/cargos-actions"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   departamentos: DepartamentoItem[];
+  cargos: CargoItem[];
 }
 
-export function DataTable<TData, TValue>({ columns, data, departamentos }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data, departamentos, cargos }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState([])
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -26,6 +28,8 @@ export function DataTable<TData, TValue>({ columns, data, departamentos }: DataT
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       globalFilter
@@ -35,7 +39,7 @@ export function DataTable<TData, TValue>({ columns, data, departamentos }: DataT
 
   return (
     <div className="items-center p-4 bg-background shadow-lg rounded-lg mt-4 border">
-      <DataTableToolbar<TData> table={table} departamentos={departamentos} />
+      <DataTableToolbar<TData> table={table} departamentos={departamentos} cargos={cargos} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
