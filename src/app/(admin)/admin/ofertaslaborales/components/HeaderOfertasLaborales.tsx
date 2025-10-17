@@ -64,18 +64,20 @@ export function HeaderOfertasLaborales() {
                                         </Button>
                                     </DialogTrigger>
 
-                                    <DialogContent className="sm:max-w-[625px]">
-                                        <DialogHeader>
+                                    <DialogContent className="sm:max-w-4xl p-0 bg-background border shadow-lg">
+                                        <DialogHeader className="px-6 pt-6">
                                             <DialogTitle>Nueva Oferta Laboral</DialogTitle>
                                             <DialogDescription>
                                                 Ingrese los datos de la nueva oferta laboral
                                             </DialogDescription>
                                         </DialogHeader>
 
-                                        <FormCreateOferta
-                                            setOpenModalCreate={setOpenModalCreate}
-                                            isEditMode={false}
-                                        />
+                                        <div className="px-6 pb-6 max-h-[80vh] overflow-y-auto">
+                                            <FormCreateOferta
+                                                setOpenModalCreate={setOpenModalCreate}
+                                                isEditMode={false}
+                                            />
+                                        </div>
                                     </DialogContent>
                                 </Dialog>
                             </span>

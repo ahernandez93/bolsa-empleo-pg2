@@ -66,8 +66,8 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
             <DataTable columns={columns} data={ofertasLaborales} />
 
             <Dialog open={openModalCreate} onOpenChange={setOpenModalCreate}>
-                <DialogContent className="sm:max-w-[625px]">
-                    <DialogHeader>
+                <DialogContent className="sm:max-w-4xl p-0 bg-background border shadow-lg">
+                    <DialogHeader className="px-6 pt-6">
                         <DialogTitle>
                             {editingOferta ? "Editar Oferta Laboral" : "Nueva Oferta Laboral"}
                         </DialogTitle>
@@ -76,11 +76,13 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <FormCreateOferta
-                        initialData={editingOferta}
-                        setOpenModalCreate={setOpenModalCreate}
-                        isEditMode={Boolean(editingOferta)}
-                    />
+                    <div className="px-6 pb-6 max-h-[80vh] overflow-y-auto">
+                        <FormCreateOferta
+                            initialData={editingOferta}
+                            setOpenModalCreate={setOpenModalCreate}
+                            isEditMode={Boolean(editingOferta)}
+                        />
+                    </div>
                 </DialogContent>
             </Dialog>
         </>
