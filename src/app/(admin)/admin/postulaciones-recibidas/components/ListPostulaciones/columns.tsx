@@ -1,11 +1,11 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 import { EstadoSelect } from "./EstadoSelect"
+import { arrayIncludes } from "@/helpers/filters"
 
 export type PostulacionConDatos = {
   id: string
@@ -44,7 +44,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Nombre
           <SortIcon sort={sort} />
@@ -63,13 +63,14 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Puesto
           <SortIcon sort={sort} />
         </Button>
       )
     },
+    filterFn: arrayIncludes,
     cell: ({ row }) => (
       <span className="font-medium">{row.original.ofertaPuesto}</span>
     ),
@@ -82,7 +83,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Creado
           <SortIcon sort={sort} />
@@ -92,20 +93,27 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
     cell: ({ row }) => format(new Date(row.original.fechaPostulacion), "dd/MM/yyyy"),
   },
   {
-    accessorKey: "ofertaUbicacionCiudad",
+    id: "ubicacion", // 👈 columna sintética para faceted
+    accessorFn: (row) => {
+      const c = row.ofertaUbicacionCiudad ?? ""
+      const d = row.ofertaUbicacionDepartamento ?? ""
+      const combo = `${c}${c && d ? " - " : ""}${d}`.trim()
+      return combo
+    },
     header: ({ column }) => {
       const sort = column.getIsSorted() ?? false
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Ubicación
           <SortIcon sort={sort} />
         </Button>
       )
     },
+    filterFn: arrayIncludes,
     cell: ({ row }) => (
       <span className="font-medium">{row.original.ofertaUbicacionCiudad} - {row.original.ofertaUbicacionDepartamento}</span>
     ),
@@ -113,6 +121,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
   {
     accessorKey: "estado",
     header: "Estado",
+    filterFn: arrayIncludes,
     cell: ({ row }) => {
       const p = row.original
       return (

@@ -2,11 +2,10 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
+import { X, MapPin, Briefcase, ClipboardList, CalendarClock, ClipboardCheck, UserCheck, XCircle } from "lucide-react"
 import { Table } from "@tanstack/react-table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter"
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
@@ -24,6 +23,35 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 
     const isFiltered = table.getState().columnFilters.length > 0
 
+    const makeFacetOptions = useCallback(
+        (columnId: string, Icon: React.ElementType) => {
+            const values = new Set<string>()
+            table.getPreFilteredRowModel().flatRows.forEach((r) => {
+                const v = String(r.getValue(columnId) ?? "").trim()
+                if (v) values.add(v)
+            })
+            return Array.from(values)
+                .sort((a, b) => a.localeCompare(b))
+                .map((v) => ({ value: v, label: v, icon: Icon }))
+        },
+        [table]
+    )
+
+    const puestoOptions = useMemo(() => makeFacetOptions("ofertaPuesto", Briefcase), [makeFacetOptions])
+
+    const ubicacionOptions = useMemo(() => makeFacetOptions("ubicacion", MapPin), [makeFacetOptions])
+
+    const estadoOptions = useMemo(
+        () => [
+            { value: "SOLICITUD", label: "Solicitud", icon: ClipboardList },
+            { value: "ENTREVISTA", label: "Entrevista", icon: CalendarClock },
+            { value: "EVALUACIONES", label: "Evaluaciones", icon: ClipboardCheck },
+            { value: "CONTRATACION", label: "Contratación", icon: UserCheck },
+            { value: "RECHAZADA", label: "Rechazada", icon: XCircle },
+        ],
+        []
+    )
+
     return (
         <div className="flex items-center gap-4 py-4">
             <Input
@@ -33,29 +61,23 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 className="max-w-xs"
             />
 
-            {/* <Label htmlFor="departamento">Departamento</Label>
+            <DataTableFacetedFilter
+                column={table.getColumn("ofertaPuesto")}
+                title="Puesto"
+                options={puestoOptions}
+            />
 
-            <Select
-                onValueChange={(value) =>
-                    table.getColumn("departamentodescripcion")?.setFilterValue(value === "all" ? "" : value)
-                }
-                defaultValue="all"
-            >
-                <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filtrar por departamento" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {departamentos.map((dep) => (
-                        <SelectItem 
-                            key={dep.id} 
-                            value={dep.descripcion.toString()}
-                        >
-                            {dep.descripcion}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select> */}
+            <DataTableFacetedFilter
+                column={table.getColumn("ubicacion")}
+                title="Ubicación"
+                options={ubicacionOptions}
+            />
+
+            <DataTableFacetedFilter
+                column={table.getColumn("estado")}
+                title="Estado"
+                options={estadoOptions}
+            />
 
             {isFiltered && (
                 <Button

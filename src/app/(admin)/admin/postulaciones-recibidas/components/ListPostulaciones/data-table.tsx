@@ -1,6 +1,6 @@
 "use client"
 
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, SortingState, } from "@tanstack/react-table"
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel, getFilteredRowModel, getSortedRowModel, SortingState, getFacetedRowModel, getFacetedUniqueValues } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { DataTableToolbar } from "./data-table-toolbar"
@@ -24,6 +24,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
     state: {
       sorting,
       globalFilter
@@ -33,7 +35,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 
   return (
     <div className="items-center p-4 bg-background shadow-lg rounded-lg mt-4 border">
-      <DataTableToolbar<TData> table={table}/>
+      <DataTableToolbar<TData> table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>

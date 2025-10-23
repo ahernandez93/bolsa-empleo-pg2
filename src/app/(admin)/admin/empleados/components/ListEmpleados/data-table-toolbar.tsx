@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { Table } from "@tanstack/react-table"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Label } from "@/components/ui/label"
 import { useState, useEffect, useMemo } from "react"
 import { DepartamentoItem } from "@/app/actions/departamentos-actions"
 import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter"
@@ -74,30 +72,6 @@ export function DataTableToolbar<TData>({ table, departamentos, cargos }: DataTa
                 onChange={(event) => setGlobalFilter(event.target.value)}
                 className="max-w-xs"
             />
-            {/* <div className="flex items-center gap-2">
-                <Label htmlFor="departamento">Departamento</Label>
-                <Select
-                    onValueChange={(value) =>
-                        table.getColumn("departamentodescripcion")?.setFilterValue(value === "all" ? "" : value)
-                    }
-                    defaultValue="all"
-                >
-                    <SelectTrigger className="w-[150px]">
-                        <SelectValue placeholder="Filtrar por departamento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Todos</SelectItem>
-                        {departamentos.map((dep) => (
-                            <SelectItem
-                                key={dep.id}
-                                value={dep.descripcion.toString()}
-                            >
-                                {dep.descripcion}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div> */}
 
             <DataTableFacetedFilter
                 column={table.getColumn("departamentodescripcion")}
