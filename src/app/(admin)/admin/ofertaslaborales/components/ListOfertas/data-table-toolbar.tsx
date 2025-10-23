@@ -66,21 +66,18 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 className="max-w-xs"
             />
 
-            {/* Área */}
             <DataTableFacetedFilter
                 column={table.getColumn("area")}
                 title="Área"
                 options={areaOptions}
             />
 
-            {/* Ubicación (Departamento - Ciudad) */}
             <DataTableFacetedFilter
                 column={table.getColumn("ubicacion")}
                 title="Ubicación"
                 options={ubicacionOptions}
             />
 
-            {/* Agregado por */}
             <DataTableFacetedFilter
                 column={table.getColumn("agregadoPorUsuario")}
                 title="Agregado por"

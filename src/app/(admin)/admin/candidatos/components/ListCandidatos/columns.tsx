@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Trash2, ArrowUp, ArrowDown } from "lucide-react"
+import { arrayIncludes } from "@/helpers/filters"
 
 export type CandidatoConDatos = {
   id: string
@@ -42,7 +43,7 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Nombre
           <SortIcon sort={sort} />
@@ -61,7 +62,7 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Correo
           <SortIcon sort={sort} />
@@ -70,8 +71,27 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
     },
   },
   {
-    accessorKey: "ubicacionDepartamento",
-    header: "Ubicación",
+    id: "ubicacion",
+    accessorFn: (row: CandidatoConDatos) => {
+      const d = row.ubicacionDepartamento ?? ""
+      const c = row.ubicacionCiudad ?? ""
+      const combo = `${d}${d && c ? " - " : ""}${c}`
+      return combo.trim()
+    },
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(sort === "asc")}
+          className="data-[state=open]:bg-accent -ml-3 h-8"
+        >
+          Ubicación
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
+    filterFn: arrayIncludes,
     cell: ({ row }) => {
       const ubicacionDepartamento = row.original.ubicacionDepartamento
       const ubicacionCiudad = row.original.ubicacionCiudad
@@ -94,7 +114,7 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Creado
           <SortIcon sort={sort} />
