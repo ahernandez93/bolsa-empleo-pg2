@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { X } from "lucide-react"
 import { Table } from "@tanstack/react-table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
+import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter"
+import { Tag, MapPin, UserRound, Hourglass, Megaphone, CircleSlash2, Archive } from "lucide-react"
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
@@ -24,8 +24,41 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 
     const isFiltered = table.getState().columnFilters.length > 0
 
+    const makeFacetOptions = useCallback(
+        (columnId: string, Icon: React.ElementType) => {
+            const values = new Set<string>()
+            table.getPreFilteredRowModel().flatRows.forEach((r) => {
+                const v = String(r.getValue(columnId) ?? "")
+                if (v.trim()) values.add(v.trim())
+            })
+            return Array.from(values)
+                .sort((a, b) => a.localeCompare(b))
+                .map((v) => ({ label: v, value: v, icon: Icon }))
+        },
+        [table]
+    )
+
+    const areaOptions = useMemo(() => makeFacetOptions("area", Tag), [makeFacetOptions])
+
+    const ubicacionOptions = useMemo(() => makeFacetOptions("ubicacion", MapPin), [makeFacetOptions])
+
+    const agregadoPorOptions = useMemo(
+        () => makeFacetOptions("agregadoPorUsuario", UserRound),
+        [makeFacetOptions]
+    )
+
+    const estadoOptions = useMemo(
+        () => [
+            { value: "PENDIENTE", label: "Pendiente", icon: Hourglass },
+            { value: "ABIERTA", label: "Abierta", icon: Megaphone },
+            { value: "RECHAZADA", label: "Rechazada", icon: CircleSlash2 },
+            { value: "CERRADA", label: "Cerrada", icon: Archive },
+        ],
+        []
+    )
+
     return (
-        <div className="flex items-center gap-4 py-4">
+        <div className="flex flex-wrap items-center gap-3 py-4">
             <Input
                 placeholder="Buscar en cualquier columna..."
                 value={globalFilter}
@@ -33,29 +66,32 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 className="max-w-xs"
             />
 
-            {/* <Label htmlFor="departamento">Departamento</Label>
+            {/* Área */}
+            <DataTableFacetedFilter
+                column={table.getColumn("area")}
+                title="Área"
+                options={areaOptions}
+            />
 
-            <Select
-                onValueChange={(value) =>
-                    table.getColumn("departamentodescripcion")?.setFilterValue(value === "all" ? "" : value)
-                }
-                defaultValue="all"
-            >
-                <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Filtrar por departamento" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {departamentos.map((dep) => (
-                        <SelectItem 
-                            key={dep.id} 
-                            value={dep.descripcion.toString()}
-                        >
-                            {dep.descripcion}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select> */}
+            {/* Ubicación (Departamento - Ciudad) */}
+            <DataTableFacetedFilter
+                column={table.getColumn("ubicacion")}
+                title="Ubicación"
+                options={ubicacionOptions}
+            />
+
+            {/* Agregado por */}
+            <DataTableFacetedFilter
+                column={table.getColumn("agregadoPorUsuario")}
+                title="Agregado por"
+                options={agregadoPorOptions}
+            />
+
+            <DataTableFacetedFilter
+                column={table.getColumn("estado")}
+                title="Estado"
+                options={estadoOptions}
+            />
 
             {isFiltered && (
                 <Button

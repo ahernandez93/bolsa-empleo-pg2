@@ -2,9 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
+import { arrayIncludes } from "@/helpers/filters"
 
 export type OfertaLaboralConDatos = {
   id: string
@@ -47,7 +47,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Puesto
           <SortIcon sort={sort} />
@@ -66,13 +66,14 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Area
           <SortIcon sort={sort} />
         </Button>
       )
     },
+    filterFn: arrayIncludes,
   },
   {
     accessorKey: "empresaId",
@@ -82,20 +83,27 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
     ),
   },
   {
-    accessorKey: "ubicacionDepartamentoDescripcion",
+    id: "ubicacion",
+    accessorFn: (row: OfertaLaboralConDatos) => {
+      const d = row.ubicacionDepartamentoDescripcion ?? ""
+      const c = row.ubicacionCiudadDescripcion ?? ""
+      const combo = `${d}${d && c ? " - " : ""}${c}`
+      return combo.trim()
+    },
     header: ({ column }) => {
       const sort = column.getIsSorted() ?? false
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(sort === "asc")}
-          className="flex items-center gap-0"
+          className="data-[state=open]:bg-accent -ml-3 h-8"
         >
           Ubicación
           <SortIcon sort={sort} />
         </Button>
       )
     },
+    filterFn: arrayIncludes,
     cell: ({ row }) => (
       <span className="font-medium">{row.original.ubicacionDepartamentoDescripcion} - {row.original.ubicacionCiudadDescripcion}</span>
     ),
@@ -103,6 +111,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
   {
     accessorKey: "estado",
     header: "Estado",
+    filterFn: arrayIncludes,
     cell: ({ row }) => {
       if (row.original.estado === "ABIERTA") {
         return <Badge variant="default">Abierta</Badge>
@@ -118,6 +127,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
   {
     accessorKey: "agregadoPorUsuario",
     header: "Agregado por",
+    filterFn: arrayIncludes,
   },
   {
     id: "actions",

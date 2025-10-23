@@ -8,7 +8,7 @@ import { Table } from "@tanstack/react-table"
 // import { Label } from "@/components/ui/label"
 import { useState, useEffect, useMemo } from "react"
 import { DepartamentoItem } from "@/app/actions/departamentos-actions"
-import { DataTableFacetedFilter } from "./data-table-faceted-filter"
+import { DataTableFacetedFilter } from "@/components/data-table-faceted-filter"
 import { ShieldCheck, SquareCheck, Square, Users2, IdCard } from "lucide-react"
 import { CargoItem } from "@/app/actions/cargos-actions"
 
