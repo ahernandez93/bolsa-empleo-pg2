@@ -1,7 +1,7 @@
 import Credentials from "next-auth/providers/credentials";
 import { type NextAuthConfig } from "next-auth"
-// import { prisma } from "@/lib/prisma";
-// import bcrypt from "bcryptjs";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export const authOptions = {
     providers: [
@@ -22,40 +22,38 @@ export const authOptions = {
                 const { email, password } = credentials;
 
                 try {
-                    const user = null;
-                    // const user = await prisma.usuario.findUnique({
-                    //     where: { email: email as string },
-                    //     include: {
-                    //         persona: true
-                    //     }
-                    // });
+                    const user = await prisma.usuario.findUnique({
+                        where: { email: email as string },
+                        include: {
+                            persona: true
+                        }
+                    });
 
                     if (!user) {
                         console.error("User not found:", email);
                         throw new Error("Usuario no encontrado");
                     }
 
-                    // if (!user.activo) {
-                    //     console.error("User is inactive:", email);
-                    //     throw new Error("Usuario inactivo");
-                    // }
+                    if (!user.activo) {
+                        console.error("User is inactive:", email);
+                        throw new Error("Usuario inactivo");
+                    }
 
-                    // const isPasswordValid = await bcrypt.compare(password as string, user.passwordHash as string);
-                    // if (!isPasswordValid) {
-                    //     console.error("Invalid password for user:", email);
-                    //     throw new Error("Contraseña incorrecta");
-                    // }
+                    const isPasswordValid = await bcrypt.compare(password as string, user.passwordHash as string);
+                    if (!isPasswordValid) {
+                        console.error("Invalid password for user:", email);
+                        throw new Error("Contraseña incorrecta");
+                    }
 
-                    // console.log("User authenticated successfully:", user.email);
-                    // console.log("Authorize user.empresaId:", user.empresaId);
+                    console.log("User authenticated successfully:", user.email);
+                    console.log("Authorize user.empresaId:", user.empresaId);
 
                     return {
-
-                        // id: user.id,
-                        // email: user.email,
-                        // name: user.persona ? `${user.persona.nombre} ${user.persona.apellido}` : user.email,
-                        // role: user.rol,
-                        // empresaId: user.empresaId ?? null
+                        id: user.id,
+                        email: user.email,
+                        name: user.persona ? `${user.persona.nombre} ${user.persona.apellido}` : user.email,
+                        role: user.rol,
+                        empresaId: user.empresaId ?? null
                     };
                 } catch (error) {
                     console.error("Database error during authentication:", error);
