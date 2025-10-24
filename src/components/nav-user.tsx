@@ -1,6 +1,6 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, LogOut } from "lucide-react"
+import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -71,10 +71,6 @@ export function NavUser({ session }: { session: Session | null }) {
                   Perfil
                 </DropdownMenuItem>
               </Link>
-              {/* <DropdownMenuItem>
-                <Bell />
-                Notificaciones
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={closeSession}>

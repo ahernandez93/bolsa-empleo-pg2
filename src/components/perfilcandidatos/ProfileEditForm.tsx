@@ -21,7 +21,7 @@ import { mapPerfilToFormValues } from "@/lib/mappers/perfilCandidato";
 
 type FormInput = z.input<typeof perfilCandidatoSchema>;
 type FormOutput = z.output<typeof perfilCandidatoSchema>;
-type Props = { 
+type Props = {
     initialData: Partial<FormInput>;
     onSaved?: (updated: FormOutput) => void;
 };
@@ -67,7 +67,7 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
         mode: "onChange",
     });
 
-    const { data, isLoading, mutate } = useSWR<PerfilCandidatoFormValues>(
+    const { data, isLoading } = useSWR<PerfilCandidatoFormValues>(
         "/api/candidatos/perfil",
         fetcherProfile,
         { revalidateOnFocus: false }
@@ -103,7 +103,6 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
             const res = await axios.put(`/api/candidatos/perfil`, values);
             const mapped = mapPerfilToFormValues(res.data);
             onSaved?.(mapped);
-            // mutate(mapped, false);
             toast.success("Perfil actualizado");
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
@@ -120,12 +119,11 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
 
         const oldUrl = form.getValues("cvUrl");
         if (oldUrl) {
-            const oldKey = oldUrl.split("/").pop(); // más robusto que replace
+            const oldKey = oldUrl.split("/").pop();
             if (oldKey) {
                 try {
                     await axios.delete(`/api/candidatos/cv?key=${encodeURIComponent(oldKey)}`);
                 } catch {
-                    // ignora errores al borrar el antiguo
                 }
             }
         }
@@ -179,7 +177,7 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
             form.setValue("cvMimeType", undefined, { shouldDirty: true });
             form.setValue("cvSize", undefined, { shouldDirty: true });
             toast.success("CV eliminado");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             console.error("Eliminar CV →", e?.response?.data ?? e);
             toast.error(e?.response?.data?.message ?? "No se pudo eliminar el CV");

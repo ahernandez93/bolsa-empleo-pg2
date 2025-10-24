@@ -3,8 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { Mail, Phone, MapPin, User, Briefcase, GraduationCap, BadgeCheck, IdCard, CheckCircle2, Plane, Home, Car, FileText } from "lucide-react";
 import type { PerfilCandidatoFormValues } from "@/lib/schemas/perfilCandidatoSchema";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 
 export default function ProfileView({ data }: { data: PerfilCandidatoFormValues }) {

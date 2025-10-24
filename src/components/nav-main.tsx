@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar"
+import { SidebarGroup, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from "@/components/ui/sidebar"
 import type { NavItem } from '@/lib/navigation-data'
 
 export function NavMain({
@@ -17,7 +17,6 @@ export function NavMain({
 
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>Plataforma</SidebarGroupLabel> */}
       <SidebarMenu>
         {items.map((item) => {
           const isMainActive = pathname === item.url

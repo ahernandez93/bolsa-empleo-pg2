@@ -1,10 +1,13 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 
-export async function GET(request: Request, { params }: { params: { id: string } }
-) {
+export const runtime = "nodejs";
+
+type Params = { id: string };
+
+export async function GET(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const candidato = await prisma.perfilCandidato.findUnique({
             where: { id },
             include: {
@@ -27,9 +30,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
 
         const candidato = await prisma.perfilCandidato.findUnique({
             where: { id },

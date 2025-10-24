@@ -2,11 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { MapPin, Building2, Briefcase } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export type EstadoPostulacion =

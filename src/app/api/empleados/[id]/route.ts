@@ -6,10 +6,13 @@ import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { RolUsuario } from "@prisma/client";
 
-export async function GET(request: Request, { params }: { params: { id: string } }
-) {
+export const runtime = "nodejs";
+
+type Params = { id: string };
+
+export async function GET(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const empleado = await prisma.empleado.findUnique({
             where: { id },
             include: {
@@ -32,9 +35,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const body = await request.json()
         const validatedData = empleadoUpdateSchema.parse(body)
 
@@ -138,9 +141,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
 
         const empleado = await prisma.empleado.findUnique({
             where: { id },

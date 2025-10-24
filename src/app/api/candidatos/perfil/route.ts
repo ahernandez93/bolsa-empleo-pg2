@@ -68,7 +68,7 @@ const educacionItem = z.object({
     nivelAcademico: z.string().optional(),
 });
 
-export const perfilUpdateSchema = z.object({
+const perfilUpdateSchema = z.object({
     // Persona + Usuario
     nombre: z.string().min(1).optional(),
     apellido: z.string().min(1).optional(),

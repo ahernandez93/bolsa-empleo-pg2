@@ -26,7 +26,7 @@ const COPIA_POR_ESTADO: Record<Estado, {
             "Prepara ejemplos concretos de tu experiencia.",
             "Repasa los requisitos del puesto.",
         ],
-        cta: { label: "Ver detalles", href: `${process.env.APP_PUBLIC_URL ?? ""}/mi-perfil/postulaciones` },
+        cta: { label: "Ver detalles", href: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/mi-perfil/postulaciones` },
     },
     EVALUACIONES: {
         titulo: "Estás en etapa de evaluaciones",
@@ -35,7 +35,7 @@ const COPIA_POR_ESTADO: Record<Estado, {
             "Asegúrate de tener una conexión estable.",
             "Lee con atención cada ejercicio.",
         ],
-        cta: { label: "Ir a mis evaluaciones", href: `${process.env.APP_PUBLIC_URL ?? ""}/evaluaciones` },
+        cta: { label: "Ir a mis evaluaciones", href: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/evaluaciones` },
     },
     CONTRATACION: {
         titulo: "¡Buenas noticias! Estás en contratación",
@@ -52,7 +52,7 @@ const COPIA_POR_ESTADO: Record<Estado, {
             "Sigue postulando a puestos afines.",
             "Actualiza tu perfil para destacar tus fortalezas.",
         ],
-        cta: { label: "Explorar nuevas vacantes", href: `${process.env.APP_PUBLIC_URL ?? ""}/ofertas` },
+        cta: { label: "Explorar nuevas vacantes", href: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/ofertas` },
     },
 }
 

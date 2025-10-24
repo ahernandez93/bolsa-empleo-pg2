@@ -4,10 +4,13 @@ import { NextResponse } from "next/server"
 import z from "zod"
 import { Prisma } from "@prisma/client";
 
-export async function GET(request: Request, { params }: { params: { id: string } }
-) {
+export const runtime = "nodejs";
+
+type Params = { id: string };
+
+export async function GET(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const cargo = await prisma.cargo.findUnique({
             where: { id: parseInt(id) },
         })
@@ -23,9 +26,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const body = await request.json()
         const validatedData = cargoSchema.parse(body)
 
@@ -72,9 +75,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
 
         const cargo = await prisma.cargo.findUnique({
             where: { id: parseInt(id) },

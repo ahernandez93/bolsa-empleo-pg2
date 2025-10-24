@@ -7,11 +7,13 @@ import { sendEstadoPostulacionEmail } from "@/lib/mailer"
 
 export const runtime = "nodejs"
 
+type Params = { id: string };
+
 // Debe coincidir con tu enum en Prisma (incluye RETIRADA si lo agregaste)
 const EstadoEnum = z.enum(["SOLICITUD", "ENTREVISTA", "EVALUACIONES", "CONTRATACION", "RECHAZADA"])
 const BodySchema = z.object({ estado: EstadoEnum })
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
     try {
         const session = await auth()
         if (!session?.user) {
@@ -24,17 +26,17 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         })
 
         if (!user || !user.activo) {
-            return { ok: false, status: 403 as const, message: "No autorizado" }
+            return NextResponse.json({ message: "No autorizado" }, { status: 403 })
         }
 
         if (!["ADMIN", "RECLUTADOR"].includes(user.rol as "ADMIN" | "RECLUTADOR")) {
-            return { ok: false, status: 403 as const, message: "No autorizado" }
+            return NextResponse.json({ message: "No autorizado" }, { status: 403 })
         }
 
         const json = await req.json()
         const { estado } = BodySchema.parse(json)
 
-        const { id } = await params
+        const { id } = await ctx.params
 
         const updated = await prisma.postulacion.update({
             where: { id },

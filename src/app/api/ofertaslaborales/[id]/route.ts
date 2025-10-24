@@ -6,11 +6,13 @@ import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth/auth";
 
 export const dynamic = 'force-dynamic';
+export const runtime = "nodejs";
 
-export async function GET(request: Request, { params }: { params: { id: string } }
-) {
+type Params = { id: string };
+
+export async function GET(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const ofertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },
             select: {
@@ -63,9 +65,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
         const session = await auth();
         const actualizadoPorId = session?.user?.id;
         const body = await request.json()
@@ -126,9 +128,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, ctx : { params: Promise<Params> }) {
     try {
-        const { id } = await params
+        const { id } = await ctx.params
 
         const ofertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },

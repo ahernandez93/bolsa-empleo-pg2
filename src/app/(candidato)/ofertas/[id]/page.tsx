@@ -1,5 +1,9 @@
 import OfertaDetailClient from "./OfertaDetailClient";
+export const runtime = "nodejs";
 
-export default function OfertaDetailPage({ params }: { params: { id: string } }) {
-    return <OfertaDetailClient id={params.id} />;
+type Params = { id: string };
+
+export default async function OfertaDetailPage({ params }: { params: Promise<Params>}) {
+    const { id } = await Promise.resolve(params);
+    return <OfertaDetailClient id={id} />;
 }
