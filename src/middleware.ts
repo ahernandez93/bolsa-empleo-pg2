@@ -1,9 +1,8 @@
-// import NextAuth from "next-auth";
+import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
-// import { authOptions } from "./lib/auth/authOptions";
-import { authEdge } from "@/lib/auth/auth-edge";
+import { authOptions } from "./lib/auth/authOptions";
 
-// const { auth: middleware } = NextAuth(authOptions);
+const { auth: middleware } = NextAuth(authOptions);
 
 const PUBLIC_EXACT = [
   "/login", // Login candidatos (raíz)
@@ -29,7 +28,7 @@ const PUBLIC_API_PREFIXES_GET = [
   "/api/ofertas",    // /api/ofertas y /api/ofertas/[id]
 ];
 
-export default authEdge((req) => {
+export default middleware((req) => {
   const { nextUrl, auth } = req;
   const pathname = nextUrl.pathname;
   const isLoggedIn = !!auth?.user;
