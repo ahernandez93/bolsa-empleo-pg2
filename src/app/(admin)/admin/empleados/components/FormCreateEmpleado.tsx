@@ -36,16 +36,16 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
     const schema = isEditMode ? empleadoUpdateSchema : empleadoSchema;
 
     const defaultValues = initialData ? {
-        nombre: initialData.usuario.persona.nombre,
-        apellido: initialData.usuario.persona.apellido,
-        telefono: initialData.usuario.persona.telefono || "",
-        direccion: initialData.usuario.persona.direccion || "",
-        fechaNacimiento: initialData.usuario.persona.fechaNacimiento?.split("T")[0] || "",
-        email: initialData.usuario.email,
+        nombre: initialData.usuario.persona.nombre ?? "",
+        apellido: initialData.usuario.persona.apellido ?? "",
+        telefono: initialData.usuario.persona.telefono ?? "",
+        direccion: initialData.usuario.persona.direccion ?? "",
+        fechaNacimiento: initialData.usuario.persona.fechaNacimiento?.split("T")[0] ?? "",
+        email: initialData.usuario.email ?? "",
         password: "",
         rol: initialData.usuario.rol,
-        departamentoId: initialData.departamentoId.toString(),
-        cargoId: initialData.cargoId.toString(),
+        departamentoId: initialData.departamentoId != null ? String(initialData.departamentoId) : undefined,
+        cargoId: initialData.cargoId != null ? String(initialData.cargoId) : undefined,
         activo: initialData.usuario?.activo,
     } : {
         nombre: "",

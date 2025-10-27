@@ -168,16 +168,16 @@ model Usuario {
 model Empleado {
   id             String   @id @default(uuid())
   usuarioId      String   @unique
-  departamentoId Int
-  cargoId        Int
+  departamentoId Int?
+  cargoId        Int?
   empresaId      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   // Relaciones
   usuario      Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  departamento Departamento @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
-  cargo        Cargo        @relation(fields: [cargoId], references: [id], onDelete: Restrict)
+  departamento Departamento? @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
+  cargo        Cargo?        @relation(fields: [cargoId], references: [id], onDelete: Restrict)
   empresa      Empresa?     @relation(fields: [empresaId], references: [id], onDelete: SetNull)
 
   @@index([empresaId])

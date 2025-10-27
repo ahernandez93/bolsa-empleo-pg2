@@ -3,8 +3,8 @@ import { OfertaLaboral } from "@prisma/client";
 export type EmpleadoCompleto = {
     id: string
     usuarioId: string
-    departamentoId: number
-    cargoId: number
+    departamentoId: number | null
+    cargoId: number | null
     createdAt: string
     updatedAt: string
     usuario: {

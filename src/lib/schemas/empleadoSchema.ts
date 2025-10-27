@@ -10,8 +10,8 @@ const schemaBase = {
   fechaNacimiento: z.string().optional(),
   email: z.string().min(1, "El email es requerido").email("Email inválido"),
   rol: z.string().min(1, "El rol es requerido").refine((v) => (ROLES as readonly string[]).includes(v), { message: "Rol inválido" }),
-  departamentoId: z.string(),
-  cargoId: z.string(),
+  departamentoId: z.string().min(1, "El departamento es requerido"),
+  cargoId: z.string().min(1, "El cargo es requerido"),
   activo: z.boolean().optional(),
 };
 

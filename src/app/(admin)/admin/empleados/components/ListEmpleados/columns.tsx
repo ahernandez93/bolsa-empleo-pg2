@@ -13,10 +13,10 @@ export type EmpleadoConDatos = {
   apellido: string
   email: string
   rol: string
-  departamentoId: number
-  departamentodescripcion: string
-  cargoId: number
-  cargodescripcion: string
+  departamentoId: number | null
+  departamentodescripcion: string | undefined
+  cargoId: number | null
+  cargodescripcion: string | undefined
   activo: boolean
   createdAt: string
 }

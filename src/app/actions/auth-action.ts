@@ -194,7 +194,7 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
         const passwordHash = await bcrypt.hash(data.usuario.password, 10)
         const now = new Date()
 
-        const [empresa, persona, usuario, /* empleado */] = await prisma.$transaction(async (tx) => {
+        const [empresa, persona, usuario, empleado] = await prisma.$transaction(async (tx) => {
             const empresa = await tx.empresa.create({
                 data: {
                     nombre: empresaNombre,
@@ -225,7 +225,7 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                 },
             })
 
-            /* const empleado = await tx.empleado.create({
+            const empleado = await tx.empleado.create({
                 data: {
                     usuarioId: usuario.id,
                     empresaId: empresa.id,
@@ -234,7 +234,7 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                     // activo: true,
                     // fechaIngreso: now,
                 },
-            }) */
+            })
 
             await tx.suscripcion.create({
                 data: {
@@ -246,13 +246,13 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                 },
             })
 
-            return [empresa, persona, usuario, /* empleado */] as const
+            return [empresa, persona, usuario, empleado] as const
         })
 
         return {
             success: true,
             error: null,
-            ids: { empresaId: empresa.id, personaId: persona.id, usuarioId: usuario.id, /* empleadoId: empleado.id */ },
+            ids: { empresaId: empresa.id, personaId: persona.id, usuarioId: usuario.id, empleadoId: empleado.id },
         } as const
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
