@@ -2,13 +2,14 @@
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BadgeCheck,  ChevronsUpDown, LogOut } from "lucide-react"
+import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react"
 import { Session } from "next-auth"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
 
-export default function NavUserCandidato({ session }: { session: Session | null }) {
+export default function NavUserCandidato({ session, onNavigate }: { session: Session | null, onNavigate?: () => void }) {
     const closeSession = async () => {
+        onNavigate?.()
         await signOut({ callbackUrl: "/" })
     }
     const user = session?.user;
@@ -51,16 +52,16 @@ export default function NavUserCandidato({ session }: { session: Session | null 
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <Link href="/perfil">
-                            <DropdownMenuItem>
-                                <BadgeCheck />
+                        <DropdownMenuItem asChild>
+                            <Link href="/perfil" onClick={onNavigate}>
+                                <BadgeCheck className="mr-2 h-4 w-4" />
                                 Perfil
-                            </DropdownMenuItem>
-                        </Link>
+                            </Link>
+                        </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={closeSession}>
-                        <LogOut />
+                        <LogOut className="mr-2 h-4 w-4" />
                         Cerrar Sesión
                     </DropdownMenuItem>
                 </DropdownMenuContent>

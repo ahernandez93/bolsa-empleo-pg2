@@ -1,63 +1,144 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { JSX, useEffect, useMemo, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Session } from "next-auth"
 import NavUserCandidato from "@/components/nav-user-candidato"
 
+// Shadcn / Lucide
+import { Button } from "@/components/ui/button"
+import {
+    Sheet,
+    SheetTrigger,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetClose,
+} from "@/components/ui/sheet"
+import { Menu, Briefcase, Bookmark, FileText, UserPlus, LogIn } from "lucide-react"
+
 export default function NavbarPublic({ session }: { session: Session | null }) {
     const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
-
     useEffect(() => setMounted(true), [])
 
-    // Para evitar mismatch: en SSR (mounted=false) devolvemos clases neutras.
     const linkClass = useMemo(() => {
         return (path: string) => {
             const isActive = mounted && pathname === path
             return [
-                "relative font-medium transition-colors duration-200",
+                "relative flex items-center gap-2 font-medium transition-colors duration-200",
                 isActive ? "text-emerald-600" : "text-slate-600 hover:text-emerald-700",
                 "after:absolute after:left-1/2 after:-bottom-[3px] after:h-[2px] after:bg-emerald-600",
                 "after:w-0 after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",
                 "hover:after:w-full",
-                // Sólo cuando ya montó aplicamos la línea completa al activo
                 isActive ? "after:w-full" : "",
             ].join(" ")
         }
     }, [mounted, pathname])
 
+    // 🧠 definimos los íconos una sola vez
+    const links = session
+        ? [
+            { href: "/ofertas", label: "Ofertas", icon: <Briefcase className="h-4 w-4" /> },
+            { href: "/guardados", label: "Guardados", icon: <Bookmark className="h-4 w-4" /> },
+            { href: "/postulaciones", label: "Mis Postulaciones", icon: <FileText className="h-4 w-4" /> },
+        ]
+        : [
+            { href: "/ofertas", label: "Ofertas", icon: <Briefcase className="h-4 w-4" /> },
+            { href: "/registrar", label: "Registrate", icon: <UserPlus className="h-4 w-4" /> },
+            { href: "/login", label: "Iniciar Sesión", icon: <LogIn className="h-4 w-4" /> },
+        ]
+
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-white/70 backdrop-blur">
             <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-                <div className="flex items-center gap-2">
-                    <Link href="/" className="flex items-center gap-3 flex-1">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">PIE</div>
-                        <span className="font-bold text-lg">Plataforma Integral de Empleabilidad</span>
-                    </Link>
-                </div>
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
+                        PIE
+                    </div>
+                    <span className="font-bold text-lg">Plataforma Integral de Empleabilidad</span>
+                </Link>
 
-                {/* suppressHydrationWarning es un extra por si algún className difiere entre SSR/CSR */}
+                {/* Desktop nav */}
                 <nav className="hidden md:flex items-center gap-6 text-sm" suppressHydrationWarning>
-                    <Link href="/ofertas" className={linkClass("/ofertas")}>Ofertas</Link>
-
-                    {session ? (
-                        <>
-                            <Link href="/guardados" className={linkClass("/guardados")}>Guardados</Link>
-                            <Link href="/postulaciones" className={linkClass("/postulaciones")}>Mis Postulaciones</Link>
-                            <div className="flex items-center gap-3">
-                                <NavUserCandidato session={session} />
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/registrar" className={linkClass("/registrar")}>Registrate</Link>
-                            <Link href="/login" className={linkClass("/login")}>Iniciar Sesión</Link>
-                        </>
+                    {links.map((l) => (
+                        <Link key={l.href} href={l.href} className={linkClass(l.href)}>
+                            {l.icon}
+                            {l.label}
+                        </Link>
+                    ))}
+                    {session && (
+                        <div className="flex items-center gap-3 ml-4">
+                            <NavUserCandidato session={session} />
+                        </div>
                     )}
                 </nav>
+
+                {/* Mobile trigger */}
+                <div className="md:hidden">
+                    <MobileMenu session={session} linkClass={linkClass} links={links} />
+                </div>
             </div>
         </header>
+    )
+}
+
+function MobileMenu({
+    session,
+    linkClass,
+    links,
+}: {
+    session: Session | null
+    linkClass: (path: string) => string
+    links: { href: string; label: string; icon: JSX.Element }[]
+}) {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Abrir menú">
+                    <Menu className="h-5 w-5" />
+                </Button>
+            </SheetTrigger>
+
+            <SheetContent side="left" className="w-[85%] sm:w-80 p-0">
+                <SheetHeader className="px-4 py-3 border-b">
+                    <SheetTitle className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
+                            PIE
+                        </div>
+                        <span>Menú</span>
+                    </SheetTitle>
+                </SheetHeader>
+
+                <ul className="flex flex-col p-2">
+                    {links.map((l) => (
+                        <li key={l.href}>
+                            <SheetClose asChild>
+                                <Link
+                                    href={l.href}
+                                    className="flex items-center gap-3 px-4 py-3 text-base hover:bg-slate-50"
+                                >
+                                    {l.icon}
+                                    <span className={linkClass(l.href)}>{l.label}</span>
+                                </Link>
+                            </SheetClose>
+                        </li>
+                    ))}
+                </ul>
+
+                {session && (
+                    <>
+                        <div className="px-4 py-2 border-t text-xs text-slate-500">Cuenta</div>
+                        <div className="px-2">
+                            <NavUserCandidato session={session} onNavigate={() => setOpen(false)} />
+                        </div>
+                    </>
+                )}
+            </SheetContent>
+        </Sheet>
     )
 }
