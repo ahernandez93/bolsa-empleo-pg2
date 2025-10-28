@@ -94,7 +94,7 @@ export default function PanelPostulaciones() {
 
     if (isLoading) {
         return (
-            <div className="p-4">
+            <div className="min-h-screen bg-slate-50">
                 <main className="mx-auto max-w-6xl px-4 py-6">
 
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -122,8 +122,15 @@ export default function PanelPostulaciones() {
     }
 
     return (
-        <div className="p-4">
+        <div className="min-h-screen bg-slate-50">
             <main className="mx-auto max-w-6xl px-4 py-6">
+                <div className="flex items-end justify-between gap-3">
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-semibold">Postulaciones</h1>
+                        <p className="text-sm text-muted-foreground">Tus postulaciones</p>
+                    </div>
+                    {/* Acciones globales (opcional): limpiar, exportar, etc. */}
+                </div>
                 {postulaciones.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         Aún no tenés postulaciones.

@@ -57,7 +57,7 @@ export default function GuardadosClient() {
     });
 
     return (
-        <div className="p-6 space-y-4">
+        <div className="min-h-screen bg-slate-50">
             <main className="mx-auto max-w-6xl px-4 py-6">
                 <div className="flex items-end justify-between gap-3">
                     <div className="space-y-1">

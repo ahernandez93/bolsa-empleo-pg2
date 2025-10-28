@@ -59,6 +59,14 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
     return (
         <div className="min-h-screen bg-slate-50">
             <main className="mx-auto max-w-6xl px-4 py-6">
+                <div className="flex items-end justify-between gap-3">
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-semibold">Ofertas</h1>
+                        <p className="text-sm text-muted-foreground">Catalogo de ofertas laborales</p>
+                    </div>
+                    {/* Acciones globales (opcional): limpiar, exportar, etc. */}
+                </div>
+                
                 {<FiltersBar
                     query={query}
                     onQuery={setQuery}
