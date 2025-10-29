@@ -47,6 +47,11 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
         [makeFacetOptions]
     )
 
+    const reclutadorOptions = useMemo(
+        () => makeFacetOptions("reclutadorUsuario", UserRound),
+        [makeFacetOptions]
+    )
+
     const estadoOptions = useMemo(
         () => [
             { value: "PENDIENTE", label: "Pendiente", icon: Hourglass },
@@ -79,15 +84,20 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
             />
 
             <DataTableFacetedFilter
+                column={table.getColumn("estado")}
+                title="Estado"
+                options={estadoOptions}
+            />
+            <DataTableFacetedFilter
                 column={table.getColumn("agregadoPorUsuario")}
                 title="Agregado por"
                 options={agregadoPorOptions}
             />
 
             <DataTableFacetedFilter
-                column={table.getColumn("estado")}
-                title="Estado"
-                options={estadoOptions}
+                column={table.getColumn("reclutadorUsuario")}
+                title="Reclutador"
+                options={reclutadorOptions}
             />
 
             {isFiltered && (

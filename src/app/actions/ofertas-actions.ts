@@ -12,9 +12,17 @@ export const getOfertasLaborales = async () => {
                         persona: true,
                     },
                 },
+                reclutador: {
+                    include: {
+                        persona: true,
+                    },
+                },
                 ubicacionDepartamento: true,
                 ubicacionCiudad: true,
                 empresa: true,
+            },
+            orderBy: {
+                fechaCreacion: "desc",
             },
 
         });
@@ -37,6 +45,9 @@ export const getOfertasLaborales = async () => {
             estado: ofertaLaboral.estado,
             agregadoPorId: ofertaLaboral.agregadoPorId,
             agregadoPorUsuario: ofertaLaboral.agregadoPor?.persona.nombre,
+            reclutadorId: ofertaLaboral.reclutadorId,
+            reclutadorUsuario: ofertaLaboral.reclutador?.persona.nombre ?? "Sin asignar",
+            fechaCreacion: ofertaLaboral.fechaCreacion.toISOString(),
         }));
 
         return data;

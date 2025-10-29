@@ -76,23 +76,6 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
     ),
   },
   {
-    accessorKey: "fechaPostulacion",
-    header: ({ column }) => {
-      const sort = column.getIsSorted() ?? false
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="data-[state=open]:bg-accent -ml-3 h-8"
-        >
-          Creado
-          <SortIcon sort={sort} />
-        </Button>
-      )
-    },
-    cell: ({ row }) => format(new Date(row.original.fechaPostulacion), "dd/MM/yyyy"),
-  },
-  {
     id: "ubicacion", // 👈 columna sintética para faceted
     accessorFn: (row) => {
       const c = row.ofertaUbicacionCiudad ?? ""
@@ -135,6 +118,23 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
         />
       )
     },
+  },
+  {
+    accessorKey: "fechaPostulacion",
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="data-[state=open]:bg-accent -ml-3 h-8"
+        >
+          Creado
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
+    cell: ({ row }) => format(new Date(row.original.fechaPostulacion), "dd/MM/yyyy"),
   },
   {
     id: "actions",

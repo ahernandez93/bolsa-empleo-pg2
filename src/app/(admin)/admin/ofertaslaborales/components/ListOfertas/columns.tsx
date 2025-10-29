@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 import { arrayIncludes } from "@/helpers/filters"
+import { format } from "date-fns"
 
 export type OfertaLaboralConDatos = {
   id: string
@@ -18,6 +19,9 @@ export type OfertaLaboralConDatos = {
   ubicacionCiudadDescripcion: string | undefined
   agregadoPorId: string
   agregadoPorUsuario: string
+  reclutadorId: string | null
+  reclutadorUsuario: string | undefined
+  fechaCreacion: string
   estado: string
 }
 interface GetColumnsProps {
@@ -126,8 +130,30 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Ofe
   },
   {
     accessorKey: "agregadoPorUsuario",
-    header: "Agregado por",
+    header: "Creador",
     filterFn: arrayIncludes,
+  },
+  {
+    accessorKey: "reclutadorUsuario",
+    header: "Reclutador",
+    filterFn: arrayIncludes,
+  },
+  {
+    accessorKey: "fechaCreacion",
+    header: ({ column }) => {
+      const sort = column.getIsSorted() ?? false
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="data-[state=open]:bg-accent -ml-3 h-8"
+        >
+          Creado
+          <SortIcon sort={sort} />
+        </Button>
+      )
+    },
+    cell: ({ row }) => format(new Date(row.original.fechaCreacion), "dd/MM/yyyy"),
   },
   {
     id: "actions",
