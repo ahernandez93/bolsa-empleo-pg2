@@ -159,7 +159,7 @@ function MobileMenu({
                         >
                             {/* Usá el móvil con texto o solo isotipo, como prefieras */}
                             <Image
-                                src="/branding/logo-mark4.svg"
+                                src="/branding/logo-mark.svg"
                                 alt="EmpleaHub"
                                 className="h-14 w-auto"
                                 width={64}
