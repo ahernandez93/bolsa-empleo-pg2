@@ -1,12 +1,11 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
-import { mkdir, writeFile, stat } from "fs/promises";
-import { unlink } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
+import { put } from "@vercel/blob";
+import { del } from "@vercel/blob";
 
 export async function POST(req: Request) {
     try {
@@ -28,20 +27,16 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "El archivo excede 8MB" }, { status: 400 });
         }
 
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        try {
-            await stat(uploadDir);
-        } catch {
-            await mkdir(uploadDir, { recursive: true });
-        }
+        const key = `${randomUUID()}.pdf`;
 
-        const key = `${randomUUID()}.pdf`; // fuerza .pdf
-        const filePath = path.join(uploadDir, key);
-
-        await writeFile(filePath, buffer);
+        const blob = await put(key, bytes, {
+            access: "public",
+            contentType: "application/pdf",
+            addRandomSuffix: false,
+        });
 
         return NextResponse.json({
-            url: `/uploads/${key}`,
+            url: blob.url, //`/uploads/${key}`,
             mime: file.type,
             size,
             key,
@@ -67,28 +62,28 @@ export async function DELETE(req: Request) {
 
         // 2) key del query
         const { searchParams } = new URL(req.url);
+        const url = searchParams.get("url");
         const key = searchParams.get("key");
-        if (!key) {
-            return NextResponse.json({ message: "Falta key" }, { status: 400 });
+        if (!url && !key) {
+            return NextResponse.json({ message: "Falta url o key" }, { status: 400 });
         }
 
         // 3) Borrar archivo local (ignora si no existe)
-        const filePath = path.join(process.cwd(), "public", "uploads", key);
-        await unlink(filePath).catch(() => { });
+        await del(url ?? key!);
 
         // 4) Limpiar campos del CV en la BD
         await prisma.perfilCandidato.update({
-            where: { usuarioId: userId }, // usuarioId es unique en tu modelo
+            where: { usuarioId: userId },
             data: {
                 cvUrl: null,
                 cvMimeType: null,
                 cvSize: null,
-                cvKey: null, // si lo usas
+                cvKey: null,
             },
         });
 
         return NextResponse.json({ ok: true });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("DELETE /api/candidatos/cv error:", e);
         return NextResponse.json(

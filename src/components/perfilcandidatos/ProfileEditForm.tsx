@@ -117,17 +117,6 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
     const handleSelectCv = async (file?: File) => {
         if (!file) return;
 
-        const oldUrl = form.getValues("cvUrl");
-        if (oldUrl) {
-            const oldKey = oldUrl.split("/").pop();
-            if (oldKey) {
-                try {
-                    await axios.delete(`/api/candidatos/cv?key=${encodeURIComponent(oldKey)}`);
-                } catch {
-                }
-            }
-        }
-
         if (file.type !== "application/pdf") {
             toast.error("Solo se admite PDF.");
             return;
@@ -136,23 +125,33 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
             toast.error("El archivo excede 8MB.");
             return;
         }
+        const oldUrl = form.getValues("cvUrl");
 
         setUploadingCv(true);
-
         const fd = new FormData();
         fd.append("file", file);
 
         try {
             const { data } = await axios.post("/api/candidatos/cv", fd);
+            const nextUrl = data.url as string;
+            const nextMime = (data.mime as string) ?? "application/pdf";
+            const nextSize = (data.size as number) ?? file.size;
             await axios.put("/api/candidatos/perfil", {
-                cvUrl: data.url,
-                cvMimeType: data.mime ?? "application/pdf",
-                cvSize: data.size,
+                cvUrl: nextUrl,
+                cvMimeType: nextMime,
+                cvSize: nextSize,
             });
-            form.setValue("cvUrl", data.url, { shouldDirty: true, shouldValidate: true });
-            form.setValue("cvMimeType", data.mime ?? "application/pdf", { shouldDirty: true });
-            form.setValue("cvSize", data.size ?? file.size, { shouldDirty: true });
+            form.setValue("cvUrl", nextUrl, { shouldDirty: true, shouldValidate: true });
+            form.setValue("cvMimeType", nextMime, { shouldDirty: true });
+            form.setValue("cvSize", nextSize, { shouldDirty: true });
+
             toast.success("CV subido");
+            if (oldUrl && oldUrl !== nextUrl) {
+                axios
+                    .delete("/api/candidatos/cv", { params: { url: oldUrl } })
+                    .catch(() => { /* lo ignoramos para no romper la UX */ });
+            }
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             console.error("Upload CV error →", e?.response?.data ?? e);
@@ -164,13 +163,11 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
     };
 
     const handleRemoveCv = async () => {
-        const oldUrl = form.getValues("cvUrl");
-        // derivar key del URL (funciona con /uploads/uuid.pdf o con absoluta)
-        const oldKey = oldUrl ? oldUrl.split("/").pop() : null;
+        const url = form.getValues("cvUrl");
 
         try {
-            if (oldKey) {
-                await axios.delete(`/api/candidatos/cv?key=${encodeURIComponent(oldKey)}`);
+            if (url) {
+                await axios.delete(`/api/candidatos/cv`, { params: { url } });
             }
             // Limpia UI del form (el servidor ya limpió BD)
             form.setValue("cvUrl", undefined, { shouldDirty: true, shouldValidate: true });
