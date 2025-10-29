@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bolsa de Empleo",
-  description: "Bolsa de Empleo es una plataforma de intermediacion laboral",
+  title: "EmpleaHub",
+  description: "EmpleaHub es una plataforma web integral de intermediacion laboral",
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

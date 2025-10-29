@@ -5,7 +5,7 @@ import { JSX, useEffect, useMemo, useState } from "react"
 import { usePathname } from "next/navigation"
 import { Session } from "next-auth"
 import NavUserCandidato from "@/components/nav-user-candidato"
-
+import Image from "next/image"
 // Shadcn / Lucide
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,51 @@ import {
     SheetClose,
 } from "@/components/ui/sheet"
 import { Menu, Briefcase, Bookmark, FileText, UserPlus, LogIn } from "lucide-react"
+
+function BrandDesktop() {
+    return (
+        <Link
+            href="/"
+            className="hidden md:flex items-center gap-3
+                    text-[#006CB4] dark:text-[#3BA8FF]
+                    [--logo-accent:#22A36B] dark:[--logo-accent:#34D399]
+                    transition-all pt-1 pb-1"
+
+            aria-label="Ir al inicio"
+        >
+            <Image
+                src="/branding/logo-horizontal.svg"
+                alt="EmpleaHub"
+                className="h-16 w-auto"
+                width={180}
+                height={48}
+                priority
+            />
+        </Link>
+    )
+}
+
+function BrandMobile() {
+    return (
+        <Link
+            href="/"
+            className="md:hidden flex items-center
+                    text-[#006CB4] dark:text-[#3BA8FF]
+                    [--logo-accent:#22A36B] dark:[--logo-accent:#34D399]
+                    transition-all"
+            aria-label="Ir al inicio"
+        >
+            <Image
+                src="/branding/logo-mark.svg"
+                alt="EmpleaHub"
+                className="h-14 w-auto"
+                width={64}
+                height={64}
+                priority
+            />
+        </Link>
+    )
+}
 
 export default function NavbarPublic({ session }: { session: Session | null }) {
     const pathname = usePathname()
@@ -52,14 +97,11 @@ export default function NavbarPublic({ session }: { session: Session | null }) {
 
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-white/70 backdrop-blur">
-            <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
-                        PIE
-                    </div>
-                    <span className="font-bold text-lg">Plataforma Integral de Empleabilidad</span>
-                </Link>
+            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+                <div className="flex items-center gap-3">
+                    <BrandMobile />
+                    <BrandDesktop />
+                </div>
 
                 {/* Desktop nav */}
                 <nav className="hidden md:flex items-center gap-6 text-sm" suppressHydrationWarning>
@@ -107,10 +149,24 @@ function MobileMenu({
             <SheetContent side="left" className="w-[85%] sm:w-80 p-0">
                 <SheetHeader className="px-4 py-3 border-b">
                     <SheetTitle className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white font-bold">
-                            PIE
-                        </div>
-                        <span>Menú</span>
+                        <Link
+                            href="/"
+                            className="
+                                flex items-center gap-2
+                                text-[#006CB4] dark:text-[#3BA8FF]
+                                [--logo-accent:#22A36B] dark:[--logo-accent:#34D399]"
+                            onClick={() => setOpen(false)}
+                        >
+                            {/* Usá el móvil con texto o solo isotipo, como prefieras */}
+                            <Image
+                                src="/branding/logo-mark4.svg"
+                                alt="EmpleaHub"
+                                className="h-14 w-auto"
+                                width={64}
+                                height={64}
+                                priority
+                            />
+                        </Link>
                     </SheetTitle>
                 </SheetHeader>
 

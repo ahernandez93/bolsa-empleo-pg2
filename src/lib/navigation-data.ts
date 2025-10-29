@@ -117,7 +117,7 @@ export const projectsData: ProjectItem[] = [
 // Datos de equipos
 export const teamsData: TeamItem[] = [
     {
-        name: "Bolsa de Empleo",
+        name: "EmpleaHub",
         logo: GalleryVerticalEnd,
         plan: "Enterprise",
     },
