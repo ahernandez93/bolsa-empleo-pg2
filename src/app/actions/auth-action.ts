@@ -13,8 +13,25 @@ function addMonths(date: Date, months: number) {
     return d
 }
 
+const canLoginWithRoles = async (email: string, allowedRoles: string[]) => {
+    const user = await prisma.usuario.findUnique({
+        where: { email: email.toLowerCase() },
+        select: { rol: true, activo: true },
+    });
+
+    if (!user || user.activo !== true || !allowedRoles.includes(user.rol)) {
+        return false;
+    }
+    return true;
+};
+
 export const LoginAction = async (email: string, password: string) => {
     try {
+        const allowed = await canLoginWithRoles(email, ["SUPERADMIN", "ADMIN", "RECLUTADOR"]);
+        if (!allowed) {
+            return { success: false, error: "Usuario no autorizado para acceso de administrador" };
+        }
+
         const res = await signIn('credentials', {
             email,
             password,
@@ -52,14 +69,12 @@ export const LoginAction = async (email: string, password: string) => {
 // Acción específica para CANDIDATO: valida rol antes de autenticar
 export const LoginActionCandidate = async (email: string, password: string) => {
     try {
-        // Verificar rol antes de crear sesión
-        const user = await prisma.usuario.findUnique({
-            where: { email },
-            select: { rol: true, activo: true }
-        });
-
-        if (user && user.activo === true && user.rol !== 'CANDIDATO') {
-            return { success: false, error: 'Usuario no autorizado para acceso de candidato' };
+        const allowed = await canLoginWithRoles(email, ["CANDIDATO"]);
+        if (!allowed) {
+            return {
+                success: false,
+                error: "Usuario no autorizado para acceso de candidato",
+            };
         }
 
         const res = await signIn('credentials', {
@@ -69,7 +84,7 @@ export const LoginActionCandidate = async (email: string, password: string) => {
         });
 
         if (res?.error) {
-            return { success: false, error: res.error };
+            return { success: false, error: "Credenciales inválidas" };
         }
 
         return { success: true, error: null };
