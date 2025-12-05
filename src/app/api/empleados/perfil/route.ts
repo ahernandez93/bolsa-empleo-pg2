@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // GET: perfil del usuario autenticado (ADMIN/RECLUTADOR)
 export async function GET() {
     try {
-        const { session, empresaId, role } = await requireEmpresaSession();
+        const { session, empresaId, rol } = await requireEmpresaSession();
 
         const usuario = await prisma.usuario.findUnique({
             where: { id: session?.user?.id },
@@ -37,7 +37,7 @@ export async function GET() {
                 ubicacionCiudadId: p.ubicacionCiudadId ?? undefined,
                 email: usuario.email,
                 empresa: usuario.empresa ? { id: empresaId, nombre: usuario.empresa.nombre } : null,
-                role,
+                rol,
             },
         });
     } catch (e) {

@@ -77,7 +77,12 @@ export default middleware((req) => {
     if (!isLoggedIn) {
       return redirectTo("/admin/login");
     }
-    if (role !== "ADMIN" && role !== "RECLUTADOR") {
+    const isAdminAreaRole =
+      role === "ADMIN" ||
+      role === "RECLUTADOR" ||
+      role === "SUPERADMIN";
+
+    if (!isAdminAreaRole) {
       return redirectTo("/admin/login");
     }
   }

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DateRangePicker from "@/components/dashboardadmin/date-range-picker";
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -57,7 +58,14 @@ function BreakdownList({ title, items, total }: { title: string; items: Record<s
 }
 
 export default function DashboardAdmin() {
-    const { plan, meta } = usePlanActual();
+    const { plan, meta, rol } = usePlanActual();
+    const isSuperAdmin = rol === "SUPERADMIN";
+
+    const [empresaFiltro, setEmpresaFiltro] = useState<"all" | string>("all");
+    const { data: empresas, isLoading: loadingEmpresas } = useSWR(
+        isSuperAdmin ? "/api/superadmin/empresas" : null,
+        fetcher,
+    );
     const [range, setRange] = useState<{ from: Date; to: Date }>(() => {
         const to = new Date();
         const from = addDays(to, -30);
@@ -68,8 +76,11 @@ export default function DashboardAdmin() {
         const p = new URLSearchParams();
         if (range?.from) p.set("from", range.from.toISOString());
         if (range?.to) p.set("to", range.to.toISOString());
+        if (isSuperAdmin && empresaFiltro !== "all") {
+            p.set("empresaId", empresaFiltro);
+        }
         return p.toString();
-    }, [range]);
+    }, [range, isSuperAdmin, empresaFiltro]);
 
     const url = qs ? `/api/admin/dashboard?${qs}` : "/api/admin/dashboard";
     const { data, isLoading } = useSWR(url, fetcher, { revalidateOnFocus: true });
@@ -77,22 +88,98 @@ export default function DashboardAdmin() {
     return (
         <div className="flex flex-col gap-4">
             {/* Header del plan */}
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Plan actual:</span>
                     <BadgePlan nombre={plan?.nombre ?? null} />
-                    {meta && (
+                    {meta && (plan?.nombre !== "Premium") ? (
                         <span className="text-xs text-muted-foreground">
                             • {meta.ofertasActivas}/{plan?.maxOfertasActivas ?? 0} ofertas activas
                             {typeof meta.restantes === "number" ? ` • ${meta.restantes} restantes` : null}
                         </span>
-                    )}
+                    ) : <span className="text-xs text-muted-foreground">
+                        Ofertas ilimitadas
+                    </span>}
                 </div>
                 <Link href="/admin/planes"><Button variant="secondary" size="sm">Cambiar plan</Button></Link>
+            </div> */}
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                {/* Lado izquierdo: según rol */}
+                {!isSuperAdmin ? (
+                    // Vista normal empresa
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Plan actual:</span>
+                        <BadgePlan nombre={plan?.nombre ?? null} />
+                        {meta && (plan?.nombre !== "Premium") ? (
+                            <span className="text-xs text-muted-foreground">
+                                • {meta.ofertasActivas}/{plan?.maxOfertasActivas ?? 0} ofertas activas
+                                {typeof meta.restantes === "number" ? ` • ${meta.restantes} restantes` : null}
+                            </span>
+                        ) : (
+                            <span className="text-xs text-muted-foreground">
+                                Ofertas ilimitadas
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    // Vista SUPERADMIN
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="uppercase text-[10px] tracking-wide">
+                                Superadmin
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                                {empresaFiltro === "all"
+                                    ? "Viendo todas las empresas"
+                                    : `Filtrando por empresa`}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Empresa:</span>
+                            {/* Select de empresas usando shadcn/ui */}
+                            {/* importá: Select, SelectTrigger, SelectValue, SelectContent, SelectItem */}
+                            <div className="w-[260px]">
+                                <Select
+                                    value={empresaFiltro}
+                                    onValueChange={(value) => setEmpresaFiltro(value as "all" | string)}
+                                >
+                                    <SelectTrigger className="h-8">
+                                        <SelectValue
+                                            placeholder={
+                                                loadingEmpresas
+                                                    ? "Cargando empresas..."
+                                                    : "Selecciona una empresa"
+                                            }
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">Todas las empresas</SelectItem>
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                        {empresas?.map((e: any) => (
+                                            <SelectItem key={e.id} value={e.id}>
+                                                {e.nombre}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Lado derecho: botón de cambiar plan solo para empresa normal */}
+                {!isSuperAdmin && (
+                    <Link href="/admin/planes">
+                        <Button variant="secondary" size="sm">
+                            Cambiar plan
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             {/* Banner de expiración */}
-            {meta && (
+            {meta && !isSuperAdmin && (
                 <BannerExpiracion
                     diasParaVencer={meta.diasParaVencer}
                     vencePronto={meta.vencePronto}

@@ -20,7 +20,7 @@ export default function PerfilEmpleadoView() {
             <Card>
                 <CardHeader className="flex-row items-center justify-between">
                     <CardTitle>Información</CardTitle>
-                    <Badge variant="secondary">{perfil.role}</Badge>
+                    <Badge variant="secondary">{perfil.rol}</Badge>
                 </CardHeader>
                 <CardContent className="space-y-2">
                     <div><span className="text-muted-foreground text-sm">Nombre:</span> <div className="font-medium">{perfil.nombre} {perfil.apellido}</div></div>

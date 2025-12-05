@@ -101,7 +101,7 @@ export type EmpleadoPerfilDTO = {
     ubicacionCiudadId?: number;
     email: string;
     empresa: EmpresaLite | null;
-    role: RolUsuario;
+    rol: RolUsuario;
 };
 
 export type ApiErrorResponse = { message: string };

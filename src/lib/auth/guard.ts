@@ -7,19 +7,21 @@ export async function requireEmpresaSession() {
     }
 
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const role = (session.user as any).role as string | undefined;
+    const rol = (session.user as any).role as string | undefined;
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const empresaId = (session.user as any).empresaId as string | null;
+    const empresaIdRaw = (session.user as any).empresaId as string | null;
 
-    const isAdminAreaRole = role === "ADMIN" || role === "RECLUTADOR" || role === "SUPERADMIN";
+    const isAdminAreaRole = rol === "ADMIN" || rol === "RECLUTADOR" || rol === "SUPERADMIN";
     if (!isAdminAreaRole) {
         throw new Error("No autorizado");
     }
 
     // Para ADMIN/RECLUTADOR, exigimos empresaId
-    if ((role === "ADMIN" || role === "RECLUTADOR") && !empresaId) {
+    if ((rol === "ADMIN" || rol === "RECLUTADOR") && !empresaIdRaw) {
         throw new Error("Empresa no asociada");
     }
 
-    return { session, empresaId: empresaId!, role };
+    const empresaId = rol === "SUPERADMIN" ? null : empresaIdRaw;
+
+    return { session, empresaId, rol };
 }

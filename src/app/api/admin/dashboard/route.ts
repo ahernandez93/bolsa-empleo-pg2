@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 const querySchema = z.object({
     from: z.string().datetime().optional(), // ISO
     to: z.string().datetime().optional(),   // ISO
+    empresaId: z.string().optional(),
 });
 
 function rangeFromQuery(q: z.infer<typeof querySchema>) {
@@ -18,9 +19,10 @@ function rangeFromQuery(q: z.infer<typeof querySchema>) {
 
 export async function GET(req: Request) {
     try {
-        const { empresaId } = await requireEmpresaSession();
+        const { empresaId, rol } = await requireEmpresaSession();
+        const isSuperAdmin = rol === "SUPERADMIN";
 
-        if (!empresaId) {
+        if (!isSuperAdmin && !empresaId) {
             return NextResponse.json({ message: "No autorizado" }, { status: 403 });
         }
 
@@ -28,17 +30,26 @@ export async function GET(req: Request) {
         const parsed = querySchema.safeParse({
             from: url.searchParams.get("from") ?? undefined,
             to: url.searchParams.get("to") ?? undefined,
+            empresaId: url.searchParams.get("empresaId") ?? undefined,
         });
         if (!parsed.success) {
             return NextResponse.json({ message: "Parámetros inválidos" }, { status: 400 });
         }
         const { from, to } = rangeFromQuery(parsed.data);
 
+        // Empresa seleccionada según rol
+        const selectedEmpresaId = isSuperAdmin
+            ? parsed.data.empresaId ?? undefined
+            : empresaId!;
+
+        // Helper para aplicar el filtro por empresa
+        const empresaWhere = selectedEmpresaId ? { empresaId: selectedEmpresaId } : {};
+
         // Ofertas por estado (rango por fechaCreacion)
         const ofertasPorEstado = await prisma.ofertaLaboral.groupBy({
             by: ["estado"],
             _count: { _all: true },
-            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
+            where: { ...empresaWhere, fechaCreacion: { gte: from, lte: to } },
         });
 
         const totalOfertas = ofertasPorEstado.reduce((acc, r) => acc + r._count._all, 0);
@@ -47,7 +58,7 @@ export async function GET(req: Request) {
         const postulacionesPorEstado = await prisma.postulacion.groupBy({
             by: ["estado"],
             _count: { _all: true },
-            where: { fechaPostulacion: { gte: from, lte: to }, oferta: { empresaId } },
+            where: { fechaPostulacion: { gte: from, lte: to }, oferta: { ...empresaWhere } },
         });
 
         const totalPostulaciones = postulacionesPorEstado.reduce((acc, r) => acc + r._count._all, 0);
@@ -56,7 +67,7 @@ export async function GET(req: Request) {
         const topCiudadesGrp = await prisma.ofertaLaboral.groupBy({
             by: ["ubicacionCiudadId"],
             _count: { _all: true },
-            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
+            where: { ...empresaWhere, fechaCreacion: { gte: from, lte: to } },
             orderBy: { _count: { id: "desc" } },
             take: 5,
         });
@@ -76,25 +87,25 @@ export async function GET(req: Request) {
         const cutoff = new Date();
         cutoff.setDate(cutoff.getDate() - 14);
         const ofertasAbiertas = await prisma.ofertaLaboral.findMany({
-            where: { estado: "ABIERTA", empresaId },
+            where: { estado: "ABIERTA", ...empresaWhere },
             select: { id: true, puesto: true, empresa: { select: { nombre: true } }, fechaCreacion: true, postulaciones: { select: { id: true }, where: { fechaPostulacion: { gte: cutoff } } } },
             orderBy: { fechaCreacion: "desc" },
             take: 50,
         });
         const ofertasSinPost = ofertasAbiertas
             .filter((o) => o.postulaciones.length === 0 && o.fechaCreacion <= cutoff)
-            .map((o) => ({ id: o.id, puesto: o.puesto, empresa: o.empresa?.nombre, fechaCreacion: o.fechaCreacion }));
+            .map((o) => ({ id: o.id, puesto: o.puesto, empresa: o.empresa, fechaCreacion: o.fechaCreacion }));
 
         // Actividad reciente
         const ultimasOfertas = await prisma.ofertaLaboral.findMany({
-            where: { empresaId, fechaCreacion: { gte: from, lte: to } },
+            where: { ...empresaWhere, fechaCreacion: { gte: from, lte: to } },
             orderBy: { fechaCreacion: "desc" },
             select: { id: true, puesto: true, empresa: { select: { nombre: true } }, fechaCreacion: true },
             take: 5,
         });
 
         const ultimasPostulaciones = await prisma.postulacion.findMany({
-            where: { fechaActualizacion: { gte: from, lte: to }, oferta: { empresaId } },
+            where: { fechaActualizacion: { gte: from, lte: to }, oferta: { ...empresaWhere } },
             orderBy: { fechaActualizacion: "desc" },
             select: {
                 id: true,
@@ -126,7 +137,7 @@ export async function GET(req: Request) {
             alerts: { ofertasSinPostulaciones14d: ofertasSinPost },
             actividad: { ultimasOfertas, ultimasPostulaciones },
         });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("GET /api/admin/dashboard error:", e);
         const msg = e?.message || "No autorizado";

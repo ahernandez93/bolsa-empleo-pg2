@@ -11,7 +11,22 @@ function daysBetween(a: Date, b: Date) {
 
 export async function GET() {
     try {
-        const { empresaId } = await requireEmpresaSession();
+        const { empresaId, rol } = await requireEmpresaSession();
+
+        if (!empresaId) {
+            return NextResponse.json({
+                ok: true,
+                rol, // 👈 importante para el frontend
+                plan: null,
+                meta: {
+                    ofertasActivas: 0,
+                    restantes: 0,
+                    diasParaVencer: null,
+                    vencePronto: false,
+                    expirada: true,
+                },
+            });
+        }
 
         // Suscripción activa
         const sub = await prisma.suscripcion.findFirst({
@@ -22,6 +37,7 @@ export async function GET() {
         if (!sub) {
             return NextResponse.json({
                 ok: true,
+                rol,
                 plan: null,
                 meta: {
                     ofertasActivas: 0,
@@ -46,6 +62,7 @@ export async function GET() {
 
         return NextResponse.json({
             ok: true,
+            rol,
             plan: {
                 nombre: sub.plan.nombre as "Gratis" | "Básico" | "Premium" | string,
                 maxOfertasActivas: sub.plan.maxOfertasActivas,

@@ -7,6 +7,7 @@ const fetcher = (url: string) => axios.get(url).then(r => r.data);
 
 export type PlanActual = {
     ok: boolean;
+    rol: "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
     plan: {
         nombre: string;
         maxOfertasActivas: number;
@@ -33,6 +34,7 @@ export function usePlanActual() {
     return {
         plan: data?.plan ?? null,
         meta: data?.meta ?? null,
+        rol: data?.rol ?? null,
         isLoading,
         isError: !!error,
         refresh: mutate,

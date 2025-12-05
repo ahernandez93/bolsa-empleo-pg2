@@ -1,9 +1,17 @@
 import { prisma } from "@/lib/prisma";
-
+import { requireEmpresaSession } from "@/lib/auth/guard";
 
 export const getEmpleados = async () => {
     try {
+        const { empresaId, rol } = await requireEmpresaSession();
+        const isSuperAdmin = rol === "SUPERADMIN";
+
+        const where = !isSuperAdmin && empresaId
+            ? { empresaId }
+            : {};
+
         const empleados = await prisma.empleado.findMany({
+            where,
             include: {
                 usuario: {
                     include: {
