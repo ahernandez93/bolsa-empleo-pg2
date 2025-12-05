@@ -15,8 +15,16 @@ function addMonths(date: Date, months: number) {
 
 export async function POST(req: Request) {
     try {
-        const { empresaId, role } = await requireEmpresaSession();
-        if (role !== "ADMIN" && role !== "SUPERADMIN") {
+        const { empresaId, rol } = await requireEmpresaSession();
+
+        if (!empresaId) {
+            return NextResponse.json(
+                { message: "Empresa no asociada" },
+                { status: 400 }
+            );
+        }
+        
+        if (rol !== "ADMIN" && rol !== "SUPERADMIN") {
             return NextResponse.json({ message: "No autorizado" }, { status: 403 });
         }
 

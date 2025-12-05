@@ -12,6 +12,13 @@ export async function GET() {
     try {
         const { empresaId } = await requireEmpresaSession();
 
+        if (!empresaId) {
+            return NextResponse.json(
+                { message: "Empresa no asociada" },
+                { status: 400 }
+            );
+        }
+
         const ofertasLaborales = await prisma.ofertaLaboral.findMany({
             where: {
                 empresaId,
@@ -53,6 +60,13 @@ export async function POST(req: Request) {
         console.log("POST /api/ofertaslaborales BODY:", body);
 
         const { empresaId } = await requireEmpresaSession();
+
+        if (!empresaId) {
+            return NextResponse.json(
+                { message: "Empresa no asociada" },
+                { status: 400 }
+            );
+        }
 
         // 2) Validar suscripción
         const sus = await getSuscripcionActiva(empresaId);

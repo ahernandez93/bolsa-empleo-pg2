@@ -10,6 +10,13 @@ export async function GET() {
     try {
         const { empresaId } = await requireEmpresaSession();
 
+        if (!empresaId) {
+            return NextResponse.json(
+                { message: "Empresa no asociada" },
+                { status: 400 }
+            );
+        }
+
         const empresa = await prisma.empresa.findUnique({
             where: { id: empresaId },
             select: {
@@ -61,6 +68,14 @@ export async function GET() {
 export async function PUT(req: Request) {
     try {
         const { empresaId } = await requireEmpresaSession();
+
+        if (!empresaId) {
+            return NextResponse.json(
+                { message: "Empresa no asociada" },
+                { status: 400 }
+            );
+        }
+
         const body = await req.json();
 
         const parsed = empresaConfigSchema.safeParse(body);
