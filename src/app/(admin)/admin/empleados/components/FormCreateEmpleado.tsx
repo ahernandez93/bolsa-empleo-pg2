@@ -17,6 +17,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { DepartamentoItem } from "@/app/actions/departamentos-actions";
 import { CargoItem } from "@/app/actions/cargos-actions";
+import useSWR from "swr";
+import { usePlanActual } from "@/hooks/use-plan-actual";
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
@@ -26,12 +28,29 @@ type FormCreateProps = {
     cargos: CargoItem[],
 }
 
+type EmpresaItem = {
+    id: string;
+    nombre: string;
+};
+
+const fetcher = (url: string) => axios.get(url).then(r => r.data);
+
+
 export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode = false, departamentos, cargos }: FormCreateProps) {
 
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false)
+
+    const { rol } = usePlanActual();
+    const isSuperAdmin = rol === "SUPERADMIN";
+
+    // Solo superadmin carga las empresas
+    const { data: empresas, isLoading: empresasLoading } = useSWR<EmpresaItem[]>(
+        isSuperAdmin ? "/api/superadmin/empresas" : null,
+        fetcher
+    );
 
     const schema = isEditMode ? empleadoUpdateSchema : empleadoSchema;
 
@@ -47,6 +66,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         departamentoId: initialData.departamentoId != null ? String(initialData.departamentoId) : undefined,
         cargoId: initialData.cargoId != null ? String(initialData.cargoId) : undefined,
         activo: initialData.usuario?.activo,
+        empresaId: undefined,
     } : {
         nombre: "",
         apellido: "",
@@ -59,6 +79,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
         departamentoId: undefined,
         cargoId: undefined,
         activo: true,
+        empresaId: undefined,
     };
     const form = useForm<EmpleadoFormData | EmpleadoUpdateData>({
         resolver: zodResolver(schema),
@@ -243,7 +264,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                         <FormItem>
                             <FormLabel>Departamento</FormLabel>
                             <Select
-                                onValueChange={field.onChange} 
+                                onValueChange={field.onChange}
                                 value={field.value?.toString() ?? ""}
                             >
                                 <FormControl>
@@ -270,7 +291,7 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                         <FormItem>
                             <FormLabel>Cargo</FormLabel>
                             <Select
-                                onValueChange={field.onChange} 
+                                onValueChange={field.onChange}
                                 value={field.value?.toString() ?? ""}
                             >
                                 <FormControl>
@@ -311,6 +332,36 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                         </FormItem>
                     )}
                 />
+
+                {!isEditMode && isSuperAdmin && (
+                    <FormField
+                        control={form.control}
+                        name="empresaId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Empresa</FormLabel>
+                                <Select
+                                    onValueChange={field.onChange}
+                                    value={field.value ?? ""}
+                                >
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={empresasLoading ? "Cargando empresas..." : "Seleccione una empresa"} />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {empresas?.map((emp) => (
+                                            <SelectItem key={emp.id} value={emp.id}>
+                                                {emp.nombre}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                )}
 
                 <div className="col-span-2 mt-4">
                     <Button type="submit" className="w-full" disabled={!isValid || isLoading}>

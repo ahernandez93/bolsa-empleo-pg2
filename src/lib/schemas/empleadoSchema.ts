@@ -13,6 +13,7 @@ const schemaBase = {
   departamentoId: z.string().min(1, "El departamento es requerido"),
   cargoId: z.string().min(1, "El cargo es requerido"),
   activo: z.boolean().optional(),
+  empresaId: z.string().optional(),
 };
 
 export const empleadoSchema = z.object({

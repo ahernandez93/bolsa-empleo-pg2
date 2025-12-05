@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { requireEmpresaSession } from "@/lib/auth/guard";
 
 const empleadoSchema = z.object({
     nombre: z.string().min(2),
@@ -17,12 +18,48 @@ const empleadoSchema = z.object({
     emailVerificado: z.boolean().optional().default(false),
     departamentoId: z.coerce.number(),
     cargoId: z.coerce.number(),
+    empresaId: z.string().optional(),
 });
 
 export async function POST(req: Request) {
     try {
+        const { empresaId, rol } = await requireEmpresaSession();
+        console.log(rol);
+        const isAdmin = rol === "ADMIN";
+        const isSuperAdmin = rol === "SUPERADMIN";
+
+        // Solo ADMIN y SUPERADMIN pueden crear empleados
+        if (!isAdmin && !isSuperAdmin) {
+            return NextResponse.json(
+                { message: "No autorizado para crear empleados" },
+                { status: 403 }
+            );
+        }
+
+        /* if (!empresaId) {
+            return NextResponse.json(
+                { message: "Administrador sin empresa asociada" },
+                { status: 400 }
+            );
+        } */
+
         const body = await req.json();
         const data = empleadoSchema.parse(body);
+
+        let empresaIdFinal: string | null = null;
+
+        if (isAdmin) {
+            empresaIdFinal = empresaId ?? null;
+        } else if (isSuperAdmin) {
+            empresaIdFinal = data.empresaId ?? null;
+        }
+
+        if (!empresaIdFinal) {
+            return NextResponse.json(
+                { message: "Debe seleccionar la empresa a la que pertenecerá el empleado" },
+                { status: 400 }
+            );
+        }
 
         const passwordHash = await bcrypt.hash(data.password, 10);
 
@@ -40,10 +77,12 @@ export async function POST(req: Request) {
                         rol: data.rol,
                         activo: true,
                         emailVerificado: false,
+                        empresaId: empresaIdFinal,
                         empleado: {
                             create: {
                                 departamentoId: data.departamentoId,
                                 cargoId: data.cargoId,
+                                empresaId: empresaIdFinal,
                             },
                         },
                     },
