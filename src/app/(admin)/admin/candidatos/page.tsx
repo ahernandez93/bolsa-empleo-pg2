@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { HeaderCandidatos } from "./components/HeaderCandidatos"
 import { ListCandidatos } from "./components/ListCandidatos/ListCandidatos"
 import { getCandidatos } from "@/app/actions/candidatos-actions"

@@ -1,11 +1,19 @@
+import { requireEmpresaSession } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 export const getPostulaciones = async () => {
     try {
+        const { empresaId, rol } = await requireEmpresaSession();
+        const isSuperAdmin = rol === "SUPER_ADMIN";
+
+        const where = !isSuperAdmin && empresaId
+            ? { oferta: { empresaId } }
+            : {};
 
         const postulaciones = await prisma.postulacion.findMany({
+            where,
             include: {
                 perfil: {
                     select: {

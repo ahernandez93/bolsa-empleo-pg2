@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { HeaderOfertasLaborales } from "./components/HeaderOfertasLaborales";
 import { ListOfertasLaborales } from "./components/ListOfertas/ListOfertasLaborales";
 import { getOfertasLaborales } from "@/app/actions/ofertas-actions";

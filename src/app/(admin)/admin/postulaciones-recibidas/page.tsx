@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { HeaderPostulaciones } from "./components/HeaderPostulaciones";
 import { ListPostulaciones } from "./components/ListPostulaciones/ListPostulaciones";
 import { getPostulaciones } from "@/app/actions/postulaciones-actions";

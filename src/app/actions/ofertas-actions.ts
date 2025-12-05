@@ -1,11 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import type { JobCardProps } from "@/components/jobcarousel";
+import { requireEmpresaSession } from "@/lib/auth/guard";
 
 export const dynamic = 'force-dynamic';
 
 export const getOfertasLaborales = async () => {
     try {
+        const { empresaId, rol } = await requireEmpresaSession();
+        const isSuperAdmin = rol === "SUPERADMIN";
+
+        const where = !isSuperAdmin && empresaId
+            ? { empresaId }
+            : {};
+
         const ofertasLaborales = await prisma.ofertaLaboral.findMany({
+            where,
             include: {
                 agregadoPor: {
                     include: {
