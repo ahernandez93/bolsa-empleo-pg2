@@ -63,7 +63,6 @@ export async function POST(req: Request) {
                 const stripeCustomerId = subscription.customer as string;
                 const stripeStatus = subscription.status;
                 const stripePriceId = subscription.items.data[0]?.price.id ?? null;
-                //eslint-disable-next-line @typescript-eslint/no-explicit-any
 
                 // metadata que pusimos en create-checkout-session
                 const meta = subscription.metadata || {};
@@ -107,7 +106,9 @@ export async function POST(req: Request) {
                 await prisma.suscripcion.updateMany({
                     where: {
                         empresaId,
-                        activa: true,
+                        //activa: true,
+                        stripeSubscriptionId: { not: stripeSubscriptionId },
+
                     },
                     data: {
                         activa: false,
@@ -141,6 +142,45 @@ export async function POST(req: Request) {
                         activa: isActiveStripeStatus(stripeStatus),
                     },
                 });
+
+                if (stripeStatus === "canceled") {
+                    // Buscar plan Gratis
+                    const planGratis = await prisma.plan.findUnique({
+                        where: { nombre: "Gratis" },
+                    });
+
+                    if (!planGratis) {
+                        console.warn("No existe plan 'Gratis' en la tabla Plan. No se pudo hacer downgrade automático.");
+                    } else {
+                        // Ver si ya tiene una suscripción Gratis activa (por si acaso)
+                        const yaTieneGratis = await prisma.suscripcion.findFirst({
+                            where: {
+                                empresaId,
+                                activa: true,
+                                planId: planGratis.id,
+                            },
+                        });
+
+                        if (!yaTieneGratis) {
+                            const ahora = new Date();
+                            const fechaFinGratis = addMonths(ahora, planGratis.duracionMeses);
+
+                            await prisma.suscripcion.create({
+                                data: {
+                                    empresaId,
+                                    planId: planGratis.id,
+                                    fechaInicio: ahora,
+                                    fechaFin: fechaFinGratis,
+                                    activa: true,
+                                },
+                            });
+
+                            console.log(
+                                `Empresa=${empresaId} downgraded automáticamente a plan Gratis después de cancelación en Stripe.`
+                            );
+                        }
+                    }
+                }
 
                 console.log(
                     `Suscripción sincronizada desde Stripe. Empresa=${empresaId}, plan=${planId}, status=${stripeStatus}`

@@ -25,6 +25,8 @@ type Plan = {
 type SuscripcionInfo = {
     status: string | null;
     fechaFin: string | null; // ISO string
+    canceladaEn?: string | null;  // ISO string
+    esDePago?: boolean;
 };
 
 export default function PlanesClient({
@@ -37,6 +39,7 @@ export default function PlanesClient({
     suscripcionInfo?: SuscripcionInfo | null;
 }) {
     const [loading, setLoading] = useState<string | null>(null);
+    const [cancelLoading, setCancelLoading] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -57,7 +60,7 @@ export default function PlanesClient({
             setLoading(planNombre);
             schema.parse({ planNombre });
 
-            // 👉 1) Plan GRATIS: se sigue manejando con tu endpoint viejo
+            //1) Plan GRATIS
             if (planNombre === "Gratis") {
                 const res = await axios.post("/api/suscripcion/cambiar", { planNombre });
                 toast.success(res.data?.message ?? `Plan cambiado a ${planNombre}`);
@@ -65,7 +68,7 @@ export default function PlanesClient({
                 return;
             }
 
-            // 👉 2) Planes de pago: crear sesión de Stripe y redirigir al checkout
+            //2) Planes de pago: crear sesión de Stripe y redirigir al checkout
             const res = await axios.post("/api/billing/create-checkout-session", {
                 planNombre,
             });
@@ -84,6 +87,33 @@ export default function PlanesClient({
             toast.error(msg);
         } finally {
             setLoading(null);
+        }
+    };
+
+    const handleCancelar = async () => {
+        try {
+            setCancelLoading(true);
+            const res = await axios.post("/api/billing/cancel-subscription");
+            toast.success(
+                res.data?.message ??
+                "Tu suscripción se cancelará al finalizar el periodo actual."
+            );
+            /* const res = await axios.post("/api/suscripcion/cambiar", {
+                planNombre: "Gratis",
+            });
+            toast.success(
+                res.data?.message ?? "Te has cambiado al plan Gratis. La suscripción de pago ha sido cancelada."
+            ); */
+            router.refresh();
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (e: any) {
+            const msg =
+                e?.response?.data?.message ??
+                e?.message ??
+                "No se pudo cancelar la suscripción";
+            toast.error(msg);
+        } finally {
+            setCancelLoading(false);
         }
     };
 
@@ -121,36 +151,67 @@ export default function PlanesClient({
         });
     })();
 
+    const canCancel =
+        !!suscripcionInfo &&
+        (suscripcionInfo.esDePago ?? true) && // por defecto asumimos que sí es de pago si no viene
+        !!suscripcionInfo.status &&
+        ["active", "trialing"].includes(suscripcionInfo.status) &&
+        !suscripcionInfo.canceladaEn;
+
+    const muestraAvisoCanceladaPendiente =
+        !!suscripcionInfo &&
+        !!suscripcionInfo.canceladaEn &&
+        suscripcionInfo.status === "active";
+
     return (
         <div className="flex flex-col gap-6 p-2">
             <h1 className="text-2xl font-bold">Planes y precios</h1>
 
             {/* Resumen de suscripción actual */}
-            <Card className="border-muted">
-                <CardContent className="p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1">
-                        <p className="text-sm font-semibold text-muted-foreground">
-                            Resumen de suscripción
-                        </p>
-                        <p className="text-lg font-bold">
-                            Plan actual:{" "}
-                            {actual ? (
-                                <span className="font-semibold">{actual}</span>
-                            ) : (
-                                <span className="text-muted-foreground">Sin plan asignado</span>
-                            )}
-                        </p>
-                        <p className="text-sm">
-                            Estado: <span className="font-medium">{statusLabel}</span>
-                        </p>
-                        <p className="text-sm">
-                            Fecha de vencimiento:{" "}
-                            <span className="font-medium">{fechaVencimientoTexto}</span>
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+            {suscripcionInfo && (
+                <Card className="border-muted">
+                    <CardContent className="p-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                            <p className="text-sm font-semibold text-muted-foreground">
+                                Resumen de suscripción
+                            </p>
+                            <p className="text-lg font-bold">
+                                Plan actual:{" "}
+                                {actual ? (
+                                    <span className="font-semibold">{actual}</span>
+                                ) : (
+                                    <span className="text-muted-foreground">Sin plan asignado</span>
+                                )}
+                            </p>
+                            <p className="text-sm">
+                                Estado: <span className="font-medium">{statusLabel}</span>
+                            </p>
+                            <p className="text-sm">
+                                Fecha de vencimiento:{" "}
+                                <span className="font-medium">{fechaVencimientoTexto}</span>
+                            </p>
 
+                            {muestraAvisoCanceladaPendiente && (
+                                <p className="text-xs text-yellow-600 mt-1">
+                                    Esta suscripción se cancelará al finalizar el periodo actual. No se
+                                    renovará automáticamente.
+                                </p>
+                            )}
+                        </div>
+                        {canCancel && (
+                            <div className="flex-shrink-0">
+                                <Button
+                                    variant="outline"
+                                    onClick={handleCancelar}
+                                    disabled={cancelLoading}
+                                >
+                                    {cancelLoading ? "Cancelando..." : "Cancelar suscripción de pago"}
+                                </Button>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
             {/* Cards de planes */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {planes.map((p) => {

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireEmpresaSession } from "@/lib/auth/guard";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const bodySchema = z.object({
     planNombre: z.enum(["Gratis", "Básico", "Premium"]),
@@ -23,7 +26,7 @@ export async function POST(req: Request) {
                 { status: 400 }
             );
         }
-        
+
         if (rol !== "ADMIN" && rol !== "SUPERADMIN") {
             return NextResponse.json({ message: "No autorizado" }, { status: 403 });
         }
@@ -48,6 +51,27 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
+        /* if (planNombre === "Gratis") {
+            const paidSub = await prisma.suscripcion.findFirst({
+                where: {
+                    empresaId,
+                    activa: true,
+                    stripeSubscriptionId: { not: null },
+                },
+            });
+
+            if (paidSub?.stripeSubscriptionId) {
+                try {
+                    await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
+                    console.log(
+                        `Stripe subscription cancelada para empresa=${empresaId} sub=${paidSub.stripeSubscriptionId}`
+                    );
+                } catch (err) {
+                    console.error("Error cancelando suscripción en Stripe:", err);
+                }
+            }
+        }
+ */
         // Cancelar suscripción activa actual
         await prisma.suscripcion.updateMany({
             where: { empresaId, activa: true },
