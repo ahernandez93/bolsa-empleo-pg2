@@ -22,6 +22,12 @@ function isActiveStripeStatus(status: string | null | undefined) {
     return status === "active" || status === "trialing";
 }
 
+function addMonths(date: Date, months: number) {
+    const d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+}
+
 export async function POST(req: Request) {
     const signature = req.headers.get("stripe-signature");
 
@@ -58,8 +64,6 @@ export async function POST(req: Request) {
                 const stripeStatus = subscription.status;
                 const stripePriceId = subscription.items.data[0]?.price.id ?? null;
                 //eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const rawCurrentPeriodEnd = (subscription as any)["current_period_end"] as number | undefined;
-                const currentPeriodEnd = rawCurrentPeriodEnd != null ? new Date(rawCurrentPeriodEnd * 1000) : null;
 
                 // metadata que pusimos en create-checkout-session
                 const meta = subscription.metadata || {};
@@ -72,6 +76,31 @@ export async function POST(req: Request) {
                     );
                     break;
                 }
+
+                const planDb = await prisma.plan.findUnique({
+                    where: { id: planId },
+                    select: { duracionMeses: true },
+                });
+
+                const duracionMeses = planDb?.duracionMeses ?? 1;
+
+                //Fecha de inicio según Stripe
+                const fechaInicio = new Date(subscription.start_date * 1000);
+
+                //Intentamos leer current_period_end POR SI ACASO lo manda,
+                //pero si no, calculamos con duracionMeses
+                //eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const rawCurrentPeriodEnd = (subscription as any)["current_period_end"] as
+                    | number
+                    | undefined;
+
+                let currentPeriodEnd: Date | null = null;
+
+                if (rawCurrentPeriodEnd != null) {
+                    currentPeriodEnd = new Date(rawCurrentPeriodEnd * 1000);
+                }
+
+                const fechaFin = currentPeriodEnd ?? addMonths(fechaInicio, duracionMeses);
 
                 // Desactivar *todas* las suscripciones activas de esa empresa.
                 // Luego el upsert vuelve a activar SOLO la del stripeSubscriptionId actual.
@@ -94,21 +123,21 @@ export async function POST(req: Request) {
                     create: {
                         empresaId,
                         planId,
-                        fechaInicio: new Date(subscription.start_date * 1000),
-                        fechaFin: currentPeriodEnd ?? new Date(subscription.start_date * 1000),
+                        fechaInicio,
+                        fechaFin,
                         activa: isActiveStripeStatus(stripeStatus),
                         stripeCustomerId,
                         stripeSubscriptionId,
                         stripePriceId: stripePriceId ?? undefined,
                         stripeStatus,
-                        currentPeriodEnd: currentPeriodEnd ?? undefined,
+                        currentPeriodEnd: fechaFin,
                     },
                     update: {
                         stripeCustomerId,
                         stripePriceId: stripePriceId ?? undefined,
                         stripeStatus,
-                        currentPeriodEnd: currentPeriodEnd ?? undefined,
-                        fechaFin: currentPeriodEnd ?? undefined,
+                        currentPeriodEnd: fechaFin,
+                        fechaFin,
                         activa: isActiveStripeStatus(stripeStatus),
                     },
                 });
