@@ -56,9 +56,34 @@ export async function GET() {
 
         const restantes = Math.max(sub.plan.maxOfertasActivas - ofertasActivas, 0);
         const hoy = new Date();
-        const diasParaVencer = daysBetween(hoy, sub.fechaFin);
+
+        /* const diasParaVencer = daysBetween(hoy, sub.fechaFin);
         const vencePronto = diasParaVencer <= 7;
-        const expirada = sub.fechaFin < hoy;
+        const expirada = sub.fechaFin < hoy; */
+
+        const fechaFinEfectiva: Date | null =
+            sub.currentPeriodEnd ?? sub.fechaFin ?? null;
+
+        let diasParaVencer: number | null = null;
+        let vencePronto = false;
+        let expirada = false;
+
+        if (fechaFinEfectiva) {
+            diasParaVencer = daysBetween(hoy, fechaFinEfectiva);
+            expirada = fechaFinEfectiva < hoy;
+            vencePronto = !expirada && diasParaVencer <= 7;
+        }
+
+        // 👇 Consideramos también el estado Stripe si existe
+        const stripeStatus = sub.stripeStatus as string | null;
+        const isStripeActive =
+            !stripeStatus || stripeStatus === "active" || stripeStatus === "trialing";
+
+        // Si Stripe dice que no está activa, la tratamos como expirada aunque la fecha esté en futuro
+        if (!isStripeActive) {
+            expirada = true;
+            vencePronto = false;
+        }
 
         return NextResponse.json({
             ok: true,
@@ -70,7 +95,7 @@ export async function GET() {
                 precioMensual: sub.plan.precioMensual,
                 duracionMeses: sub.plan.duracionMeses,
                 fechaInicio: sub.fechaInicio,
-                fechaFin: sub.fechaFin,
+                fechaFin: fechaFinEfectiva ?? sub.fechaFin,
             },
             meta: {
                 ofertasActivas,

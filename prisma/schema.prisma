@@ -68,6 +68,8 @@ model Empresa {
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
+  stripeCustomerId String? @unique
+
   // Relaciones
   ubicacionDepartamento UbicacionDepartamento? @relation(fields: [ubicacionDepartamentoId], references: [id], onDelete: SetNull)
   ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: SetNull)
@@ -105,6 +107,12 @@ model Suscripcion {
   fechaFin    DateTime
   activa      Boolean   @default(true)
   canceladaEn DateTime?
+
+  stripeCustomerId     String?
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  stripeStatus         String? // 'active', 'past_due', 'canceled', etc.
+  currentPeriodEnd     DateTime? // viene de Stripe (current_period_end)
 
   empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   plan    Plan    @relation(fields: [planId], references: [id], onDelete: Restrict)
@@ -175,10 +183,10 @@ model Empleado {
   updatedAt      DateTime @updatedAt
 
   // Relaciones
-  usuario      Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuario      Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
   departamento Departamento? @relation(fields: [departamentoId], references: [id], onDelete: Restrict)
   cargo        Cargo?        @relation(fields: [cargoId], references: [id], onDelete: Restrict)
-  empresa      Empresa?     @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  empresa      Empresa?      @relation(fields: [empresaId], references: [id], onDelete: SetNull)
 
   @@index([empresaId])
 }

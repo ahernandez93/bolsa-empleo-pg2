@@ -12,6 +12,7 @@ export default async function PlanesPage() {
     const role = (session?.user as any)?.role as string | undefined;
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
     const empresaId = (session?.user as any)?.empresaId as string | null;
+
     if (!session?.user?.id) redirect("/admin/login");
     if (role !== "ADMIN" && role !== "SUPERADMIN") redirect("/admin");
 
@@ -28,9 +29,31 @@ export default async function PlanesPage() {
 
     const actual = susActiva?.plan?.nombre ?? null;
 
+    const effectiveStatus =
+        (susActiva?.stripeStatus as string | null) ??
+        (susActiva ? (susActiva.activa ? "active" : "inactive") : null);
+
+    const effectiveEndDate: Date | null =
+        (susActiva?.currentPeriodEnd as Date | null) ??
+        (susActiva?.fechaFin as Date | null) ??
+        null;
+
     return (
         <div className="flex flex-col gap-4 p-4 pt-0">
-            <PlanesClient planes={planes} actual={actual} />
+            <PlanesClient
+                planes={planes}
+                actual={actual}
+                suscripcionInfo={
+                    susActiva
+                        ? {
+                            status: effectiveStatus,
+                            fechaFin: effectiveEndDate
+                                ? effectiveEndDate.toISOString()
+                                : null,
+                        }
+                        : null
+                }
+            />
         </div>
     );
 }
