@@ -163,8 +163,8 @@ export async function POST(req: Request) {
                     planNombre: plan.nombre,
                 },
             },
-            success_url: `${APP_URL}/dashboard/billing?checkout=success`,
-            cancel_url: `${APP_URL}/dashboard/billing?checkout=cancelled`,
+            success_url: `${APP_URL}/admin/planes?checkout=success`,
+            cancel_url: `${APP_URL}/admin/planes?checkout=cancelled`,
         });
 
         if (!session.url) {
@@ -178,7 +178,7 @@ export async function POST(req: Request) {
             ok: true,
             url: session.url,
         });
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("POST /api/billing/create-checkout-session", e);
 

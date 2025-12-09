@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import axios from "axios";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 const schema = z.object({ planNombre: z.enum(["Gratis", "Básico", "Premium"]) });
 
@@ -37,6 +38,19 @@ export default function PlanesClient({
 }) {
     const [loading, setLoading] = useState<string | null>(null);
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const checkout = searchParams.get("checkout");
+        if (checkout === "success") {
+            toast.success("Pago realizado con éxito. Tu suscripción ha sido actualizada.");
+            router.replace("/admin/planes");
+        }
+        if (checkout === "cancel") {
+            toast.info("El pago fue cancelado.");
+            router.replace("/admin/planes");
+        }
+    }, [searchParams, router]);
 
     const onSelect = async (planNombre: "Gratis" | "Básico" | "Premium") => {
         try {
