@@ -3,6 +3,17 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import axios from "axios";
 import { z } from "zod";
@@ -11,6 +22,8 @@ import { toast } from "sonner";
 import { useEffect } from "react";
 
 const schema = z.object({ planNombre: z.enum(["Gratis", "Básico", "Premium"]) });
+
+type PlanNombre = "Gratis" | "Básico" | "Premium";
 
 type Plan = {
     id: string;
@@ -24,8 +37,8 @@ type Plan = {
 
 type SuscripcionInfo = {
     status: string | null;
-    fechaFin: string | null; // ISO string
-    canceladaEn?: string | null;  // ISO string
+    fechaFin: string | null;
+    canceladaEn?: string | null;
     esDePago?: boolean;
 };
 
@@ -40,6 +53,9 @@ export default function PlanesClient({
 }) {
     const [loading, setLoading] = useState<string | null>(null);
     const [cancelLoading, setCancelLoading] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [pendingPlan, setPendingPlan] = useState<PlanNombre | null>(null);
+
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -55,7 +71,7 @@ export default function PlanesClient({
         }
     }, [searchParams, router]);
 
-    const onSelect = async (planNombre: "Gratis" | "Básico" | "Premium") => {
+    const onSelect = async (planNombre: PlanNombre) => {
         try {
             setLoading(planNombre);
             schema.parse({ planNombre });
@@ -87,6 +103,8 @@ export default function PlanesClient({
             toast.error(msg);
         } finally {
             setLoading(null);
+            setConfirmOpen(false);
+            setPendingPlan(null);
         }
     };
 
@@ -161,7 +179,61 @@ export default function PlanesClient({
     const muestraAvisoCanceladaPendiente =
         !!suscripcionInfo &&
         !!suscripcionInfo.canceladaEn &&
-        suscripcionInfo.status === "active";
+        ["active", "trialing"].includes(suscripcionInfo.status ?? "");
+
+    const currentPlan = actual
+        ? planes.find((p) => p.nombre === actual) ?? null
+        : null;
+
+    const targetPlan = pendingPlan
+        ? planes.find((p) => p.nombre === pendingPlan) ?? null
+        : null;
+
+    const isDowngrade =
+        currentPlan &&
+        targetPlan &&
+        targetPlan.precioMensual < currentPlan.precioMensual;
+
+    const isUpgrade =
+        currentPlan &&
+        targetPlan &&
+        targetPlan.precioMensual > currentPlan.precioMensual;
+
+    const confirmTitle = (() => {
+        if (!targetPlan) return "Confirmar cambio de plan";
+        if (isUpgrade) return "Confirmar mejora de plan";
+        if (isDowngrade) return "Confirmar cambio a un plan inferior";
+        return "Confirmar cambio de plan";
+    })();
+
+    const confirmDescription = (() => {
+        if (!targetPlan) return "Estás a punto de cambiar de plan. ¿Deseás continuar?";
+
+        if (isUpgrade) {
+            return `Vas a cambiar del plan "${currentPlan?.nombre}" al plan "${targetPlan.nombre}". 
+            Este cambio puede generar un cobro inmediato a través de Stripe. ¿Estás seguro de continuar?`;
+        }
+
+        if (isDowngrade) {
+            return `Vas a cambiar del plan "${currentPlan?.nombre}" al plan "${targetPlan.nombre}". 
+            Podrías perder beneficios como mayor límite de ofertas activas u ofertas destacadas. 
+            ¿Deseás continuar con el cambio?`;
+        }
+
+        if (targetPlan.precioMensual === 0) {
+            return `Vas a cambiar al plan "Gratis". A partir de este cambio, se aplicarán las restricciones de ese plan. 
+            Si tu suscripción actual es de pago, dejarás de recibir beneficios de los planes superiores. ¿Confirmás el cambio?`;
+        }
+
+        return `Vas a cambiar tu plan actual por "${targetPlan.nombre}". ¿Deseás continuar?`;
+    })();
+
+    const handleClickPlan = (planNombre: PlanNombre) => {
+        // Si ya es el plan actual, no hacemos nada
+        if (planNombre === actual) return;
+        setPendingPlan(planNombre);
+        setConfirmOpen(true);
+    };
 
     return (
         <div className="flex flex-col gap-6 p-2">
@@ -205,7 +277,7 @@ export default function PlanesClient({
                                     onClick={handleCancelar}
                                     disabled={cancelLoading}
                                 >
-                                    {cancelLoading ? "Cancelando..." : "Cancelar suscripción de pago"}
+                                    {cancelLoading ? "Cancelando..." : "Cancelar renovación"}
                                 </Button>
                             </div>
                         )}
@@ -246,7 +318,7 @@ export default function PlanesClient({
                                 <Button
                                     disabled={loading === p.nombre || isActual}
                                     onClick={() =>
-                                        onSelect(p.nombre as "Gratis" | "Básico" | "Premium")
+                                        handleClickPlan(p.nombre as PlanNombre)
                                     }
                                     className="w-full"
                                 >
@@ -263,6 +335,36 @@ export default function PlanesClient({
                     );
                 })}
             </div>
+
+            {/* Diálogo de confirmación de cambio de plan */}
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{confirmTitle}</AlertDialogTitle>
+                        <AlertDialogDescription className="whitespace-pre-line">
+                            {confirmDescription}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setPendingPlan(null);
+                            }}
+                        >
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                if (pendingPlan) {
+                                    onSelect(pendingPlan);
+                                }
+                            }}
+                        >
+                            Confirmar cambio
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

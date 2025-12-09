@@ -31,28 +31,30 @@ export default async function PlanesPage() {
 
     const effectiveStatus =
         (susActiva?.stripeStatus as string | null) ??
-        (susActiva ? (susActiva.activa ? "active" : "inactive") : null);
+        (susActiva ? (susActiva.activa ? "active" : "canceled") : null);
 
     const effectiveEndDate: Date | null =
         (susActiva?.currentPeriodEnd as Date | null) ??
         (susActiva?.fechaFin as Date | null) ??
         null;
 
+    const suscripcionInfo = susActiva
+        ? {
+            status: effectiveStatus,
+            fechaFin: effectiveEndDate ? effectiveEndDate.toISOString() : null,
+            canceladaEn: susActiva.canceladaEn
+                ? susActiva.canceladaEn.toISOString()
+                : null,
+            esDePago: !!susActiva.stripeSubscriptionId,
+        }
+        : null;
+
     return (
         <div className="flex flex-col gap-4 p-4 pt-0">
             <PlanesClient
                 planes={planes}
                 actual={actual}
-                suscripcionInfo={
-                    susActiva
-                        ? {
-                            status: effectiveStatus,
-                            fechaFin: effectiveEndDate
-                                ? effectiveEndDate.toISOString()
-                                : null,
-                        }
-                        : null
-                }
+                suscripcionInfo={suscripcionInfo}
             />
         </div>
     );
