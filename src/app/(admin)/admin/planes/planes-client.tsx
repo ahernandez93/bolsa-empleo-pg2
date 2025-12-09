@@ -202,11 +202,6 @@ export default function PlanesClient({
                     );
                 })}
             </div>
-
-            <p className="text-xs text-muted-foreground">
-                * El plan Gratis se activa directamente en la plataforma. Los planes de
-                pago te redirigen a Stripe para completar el pago de la suscripción.
-            </p>
         </div>
     );
 }

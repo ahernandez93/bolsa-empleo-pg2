@@ -42,6 +42,10 @@ export default middleware((req) => {
     return NextResponse.redirect(url);
   };
 
+  if (pathname.startsWith("/api/stripe/webhook")) {
+    return NextResponse.next();
+  }
+
   // Permite que las rutas de la API de NextAuth pasen siempre
   if (isApiAuthRoute) {
     return NextResponse.next();

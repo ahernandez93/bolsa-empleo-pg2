@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 const stripeSecret = process.env.STRIPE_SECRET_KEY!;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -35,7 +38,7 @@ export async function POST(req: Request) {
         // OJO: hay que leer el body como texto crudo, no como JSON
         const body = await req.text();
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
         console.error("Error verificando firma del webhook:", err?.message);
         return NextResponse.json(
