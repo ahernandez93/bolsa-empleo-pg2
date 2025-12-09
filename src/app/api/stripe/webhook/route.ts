@@ -73,12 +73,12 @@ export async function POST(req: Request) {
                     break;
                 }
 
-                // Desactivar suscripciones activas anteriores (si las hay)
+                // Desactivar *todas* las suscripciones activas de esa empresa.
+                // Luego el upsert vuelve a activar SOLO la del stripeSubscriptionId actual.
                 await prisma.suscripcion.updateMany({
                     where: {
                         empresaId,
                         activa: true,
-                        stripeSubscriptionId: { not: stripeSubscriptionId },
                     },
                     data: {
                         activa: false,
