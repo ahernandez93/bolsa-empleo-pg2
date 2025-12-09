@@ -106,8 +106,8 @@ export async function POST(req: Request) {
                 await prisma.suscripcion.updateMany({
                     where: {
                         empresaId,
-                        //activa: true,
-                        stripeSubscriptionId: { not: stripeSubscriptionId },
+                        activa: true,
+                        //stripeSubscriptionId: { not: stripeSubscriptionId },
 
                     },
                     data: {
