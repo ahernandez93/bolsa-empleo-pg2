@@ -8,7 +8,6 @@ import { FormCreateOferta } from "../FormCreateOferta"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-// import { OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types"
 
 type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
@@ -62,7 +61,7 @@ export function ListOfertasLaborales({ ofertasLaborales, currentUserRole, reclut
             duration: 10000,
         })
     }
-    const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete })
+    const columns = getColumns({ onEdit: handleEdit, onDelete: handleDelete, currentUserRole })
 
     return (
         <>

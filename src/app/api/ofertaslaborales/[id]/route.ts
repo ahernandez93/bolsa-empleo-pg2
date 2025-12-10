@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { ofertaLaboralUpdateSchema, ofertaLaboralUpdateAdminSchema, ofertaLaboralUpdateRecruiterSchema } from "@/lib/schemas/ofertaLaboralSchema"
+import { ofertaLaboralUpdateAdminSchema, ofertaLaboralUpdateRecruiterSchema } from "@/lib/schemas/ofertaLaboralSchema"
 import { NextResponse } from "next/server"
 import z from "zod"
 import { Prisma } from "@prisma/client";

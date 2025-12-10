@@ -53,9 +53,13 @@ export const getOfertasLaborales = async () => {
             salario: ofertaLaboral.salario,
             estado: ofertaLaboral.estado,
             agregadoPorId: ofertaLaboral.agregadoPorId,
-            agregadoPorUsuario: ofertaLaboral.agregadoPor?.persona.nombre,
+            agregadoPorUsuario: ofertaLaboral.agregadoPor
+                ? `${ofertaLaboral.agregadoPor.persona.nombre} ${ofertaLaboral.agregadoPor.persona.apellido}`
+                : "—",
             reclutadorId: ofertaLaboral.reclutadorId,
-            reclutadorUsuario: ofertaLaboral.reclutador?.persona.nombre ?? "Sin asignar",
+            reclutadorUsuario: ofertaLaboral.reclutador
+                ? `${ofertaLaboral.reclutador.persona.nombre} ${ofertaLaboral.reclutador.persona.apellido}`
+                : "Sin asignar",
             fechaCreacion: ofertaLaboral.fechaCreacion.toISOString(),
         }));
 

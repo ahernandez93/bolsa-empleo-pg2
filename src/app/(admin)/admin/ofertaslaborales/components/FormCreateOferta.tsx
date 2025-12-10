@@ -11,10 +11,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 import {
-    ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, ofertaLaboralUpdateAdminSchema,
-    ofertaLaboralUpdateRecruiterSchema, OfertaLaboralFormData, OfertaLaboralUpdateData, OfertaLaboralUpdateAdminData, OfertaLaboralUpdateRecruiterData,
+    ofertaLaboralFormSchema, ofertaLaboralUpdateAdminSchema,
+    ofertaLaboralUpdateRecruiterSchema, OfertaLaboralFormData, OfertaLaboralUpdateAdminData, OfertaLaboralUpdateRecruiterData,
 } from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types";
 import useSWR from "swr";
@@ -153,15 +152,15 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
 
         try {
             if (isEditMode) {
-                const payload = data as OfertaLaboralUpdateData;
-                await axios.put(`/api/ofertaslaborales/${initialData?.id}`, payload)
+                //const payload = data as OfertaLaboralUpdateData;
+                await axios.put(`/api/ofertaslaborales/${initialData?.id}`, data)
                 toast.success("Oferta Laboral actualizada correctamente")
-                console.log("Oferta Laboral actualizada correctamente", payload)
+                console.log("Oferta Laboral actualizada correctamente", data)
             } else {
-                const payload = data as OfertaLaboralFormData;
-                await axios.post("/api/ofertaslaborales", payload)
+                //const payload = data as OfertaLaboralFormData;
+                await axios.post("/api/ofertaslaborales", data)
                 toast.success("Oferta Laboral creada exitosamente")
-                console.log("Oferta Laboral creada exitosamente", payload)
+                console.log("Oferta Laboral creada exitosamente", data)
             }
 
             form.reset()
@@ -462,19 +461,33 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                         <Select
                                             value={field.value ?? ""}
                                             onValueChange={(v) => field.onChange(v || null)}
+                                            disabled={!reclutadores || reclutadores.length === 0}
                                         >
                                             <SelectTrigger className={focusSlim}>
-                                                <SelectValue placeholder="Seleccionar reclutador" />
+                                                <SelectValue placeholder={
+                                                    !reclutadores || reclutadores.length === 0
+                                                        ? "No hay reclutadores registrados"
+                                                        : "Seleccionar reclutador"} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="">Sin asignar</SelectItem>
-                                                {reclutadores.map((r) => (
-                                                    <SelectItem key={r.id} value={r.id}>
-                                                        {r.nombre}
-                                                    </SelectItem>
-                                                ))}
+                                                {reclutadores && reclutadores.length > 0 && (
+                                                    <>
+                                                        <SelectItem value="none">Sin asignar</SelectItem>
+                                                        {reclutadores.map((r) => (
+                                                            <SelectItem key={r.id} value={r.id}>
+                                                                {r.nombre}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </>
+                                                )}
                                             </SelectContent>
                                         </Select>
+                                        {(!reclutadores || reclutadores.length === 0) && (
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                No hay reclutadores activos en esta empresa. Creá empleados con rol
+                                                RECLUTADOR para poder asignarlos.
+                                            </p>
+                                        )}
                                         <FormMessage />
                                     </FormItem>
                                 )}

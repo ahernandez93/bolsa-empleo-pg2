@@ -25,9 +25,12 @@ export type OfertaLaboralConDatos = {
   fechaCreacion: string
   estado: string
 }
+
+type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
 interface GetColumnsProps {
   onEdit: (ofertaLaboral: OfertaLaboralConDatos) => void
   onDelete: (ofertaLaboral: OfertaLaboralConDatos) => void
+  currentUserRole: RolUsuario
 }
 
 const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
@@ -43,143 +46,150 @@ const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
   )
 }
 
-export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<OfertaLaboralConDatos>[] => [
-  {
-    accessorKey: "puesto",
-    header: ({ column }) => {
-      const sort = column.getIsSorted() ?? false
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(sort === "asc")}
-          className="data-[state=open]:bg-accent -ml-3 h-8"
-        >
-          Puesto
-          <SortIcon sort={sort} />
-        </Button>
-      )
+export const getColumns = ({ onEdit, onDelete, currentUserRole }: GetColumnsProps): ColumnDef<OfertaLaboralConDatos>[] => {
+  const columns: ColumnDef<OfertaLaboralConDatos>[] = [
+    {
+      accessorKey: "puesto",
+      header: ({ column }) => {
+        const sort = column.getIsSorted() ?? false
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(sort === "asc")}
+            className="data-[state=open]:bg-accent -ml-3 h-8"
+          >
+            Puesto
+            <SortIcon sort={sort} />
+          </Button>
+        )
+      },
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.puesto}</span>
+      ),
     },
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.puesto}</span>
-    ),
-  },
-  {
-    accessorKey: "area",
-    header: ({ column }) => {
-      const sort = column.getIsSorted() ?? false
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="data-[state=open]:bg-accent -ml-3 h-8"
-        >
-          Area
-          <SortIcon sort={sort} />
-        </Button>
-      )
+    {
+      accessorKey: "area",
+      header: ({ column }) => {
+        const sort = column.getIsSorted() ?? false
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="data-[state=open]:bg-accent -ml-3 h-8"
+          >
+            Area
+            <SortIcon sort={sort} />
+          </Button>
+        )
+      },
+      filterFn: arrayIncludes,
     },
-    filterFn: arrayIncludes,
-  },
-  {
-    accessorKey: "empresaId",
-    header: "Empresa",
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.empresaNombre}</span>
-    ),
-  },
-  {
-    id: "ubicacion",
-    accessorFn: (row: OfertaLaboralConDatos) => {
-      const d = row.ubicacionDepartamentoDescripcion ?? ""
-      const c = row.ubicacionCiudadDescripcion ?? ""
-      const combo = `${d}${d && c ? " - " : ""}${c}`
-      return combo.trim()
+    {
+      id: "ubicacion",
+      accessorFn: (row: OfertaLaboralConDatos) => {
+        const d = row.ubicacionDepartamentoDescripcion ?? ""
+        const c = row.ubicacionCiudadDescripcion ?? ""
+        const combo = `${d}${d && c ? " - " : ""}${c}`
+        return combo.trim()
+      },
+      header: ({ column }) => {
+        const sort = column.getIsSorted() ?? false
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(sort === "asc")}
+            className="data-[state=open]:bg-accent -ml-3 h-8"
+          >
+            Ubicación
+            <SortIcon sort={sort} />
+          </Button>
+        )
+      },
+      filterFn: arrayIncludes,
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.ubicacionDepartamentoDescripcion} - {row.original.ubicacionCiudadDescripcion}</span>
+      ),
     },
-    header: ({ column }) => {
-      const sort = column.getIsSorted() ?? false
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(sort === "asc")}
-          className="data-[state=open]:bg-accent -ml-3 h-8"
-        >
-          Ubicación
-          <SortIcon sort={sort} />
-        </Button>
-      )
+    {
+      accessorKey: "estado",
+      header: "Estado",
+      filterFn: arrayIncludes,
+      cell: ({ row }) => {
+        if (row.original.estado === "ABIERTA") {
+          return <Badge variant="default">Abierta</Badge>
+        } else if (row.original.estado === "RECHAZADA") {
+          return <Badge variant="destructive">Rechazada</Badge>
+        } else if (row.original.estado === "CERRADA") {
+          return <Badge variant="secondary">Cerrada</Badge>
+        } else {
+          return <Badge variant="secondary">Pendiente</Badge>
+        }
+      },
     },
-    filterFn: arrayIncludes,
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.ubicacionDepartamentoDescripcion} - {row.original.ubicacionCiudadDescripcion}</span>
-    ),
-  },
-  {
-    accessorKey: "estado",
-    header: "Estado",
-    filterFn: arrayIncludes,
-    cell: ({ row }) => {
-      if (row.original.estado === "ABIERTA") {
-        return <Badge variant="default">Abierta</Badge>
-      } else if (row.original.estado === "RECHAZADA") {
-        return <Badge variant="destructive">Rechazada</Badge>
-      } else if (row.original.estado === "CERRADA") {
-        return <Badge variant="secondary">Cerrada</Badge>
-      } else {
-        return <Badge variant="secondary">Pendiente</Badge>
-      }
+    {
+      accessorKey: "agregadoPorUsuario",
+      header: "Creador",
+      filterFn: arrayIncludes,
     },
-  },
-  {
-    accessorKey: "agregadoPorUsuario",
-    header: "Creador",
-    filterFn: arrayIncludes,
-  },
-  {
-    accessorKey: "reclutadorUsuario",
-    header: "Reclutador",
-    filterFn: arrayIncludes,
-  },
-  {
-    accessorKey: "fechaCreacion",
-    header: ({ column }) => {
-      const sort = column.getIsSorted() ?? false
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="data-[state=open]:bg-accent -ml-3 h-8"
-        >
-          Creado
-          <SortIcon sort={sort} />
-        </Button>
-      )
+    {
+      accessorKey: "reclutadorUsuario",
+      header: "Reclutador",
+      filterFn: arrayIncludes,
     },
-    cell: ({ row }) => format(new Date(row.original.fechaCreacion), "dd/MM/yyyy"),
-  },
-  {
-    id: "actions",
-    header: "Acciones",
-    cell: ({ row }) => {
-      const ofertaLaboral = row.original
+    {
+      accessorKey: "fechaCreacion",
+      header: ({ column }) => {
+        const sort = column.getIsSorted() ?? false
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="data-[state=open]:bg-accent -ml-3 h-8"
+          >
+            Creado
+            <SortIcon sort={sort} />
+          </Button>
+        )
+      },
+      cell: ({ row }) => format(new Date(row.original.fechaCreacion), "dd/MM/yyyy"),
+    },
+    {
+      id: "actions",
+      header: "Acciones",
+      cell: ({ row }) => {
+        const ofertaLaboral = row.original
 
-      return (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => onEdit(ofertaLaboral)}
-          >
-            <Pencil className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="icon"
-            onClick={() => onDelete(ofertaLaboral)}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        </div>
-      )
+        return (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => onEdit(ofertaLaboral)}
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              onClick={() => onDelete(ofertaLaboral)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        )
+      },
     },
-  },
-]
+  ];
+
+  if (currentUserRole === "SUPERADMIN") {
+    columns.splice(2, 0, {
+      accessorKey: "empresaNombre",
+      header: "Empresa",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.empresaNombre}</span>
+      ),
+    });
+  }
+
+  return columns
+}
