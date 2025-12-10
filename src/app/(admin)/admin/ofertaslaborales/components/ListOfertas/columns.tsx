@@ -89,7 +89,7 @@ export const getColumns = ({ onEdit, onDelete, currentUserRole }: GetColumnsProp
       accessorFn: (row: OfertaLaboralConDatos) => {
         const d = row.ubicacionDepartamentoDescripcion ?? ""
         const c = row.ubicacionCiudadDescripcion ?? ""
-        const combo = `${d}${d && c ? " - " : ""}${c}`
+        const combo = `${c}${c && d ? " - " : ""}${d}`
         return combo.trim()
       },
       header: ({ column }) => {
@@ -107,7 +107,7 @@ export const getColumns = ({ onEdit, onDelete, currentUserRole }: GetColumnsProp
       },
       filterFn: arrayIncludes,
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.ubicacionDepartamentoDescripcion} - {row.original.ubicacionCiudadDescripcion}</span>
+        <span className="font-medium">{row.original.ubicacionCiudadDescripcion} - {row.original.ubicacionDepartamentoDescripcion}</span>
       ),
     },
     {

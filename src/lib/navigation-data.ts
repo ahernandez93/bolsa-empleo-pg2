@@ -1,14 +1,18 @@
 import { AudioWaveform, BookOpen, Command, Frame, GalleryVerticalEnd, Map, PieChart, Settings2, LucideIcon, House, PersonStanding } from 'lucide-react'
 
+export type UserRole = "SUPERADMIN" | "ADMIN" | "RECLUTADOR"
+
 export interface NavSubItem {
     title: string
     url: string
+    roles?: UserRole[]
 }
 export interface NavItem {
     title: string
     url: string
     icon?: LucideIcon
     isActive?: boolean
+    roles?: UserRole[]
     items?: NavSubItem[]
 }
 
@@ -37,10 +41,12 @@ export const navigationData: NavItem[] = [
         url: "#",
         icon: House,
         isActive: true,
+        roles: ["ADMIN", "RECLUTADOR"],
         items: [
             {
                 title: "Dashboard",
                 url: "/admin",
+                roles: ["ADMIN", "RECLUTADOR"]
             },
         ],
     },
@@ -48,18 +54,22 @@ export const navigationData: NavItem[] = [
         title: "Recursos Humanos",
         url: "#",
         icon: PersonStanding,
+        roles: ["ADMIN"],
         items: [
             {
                 title: "Gestión de Empleados",
                 url: "/admin/empleados",
+                roles: ["ADMIN"],
             },
             {
                 title: "Departamentos",
                 url: "/admin/departamentos",
+                roles: ["ADMIN"],
             },
             {
                 title: "Cargos",
                 url: "/admin/cargos",
+                roles: ["ADMIN"],
             },
         ],
     },
@@ -67,18 +77,22 @@ export const navigationData: NavItem[] = [
         title: "Ofertas Laborales",
         url: "#",
         icon: BookOpen,
+        roles: ["ADMIN", "RECLUTADOR"],
         items: [
             {
                 title: "Crear Nueva Oferta",
                 url: "/admin/ofertaslaborales",
+                roles: ["ADMIN", "RECLUTADOR"],
             },
             {
                 title: "Postulaciones Recibidas",
                 url: "/admin/postulaciones-recibidas",
+                roles: ["ADMIN", "RECLUTADOR"],
             },
             {
                 title: "Candidatos Registrados",
                 url: "/admin/candidatos",
+                roles: ["ADMIN", "RECLUTADOR"],
             },
         ],
     },
@@ -86,10 +100,12 @@ export const navigationData: NavItem[] = [
         title: "Ajustes",
         url: "#",
         icon: Settings2,
+        roles: ["ADMIN"],
         items: [
             {
                 title: "Configuraciones de la empresa",
                 url: "/admin/config-empresa",
+                roles: ["ADMIN"],
             },
         ],
     },

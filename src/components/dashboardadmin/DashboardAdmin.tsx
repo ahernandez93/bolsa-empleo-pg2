@@ -60,6 +60,7 @@ function BreakdownList({ title, items, total }: { title: string; items: Record<s
 export default function DashboardAdmin() {
     const { plan, meta, rol } = usePlanActual();
     const isSuperAdmin = rol === "SUPERADMIN";
+    const isAdmin = rol === "ADMIN";
 
     const [empresaFiltro, setEmpresaFiltro] = useState<"all" | string>("all");
     const { data: empresas, isLoading: loadingEmpresas } = useSWR(
@@ -88,21 +89,6 @@ export default function DashboardAdmin() {
     return (
         <div className="flex flex-col gap-4">
             {/* Header del plan */}
-            {/* <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Plan actual:</span>
-                    <BadgePlan nombre={plan?.nombre ?? null} />
-                    {meta && (plan?.nombre !== "Premium") ? (
-                        <span className="text-xs text-muted-foreground">
-                            • {meta.ofertasActivas}/{plan?.maxOfertasActivas ?? 0} ofertas activas
-                            {typeof meta.restantes === "number" ? ` • ${meta.restantes} restantes` : null}
-                        </span>
-                    ) : <span className="text-xs text-muted-foreground">
-                        Ofertas ilimitadas
-                    </span>}
-                </div>
-                <Link href="/admin/planes"><Button variant="secondary" size="sm">Cambiar plan</Button></Link>
-            </div> */}
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 {/* Lado izquierdo: según rol */}
                 {!isSuperAdmin ? (
@@ -169,7 +155,7 @@ export default function DashboardAdmin() {
                 )}
 
                 {/* Lado derecho: botón de cambiar plan solo para empresa normal */}
-                {!isSuperAdmin && (
+                {isAdmin && (
                     <Link href="/admin/planes">
                         <Button variant="secondary" size="sm">
                             Cambiar plan

@@ -1,17 +1,39 @@
 import { prisma } from "@/lib/prisma";
 import type { JobCardProps } from "@/components/jobcarousel";
 import { requireEmpresaSession } from "@/lib/auth/guard";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
 export const getOfertasLaborales = async () => {
     try {
-        const { empresaId, rol } = await requireEmpresaSession();
+        const { session, empresaId, rol } = await requireEmpresaSession();
+        const userId = session?.user?.id;
         const isSuperAdmin = rol === "SUPERADMIN";
+        const isRecruiter = rol === "RECLUTADOR";
 
-        const where = !isSuperAdmin && empresaId
-            ? { empresaId }
-            : {};
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let where: Prisma.OfertaLaboralWhereInput = {};
+
+        if (!isSuperAdmin && empresaId) {
+            if (isRecruiter) {
+                // Reclutador: solo ofertas de su empresa
+                // creadas por él o asignadas a él
+                where = {
+                    empresaId,
+                    OR: [
+                        { agregadoPorId: userId },
+                        { reclutadorId: userId },
+                    ],
+                };
+            } else {
+                // ADMIN:
+                // todas las ofertas de la empresa
+                where = {
+                    empresaId,
+                };
+            }
+        }
 
         const ofertasLaborales = await prisma.ofertaLaboral.findMany({
             where,

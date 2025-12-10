@@ -1,16 +1,43 @@
 import { requireEmpresaSession } from "@/lib/auth/guard";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
 export const getPostulaciones = async () => {
     try {
-        const { empresaId, rol } = await requireEmpresaSession();
-        const isSuperAdmin = rol === "SUPER_ADMIN";
+        const { session, empresaId, rol } = await requireEmpresaSession();
 
-        const where = !isSuperAdmin && empresaId
-            ? { oferta: { empresaId } }
-            : {};
+        const userId = session?.user?.id;
+        const isSuperAdmin = rol === "SUPERADMIN";
+        const isRecruiter = rol === "RECLUTADOR";
+
+        let where: Prisma.PostulacionWhereInput = {};
+
+        if (!isSuperAdmin && empresaId) {
+            if (isRecruiter) {
+                // RECLUTADOR:
+                // Solo postulaciones a ofertas de su empresa
+                // que él creó o que le asignaron
+                where = {
+                    oferta: {
+                        empresaId,
+                        OR: [
+                            { agregadoPorId: userId },
+                            { reclutadorId: userId },
+                        ],
+                    },
+                };
+            } else {
+                // ADMIN (u otro rol admin de empresa):
+                // todas las postulaciones de las ofertas de su empresa
+                where = {
+                    oferta: {
+                        empresaId,
+                    },
+                };
+            }
+        }
 
         const postulaciones = await prisma.postulacion.findMany({
             where,

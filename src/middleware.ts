@@ -6,9 +6,9 @@ const { auth: middleware } = NextAuth(authOptions);
 
 const PUBLIC_EXACT = [
   "/login", // Login candidatos (raíz)
+  "/registrar", // Registro candidatos
   "/admin/login", // Login administradores
   "/admin/registro", // Registro administradores
-  "/registrar", // Registro candidatos
   "/ofertas", // Vacantes
   "/api/auth/register",
   "/api/auth",
@@ -26,6 +26,17 @@ const PUBLIC_PREFIXES = [
 // APIs públicas (solo GET)
 const PUBLIC_API_PREFIXES_GET = [
   "/api/ofertas",    // /api/ofertas y /api/ofertas/[id]
+];
+
+const RECRUITER_ADMIN_EXACT = [
+  "/admin", // dashboard
+];
+
+const RECRUITER_ADMIN_PREFIXES = [
+  "/admin/ofertaslaborales",
+  "/admin/postulaciones-recibidas",
+  "/admin/candidatos",
+  "/admin/perfil",
 ];
 
 export default middleware((req) => {
@@ -88,6 +99,21 @@ export default middleware((req) => {
 
     if (!isAdminAreaRole) {
       return redirectTo("/admin/login");
+    }
+
+    if (role === "RECLUTADOR") {
+      const isAllowedExact = RECRUITER_ADMIN_EXACT.includes(pathname);
+
+      const isAllowedPrefixed = RECRUITER_ADMIN_PREFIXES.some((p) =>
+        pathname === p || pathname.startsWith(p + "/")
+      );
+
+      const recruiterCanAccess = isAllowedExact || isAllowedPrefixed;
+
+      if (!recruiterCanAccess) {
+        // lo mandamos de regreso al dashboard
+        return redirectTo("/admin");
+      }
     }
   }
 

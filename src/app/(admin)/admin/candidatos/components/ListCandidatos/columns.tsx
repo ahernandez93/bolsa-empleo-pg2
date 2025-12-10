@@ -75,7 +75,7 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
     accessorFn: (row: CandidatoConDatos) => {
       const d = row.ubicacionDepartamento ?? ""
       const c = row.ubicacionCiudad ?? ""
-      const combo = `${d}${d && c ? " - " : ""}${c}`
+      const combo = `${c}${c && d ? " - " : ""}${d}`
       return combo.trim()
     },
     header: ({ column }) => {
@@ -97,7 +97,7 @@ export const getColumns = ({ onDelete }: GetColumnsProps): ColumnDef<CandidatoCo
       const ubicacionCiudad = row.original.ubicacionCiudad
       return (
         <span className="font-medium">
-          {ubicacionDepartamento} , {ubicacionCiudad}
+          {ubicacionCiudad} , {ubicacionDepartamento}
         </span>
       )
     },
