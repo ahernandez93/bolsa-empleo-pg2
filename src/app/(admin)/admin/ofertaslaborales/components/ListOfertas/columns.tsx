@@ -21,6 +21,7 @@ export type OfertaLaboralConDatos = {
   agregadoPorUsuario: string
   reclutadorId: string | null
   reclutadorUsuario: string | undefined
+  reclutadorNombre?: string | null;
   fechaCreacion: string
   estado: string
 }

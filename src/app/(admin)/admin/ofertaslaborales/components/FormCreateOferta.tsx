@@ -3,7 +3,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,30 +12,42 @@ import { useEffect, useState } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, OfertaLaboralFormData, OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
+import {
+    ofertaLaboralFormSchema, ofertaLaboralUpdateSchema, ofertaLaboralUpdateAdminSchema,
+    ofertaLaboralUpdateRecruiterSchema, OfertaLaboralFormData, OfertaLaboralUpdateData, OfertaLaboralUpdateAdminData, OfertaLaboralUpdateRecruiterData,
+} from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
 import { Separator } from "@/components/ui/separator";
-// evita SSR del editor
 const Wysiwyg = dynamic(() => import("@/components/richtext/Wysiwyg"), { ssr: false });
 
 
 type FormCreateProps = {
     setOpenModalCreate: Dispatch<SetStateAction<boolean>>
     initialData?: InitialDataUpdateOfertaLaboral | null,
-    isEditMode: boolean
+    isEditMode: boolean,
+    currentUserRole: RolUsuario;
+    reclutadores?: { id: string; nombre: string }[];
 }
 
-type FormBase = z.infer<typeof ofertaLaboralFormSchema> & Partial<Pick<z.infer<typeof ofertaLaboralUpdateSchema>, "estado">>;
+type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
+
+type FormBase =
+    | OfertaLaboralFormData
+    | (OfertaLaboralUpdateAdminData & { reclutadorId?: string | null })
+    | OfertaLaboralUpdateRecruiterData;
 
 const fetcher = (url: string) => axios.get(url).then((r) => r.data);
 
-export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode = false }: FormCreateProps) {
+export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode = false, currentUserRole, reclutadores }: FormCreateProps) {
 
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const isAdmin = currentUserRole === "ADMIN" || currentUserRole === "SUPERADMIN";
+    const isRecruiter = currentUserRole === "RECLUTADOR";
 
     const defaultValues = initialData ? {
         puesto: initialData.puesto,
@@ -50,6 +61,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         modalidad: initialData.modalidad,
         salario: initialData.salario,
         estado: initialData.estado,
+        ...(isAdmin && { reclutadorId: initialData.reclutadorId ?? null }),
     } : {
         puesto: "",
         descripcionPuesto: "",
@@ -63,9 +75,11 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         salario: 0,
     };
 
+
+
     const form = useForm<FormBase>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        resolver: zodResolver(isEditMode ? ofertaLaboralUpdateSchema : ofertaLaboralFormSchema) as any,
+        resolver: zodResolver(isEditMode ? isAdmin ? ofertaLaboralUpdateAdminSchema : ofertaLaboralUpdateRecruiterSchema : ofertaLaboralFormSchema) as any,
         defaultValues: defaultValues,
         mode: "onChange",
         reValidateMode: "onChange",
@@ -85,6 +99,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                 modalidad: initialData.modalidad,
                 salario: initialData.salario,
                 estado: initialData.estado,
+                ...(isAdmin && { reclutadorId: initialData.reclutadorId ?? null }),
             } satisfies Partial<FormBase>);
         } else if (!isEditMode) {
             form.reset({
@@ -132,7 +147,7 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
         fetcher
     );
 
-    const onSubmit = async (data: OfertaLaboralFormData | OfertaLaboralUpdateData) => {
+    const onSubmit = async (data: FormBase) => {
         setError(null);
         setIsLoading(true)
 
@@ -435,6 +450,51 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                 )}
                             />
                         )}
+
+                        {/* RECLUTADOR asignado */}
+                        {isEditMode && isAdmin && reclutadores && (
+                            <FormField
+                                control={form.control}
+                                name="reclutadorId"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Reclutador asignado</FormLabel>
+                                        <Select
+                                            value={field.value ?? ""}
+                                            onValueChange={(v) => field.onChange(v || null)}
+                                        >
+                                            <SelectTrigger className={focusSlim}>
+                                                <SelectValue placeholder="Seleccionar reclutador" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="">Sin asignar</SelectItem>
+                                                {reclutadores.map((r) => (
+                                                    <SelectItem key={r.id} value={r.id}>
+                                                        {r.nombre}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+
+                        {isEditMode && isRecruiter && initialData?.reclutadorNombre && (
+                            <FormItem>
+                                <FormLabel>Reclutador asignado</FormLabel>
+                                <Input
+                                    value={initialData.reclutadorNombre}
+                                    readOnly
+                                    className="bg-muted"
+                                />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Este campo solo puede ser modificado por el administrador.
+                                </p>
+                            </FormItem>
+                        )}
+
                     </div>
                 </section>
 

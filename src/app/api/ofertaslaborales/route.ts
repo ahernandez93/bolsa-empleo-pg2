@@ -112,7 +112,8 @@ export async function POST(req: Request) {
                 modalidad: data.modalidad,
                 salario: data.salario,
                 agregadoPorId: data.agregadoPorId,
-                estado: data.estado,
+                estado: "PENDIENTE",
+                reclutadorId: null,
             }
         });
 

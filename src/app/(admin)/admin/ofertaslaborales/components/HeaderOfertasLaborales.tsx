@@ -17,7 +17,17 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function HeaderOfertasLaborales() {
+type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
+
+type HeaderOfertasLaboralesProps = {
+    currentUserRole: RolUsuario;
+    reclutadores: { id: string; nombre: string; email: string }[];
+};
+
+export function HeaderOfertasLaborales({
+    currentUserRole,
+    reclutadores,
+}: HeaderOfertasLaboralesProps) {
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const { plan, meta, isLoading } = usePlanActual();
 
@@ -76,6 +86,9 @@ export function HeaderOfertasLaborales() {
                                             <FormCreateOferta
                                                 setOpenModalCreate={setOpenModalCreate}
                                                 isEditMode={false}
+                                                initialData={null}
+                                                currentUserRole={currentUserRole}
+                                                reclutadores={reclutadores}
                                             />
                                         </div>
                                     </DialogContent>

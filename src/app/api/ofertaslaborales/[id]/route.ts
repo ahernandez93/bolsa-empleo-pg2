@@ -1,16 +1,16 @@
 import { prisma } from "@/lib/prisma"
-import { ofertaLaboralUpdateSchema } from "@/lib/schemas/ofertaLaboralSchema"
+import { ofertaLaboralUpdateSchema, ofertaLaboralUpdateAdminSchema, ofertaLaboralUpdateRecruiterSchema } from "@/lib/schemas/ofertaLaboralSchema"
 import { NextResponse } from "next/server"
 import z from "zod"
 import { Prisma } from "@prisma/client";
-import { auth } from "@/lib/auth/auth";
+import { requireEmpresaSession } from "@/lib/auth/guard";
 
 export const dynamic = 'force-dynamic';
 export const runtime = "nodejs";
 
 type Params = { id: string };
 
-export async function GET(request: Request, ctx : { params: Promise<Params> }) {
+export async function GET(request: Request, ctx: { params: Promise<Params> }) {
     try {
         const { id } = await ctx.params
         const ofertaLaboral = await prisma.ofertaLaboral.findUnique({
@@ -32,6 +32,17 @@ export async function GET(request: Request, ctx : { params: Promise<Params> }) {
                 ubicacionDepartamentoId: true,
                 ubicacionCiudad: { select: { nombre: true } },
                 ubicacionDepartamento: { select: { nombre: true } },
+                reclutadorId: true,
+                reclutador: {
+                    select: {
+                        persona: {
+                            select: {
+                                nombre: true,
+                                apellido: true,
+                            },
+                        },
+                    },
+                },
             },
         })
 
@@ -56,6 +67,10 @@ export async function GET(request: Request, ctx : { params: Promise<Params> }) {
             ubicacionDepartamentoId: ofertaLaboral.ubicacionDepartamentoId,
             ubicacionCiudadDescripcion: ofertaLaboral.ubicacionCiudad?.nombre ?? null,
             ubicacionDepartamentoDescripcion: ofertaLaboral.ubicacionDepartamento?.nombre ?? null,
+            reclutadorId: ofertaLaboral.reclutadorId,
+            reclutadorNombre: ofertaLaboral.reclutador
+                ? `${ofertaLaboral.reclutador.persona.nombre} ${ofertaLaboral.reclutador.persona.apellido}`
+                : null,
         };
 
         return NextResponse.json(dto)
@@ -65,13 +80,15 @@ export async function GET(request: Request, ctx : { params: Promise<Params> }) {
     }
 }
 
-export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
+export async function PUT(request: Request, ctx: { params: Promise<Params> }) {
     try {
         const { id } = await ctx.params
-        const session = await auth();
+        const { session, empresaId, rol } = await requireEmpresaSession();
         const actualizadoPorId = session?.user?.id;
+
         const body = await request.json()
-        const validatedData = ofertaLaboralUpdateSchema.parse(body)
+
+        //const validatedData = ofertaLaboralUpdateSchema.parse(body)
 
         const existingOfertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },
@@ -81,22 +98,74 @@ export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
             return NextResponse.json({ message: "Oferta laboral no encontrada" }, { status: 404 })
         }
 
-        const ofertaLaboralUpdateData: Prisma.OfertaLaboralUpdateInput = {
-            puesto: validatedData.puesto,
-            descripcionPuesto: validatedData.descripcionPuesto,
-            area: validatedData.area,
-            ubicacionDepartamento: { connect: { id: validatedData.ubicacionDepartamentoId } },
-            ubicacionCiudad: { connect: { id: validatedData.ubicacionCiudadId } },
-            //empresa: validatedData.empresa,
-            nivelAcademico: validatedData.nivelAcademico,
-            experienciaLaboral: validatedData.experienciaLaboral,
-            tipoTrabajo: validatedData.tipoTrabajo,
-            modalidad: validatedData.modalidad,
-            salario: validatedData.salario,
-            estado: validatedData.estado,
-            ...(actualizadoPorId
-                ? { actualizadoPor: { connect: { id: actualizadoPorId } } }
-                : {}),
+        if (rol !== "SUPERADMIN") {
+            if (!empresaId || existingOfertaLaboral.empresaId !== empresaId) {
+                return NextResponse.json(
+                    { message: "No tenés permiso para editar esta oferta" },
+                    { status: 403 }
+                );
+            }
+        }
+
+        let ofertaLaboralUpdateData: Prisma.OfertaLaboralUpdateInput;
+
+        if (rol === "ADMIN" || rol === "SUPERADMIN") {
+            //ADMIN: puede cambiar estado y reclutador
+            const validatedData = ofertaLaboralUpdateAdminSchema.parse(body);
+
+            ofertaLaboralUpdateData = {
+                puesto: validatedData.puesto,
+                descripcionPuesto: validatedData.descripcionPuesto,
+                area: validatedData.area,
+                ubicacionDepartamento: {
+                    connect: { id: validatedData.ubicacionDepartamentoId },
+                },
+                ubicacionCiudad: {
+                    connect: { id: validatedData.ubicacionCiudadId },
+                },
+                nivelAcademico: validatedData.nivelAcademico,
+                experienciaLaboral: validatedData.experienciaLaboral,
+                tipoTrabajo: validatedData.tipoTrabajo,
+                modalidad: validatedData.modalidad,
+                salario: validatedData.salario,
+                estado: validatedData.estado,
+                ...(actualizadoPorId
+                    ? { actualizadoPor: { connect: { id: actualizadoPorId } } }
+                    : {}),
+                //manejo de reclutador
+                ...(validatedData.reclutadorId
+                    ? { reclutador: { connect: { id: validatedData.reclutadorId } } }
+                    : { reclutador: { disconnect: true } }),
+            };
+        } else if (rol === "RECLUTADOR") {
+            //RECLUTADOR: NO puede cambiar reclutadorId, sí estado
+            const validatedData = ofertaLaboralUpdateRecruiterSchema.parse(body);
+
+            ofertaLaboralUpdateData = {
+                puesto: validatedData.puesto,
+                descripcionPuesto: validatedData.descripcionPuesto,
+                area: validatedData.area,
+                ubicacionDepartamento: {
+                    connect: { id: validatedData.ubicacionDepartamentoId },
+                },
+                ubicacionCiudad: {
+                    connect: { id: validatedData.ubicacionCiudadId },
+                },
+                nivelAcademico: validatedData.nivelAcademico,
+                experienciaLaboral: validatedData.experienciaLaboral,
+                tipoTrabajo: validatedData.tipoTrabajo,
+                modalidad: validatedData.modalidad,
+                salario: validatedData.salario,
+                estado: validatedData.estado,
+                ...(actualizadoPorId
+                    ? { actualizadoPor: { connect: { id: actualizadoPorId } } }
+                    : {}),
+            };
+        } else {
+            return NextResponse.json(
+                { message: "Rol no autorizado para editar ofertas" },
+                { status: 403 }
+            );
         }
 
         const updatedOfertaLaboral = await prisma.ofertaLaboral.update({
@@ -128,7 +197,7 @@ export async function PUT(request: Request, ctx : { params: Promise<Params> }) {
     }
 }
 
-export async function DELETE(request: Request, ctx : { params: Promise<Params> }) {
+export async function DELETE(request: Request, ctx: { params: Promise<Params> }) {
     try {
         const { id } = await ctx.params
 

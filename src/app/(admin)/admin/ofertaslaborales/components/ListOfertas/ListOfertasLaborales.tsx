@@ -11,11 +11,14 @@ import { useRouter } from "next/navigation"
 // import { OfertaLaboralUpdateData } from "@/lib/schemas/ofertaLaboralSchema";
 import { InitialDataUpdateOfertaLaboral } from "@/types"
 
+type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
 interface ListEmpleadosProps {
-    ofertasLaborales: OfertaLaboralConDatos[]
+    ofertasLaborales: OfertaLaboralConDatos[],
+    currentUserRole: RolUsuario;
+    reclutadores: { id: string; nombre: string; email: string }[];
 }
 
-export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
+export function ListOfertasLaborales({ ofertasLaborales, currentUserRole, reclutadores }: ListEmpleadosProps) {
     const [editingOferta, setEditingOferta] = useState<InitialDataUpdateOfertaLaboral | null>(null)
     const [openModalCreate, setOpenModalCreate] = useState(false);
     const router = useRouter()
@@ -81,6 +84,8 @@ export function ListOfertasLaborales({ ofertasLaborales }: ListEmpleadosProps) {
                             initialData={editingOferta}
                             setOpenModalCreate={setOpenModalCreate}
                             isEditMode={Boolean(editingOferta)}
+                            currentUserRole={currentUserRole}
+                            reclutadores={reclutadores}
                         />
                     </div>
                 </DialogContent>

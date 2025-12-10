@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { requireEmpresaSession } from "@/lib/auth/guard";
+import { RolUsuario } from "@prisma/client";
 
 export const getEmpleados = async () => {
     try {
@@ -43,6 +44,44 @@ export const getEmpleados = async () => {
 
     } catch (error) {
         console.error("Error fetching empleados from database:", error);
+        return [];
+    }
+}
+
+export const getReclutadoresEmpresa = async () => {
+    try {
+        const { empresaId, rol } = await requireEmpresaSession();
+        const isSuperAdmin = rol === "SUPERADMIN";
+
+        // Si usás la tabla Usuario como origen de reclutadores:
+        const whereUsuario = {
+            rol: "RECLUTADOR" as RolUsuario,
+            ...(isSuperAdmin
+                ? {}
+                : { empresaId: empresaId ?? undefined }),
+        };
+
+        const usuarios = await prisma.usuario.findMany({
+            where: whereUsuario,
+            include: {
+                persona: true,
+            },
+            orderBy: {
+                persona: {
+                    nombre: "asc",
+                },
+            },
+        });
+
+        const data = usuarios.map((u) => ({
+            id: u.id,
+            nombre: `${u.persona.nombre} ${u.persona.apellido}`,
+            email: u.email,
+        }));
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching reclutadores:", error);
         return [];
     }
 }
