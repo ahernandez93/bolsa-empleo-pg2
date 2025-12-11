@@ -1,6 +1,7 @@
 import { Resend } from "resend"
 import { render } from "@react-email/render"
 import { EstadoPostulacionEmail } from "@/emails/EstadoPostulacionEmail"
+import { PasswordResetEmail } from "@/emails/PasswordResetEmail"
 
 type Estado = "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
 
@@ -9,6 +10,16 @@ if (!API_KEY) {
     console.warn("[mailer] RESEND_API_KEY no está definida")
 }
 const resend = new Resend(API_KEY)
+
+function asuntoPorEstado(puesto: string, estado: Estado) {
+    switch (estado) {
+        case "SOLICITUD": return `Recibimos tu postulación a ${puesto}`
+        case "ENTREVISTA": return `Entrevista para ${puesto}: siguiente paso`
+        case "EVALUACIONES": return `Evaluaciones para ${puesto}: instrucciones`
+        case "CONTRATACION": return `¡Adelante con ${puesto}! Proceso de contratación`
+        case "RECHAZADA": return `Actualización sobre tu postulación a ${puesto}`
+    }
+}
 
 export async function sendEstadoPostulacionEmail(opts: {
     to: string
@@ -47,12 +58,39 @@ export async function sendEstadoPostulacionEmail(opts: {
     console.log("Correo enviado a", opts.to)
 }
 
-function asuntoPorEstado(puesto: string, estado: Estado) {
-    switch (estado) {
-        case "SOLICITUD": return `Recibimos tu postulación a ${puesto}`
-        case "ENTREVISTA": return `Entrevista para ${puesto}: siguiente paso`
-        case "EVALUACIONES": return `Evaluaciones para ${puesto}: instrucciones`
-        case "CONTRATACION": return `¡Adelante con ${puesto}! Proceso de contratación`
-        case "RECHAZADA": return `Actualización sobre tu postulación a ${puesto}`
+export async function sendPasswordResetEmail(to: string, resetUrl: string, nombre?: string | null) {
+    if (!to) {
+        console.error("[mailer] Falta destinatario en sendPasswordResetEmail")
+        return
     }
+
+    const subject = "Restablecer contraseña - EmpleaHub"
+
+    try {
+        const html = await render(
+            PasswordResetEmail({
+                nombre: nombre ?? null,
+                resetUrl,
+            })
+        )
+
+        console.log("[mailer] Enviando reset password →", { to, subject })
+
+        const resp = await resend.emails.send({
+            from: "onboarding@resend.dev",
+            to: "allan.hernandez777@gmail.com",//to,
+            subject,
+            html,
+        })
+
+        console.log("[mailer] Resend response (reset):", resp)
+        if (resp?.error) {
+            console.error("[mailer] Resend error (reset):", resp.error)
+        }
+    } catch (err) {
+        console.error("[mailer] Throw en sendPasswordResetEmail:", err)
+        throw err
+    }
+
+    console.log("Correo de recuperación enviado a", to)
 }

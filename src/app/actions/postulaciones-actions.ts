@@ -29,7 +29,7 @@ export const getPostulaciones = async () => {
                     },
                 };
             } else {
-                // ADMIN (u otro rol admin de empresa):
+                // ADMIN:
                 // todas las postulaciones de las ofertas de su empresa
                 where = {
                     oferta: {

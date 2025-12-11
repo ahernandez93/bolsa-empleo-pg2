@@ -12,7 +12,6 @@ export const getOfertasLaborales = async () => {
         const isSuperAdmin = rol === "SUPERADMIN";
         const isRecruiter = rol === "RECLUTADOR";
 
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
         let where: Prisma.OfertaLaboralWhereInput = {};
 
         if (!isSuperAdmin && empresaId) {

@@ -91,12 +91,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
                     <FormItem>
                       <div className="flex items-center">
                         <FormLabel>Contraseña</FormLabel>
-                        <a
-                          href="#"
+                        <Link
+                          href="/admin/recuperar-contrasena"
                           className="ml-auto text-sm underline-offset-2 hover:underline"
                         >
                           ¿Olvidaste tu contraseña?
-                        </a>
+                        </Link>
                       </div>
                       <FormControl>
                         <Input type="password" {...field} />

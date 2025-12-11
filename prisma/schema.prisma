@@ -163,14 +163,27 @@ model Usuario {
   perfilCandidato PerfilCandidato?
 
   // Relaciones con ofertas
-  ofertasAsignadas    OfertaLaboral[]  @relation("OfertasAsignadas")
-  ofertasPublicadas   OfertaLaboral[]  @relation("OfertasPublicadas")
-  ofertasAprobadas    OfertaLaboral[]  @relation("OfertasAprobadas")
-  ofertasActualizadas OfertaLaboral[]  @relation("OfertasActualizadas")
+  ofertasAsignadas    OfertaLaboral[]      @relation("OfertasAsignadas")
+  ofertasPublicadas   OfertaLaboral[]      @relation("OfertasPublicadas")
+  ofertasAprobadas    OfertaLaboral[]      @relation("OfertasAprobadas")
+  ofertasActualizadas OfertaLaboral[]      @relation("OfertasActualizadas")
   guardados           GuardadoOferta[]
-  empresa             Empresa?         @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  empresa             Empresa?             @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  passwordResetTokens PasswordResetToken[]
 
   @@index([empresaId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  user      Usuario   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
 }
 
 model Empleado {

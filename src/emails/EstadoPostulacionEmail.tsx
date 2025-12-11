@@ -1,7 +1,5 @@
 import * as React from "react"
-import {
-    Html, Head, Preview, Body, Container, Heading, Text, Hr, Section, Link,
-} from "@react-email/components"
+import { Html, Head, Preview, Body, Container, Heading, Text, Hr, Section, Link } from "@react-email/components"
 
 type Estado = "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
 
