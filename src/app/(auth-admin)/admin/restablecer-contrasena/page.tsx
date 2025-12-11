@@ -18,6 +18,8 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 const schema = z
     .object({
@@ -79,7 +81,7 @@ export default function RestablecerContrasenaPage() {
             } else {
                 toast.error(res.data.message || "No se pudo actualizar la contraseña.");
             }
-        //eslint-disable-next-line @typescript-eslint/no-explicit-any
+            //eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error(error);
             const msg =
@@ -91,58 +93,81 @@ export default function RestablecerContrasenaPage() {
 
     return (
         <div className="bg-muted flex min-h-svh items-center justify-center p-6">
-            <Card className="w-full max-w-md">
-                <CardContent className="p-6">
-                    <h1 className="mb-2 text-xl font-bold text-center">
-                        Restablecer contraseña
-                    </h1>
-                    <p className="mb-6 text-sm text-muted-foreground text-center">
-                        Escribí tu nueva contraseña.
-                    </p>
+            <div className="w-full max-w-sm md:max-w-3xl">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full"
+                >
+                    <Card className="overflow-hidden p-0">
+                        <CardContent className="grid p-0 md:grid-cols-2">
+                            <div className="p-6 md:p-8">
+                                <h1 className="mb-2 text-xl font-bold text-center">
+                                    Restablecer contraseña
+                                </h1>
+                                <p className="mb-6 text-sm text-muted-foreground text-center">
+                                    Escribí tu nueva contraseña.
+                                </p>
 
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nueva contraseña</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                        <FormField
+                                            control={form.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Nueva contraseña</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="password" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                            <FormField
-                                control={form.control}
-                                name="confirmPassword"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Confirmar contraseña</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                                        <FormField
+                                            control={form.control}
+                                            name="confirmPassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Confirmar contraseña</FormLabel>
+                                                    <FormControl>
+                                                        <Input type="password" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                            <Button type="submit" className="w-full">
-                                Guardar nueva contraseña
-                            </Button>
-                        </form>
-                    </Form>
+                                        <Button type="submit" className="w-full">
+                                            Guardar nueva contraseña
+                                        </Button>
+                                    </form>
+                                </Form>
 
-                    <div className="mt-4 text-center text-sm">
-                        <Link href="/admin/login" className="underline underline-offset-4">
-                            Ir al inicio de sesión
-                        </Link>
-                    </div>
-                </CardContent>
-            </Card>
+                                <div className="mt-4 text-center text-sm">
+                                    <Link href="/admin/login" className="underline underline-offset-4">
+                                        Ir al inicio de sesión
+                                    </Link>
+                                </div>
+                            </div>
+
+                            <div className="bg-muted relative hidden md:block">
+                                <Image
+                                    src="/portada5.jpg"
+                                    alt="Portada Recuperar Contraseña"
+                                    width={100}
+                                    height={100}
+                                    quality={100}
+                                    priority={true}
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            </div>
         </div>
     );
 }
