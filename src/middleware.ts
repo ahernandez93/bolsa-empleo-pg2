@@ -7,8 +7,12 @@ const { auth: middleware } = NextAuth(authOptions);
 const PUBLIC_EXACT = [
   "/login", // Login candidatos (raíz)
   "/registrar", // Registro candidatos
+  "/recuperar-contrasena", // Recuperar contraseña candidatos
+  "/restablecer-contrasena", // Reset contraseña candidatos
   "/admin/login", // Login administradores
   "/admin/registro", // Registro administradores
+  "/admin/recuperar-contrasena", // Recuperar contraseña admin
+  "/admin/restablecer-contrasena", // Reset contraseña admin
   "/ofertas", // Vacantes
   "/api/auth/register",
   "/api/auth",

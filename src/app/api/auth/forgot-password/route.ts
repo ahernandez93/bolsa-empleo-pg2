@@ -7,6 +7,7 @@ import { sendPasswordResetEmail } from "@/lib/mailer";
 
 const forgotSchema = z.object({
     email: z.string().email(),
+    tipo: z.enum(["admin", "candidato"]).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { email } = parsed.data;
+        const { email, tipo } = parsed.data;
 
         const user = await prisma.usuario.findUnique({
             where: { email },
@@ -59,7 +60,12 @@ export async function POST(req: NextRequest) {
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-        const resetUrl = `${baseUrl}/admin/restablecer-contrasena?token=${token}`;
+        const resetPath =
+            tipo === "candidato"
+                ? "/restablecer-contrasena"
+                : "/admin/restablecer-contrasena";
+
+        const resetUrl = `${baseUrl}${resetPath}?token=${token}`;
 
         const nombreCompleto = user.persona
             ? `${user.persona.nombre} ${user.persona.apellido}`

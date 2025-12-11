@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useState } from "react"
 import { LoginActionCandidate } from "@/app/actions/auth-action"
+import Link from "next/link"
 
 const loginSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -91,12 +92,12 @@ export function LoginFormCandidate({ className, ...props }: React.ComponentProps
                     <FormItem>
                       <div className="flex items-center">
                         <FormLabel>Contraseña</FormLabel>
-                        <a
-                          href="#"
+                        <Link
+                          href="/recuperar-contrasena"
                           className="ml-auto text-sm underline-offset-2 hover:underline"
                         >
                           ¿Olvidaste tu contraseña?
-                        </a>
+                        </Link>
                       </div>
                       <FormControl>
                         <Input type="password" {...field} />
