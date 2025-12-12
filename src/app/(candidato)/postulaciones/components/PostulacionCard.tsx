@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Building2, Briefcase } from "lucide-react";
+import { MapPin, Building2, Briefcase, FileUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -12,8 +14,7 @@ export type EstadoPostulacion =
     | "ENTREVISTA"
     | "EVALUACIONES"
     | "CONTRATACION"
-    | "RECHAZADA"
-    | "RETIRADA"; // si tu enum no la tiene aún, tendrás que agregarla en Prisma
+    | "RECHAZADA";
 
 type Props = {
     id: string; // id de la postulacion
@@ -29,7 +30,7 @@ type Props = {
     estado: EstadoPostulacion;
     fechaPostulacion: string | Date;
     fechaActualizacion: string | Date;
-    onWithdraw: (postulacionId: string) => void;
+    // onWithd  raw: (postulacionId: string) => void;
     canWithdraw?: boolean;
 };
 
@@ -42,7 +43,6 @@ const ESTADO_CFG: Record<
     EVALUACIONES: { label: "Evaluaciones", badgeClass: "bg-yellow-500 text-white", step: 3 },
     CONTRATACION: { label: "Contratación", badgeClass: "bg-green-600 text-white", step: 4 },
     RECHAZADA: { label: "Rechazada", badgeClass: "bg-red-600 text-white", step: 0 },
-    RETIRADA: { label: "Retirada", badgeClass: "bg-muted text-foreground", step: 0 },
 };
 
 function StepsBar({ step }: { step: number }) {
@@ -72,8 +72,8 @@ export default function PostulacionCard({
     estado,
     fechaPostulacion,
     fechaActualizacion,
-    onWithdraw,
-    canWithdraw = true,
+    // onWithdraw,
+    //canWithdraw = true,
 }: Props) {
     const cfg = ESTADO_CFG[estado];
 
@@ -86,8 +86,9 @@ export default function PostulacionCard({
         locale: es,
     });
 
-    const disableWithdraw =
-        !canWithdraw || estado === "RECHAZADA" || estado === "RETIRADA" || estado === "CONTRATACION";
+    /* const disableWithdraw = !canWithdraw || estado === "RECHAZADA" || estado === "RETIRADA" || estado === "CONTRATACION"; */
+
+    const isContratacion = estado === "CONTRATACION";
 
     return (
         <Card className="group relative overflow-hidden border-slate-200 h-full flex flex-col">
@@ -148,6 +149,18 @@ export default function PostulacionCard({
                         Retirar
                     </Button>
                 </div> */}
+
+                {/* ÚNICA acción: Documentación */}
+                {isContratacion && (
+                    <div className="mt-2">
+                        <Link href={`/postulaciones/${id}/documentos`}>
+                            <Button className="w-full">
+                                <FileUp className="h-4 w-4 mr-2" />
+                                Documentación
+                            </Button>
+                        </Link>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

@@ -44,20 +44,20 @@ export default function PanelPostulaciones() {
 
     const postulaciones = useMemo(() => data?.postulaciones ?? [], [data]);
 
-    const onWithdraw = (id: string) => {
+    /* const onWithdraw = (id: string) => {
         setSelectedId(id);
         setConfirmOpen(true);
-    };
+    }; */
 
     const confirmWithdraw = async () => {
         if (!selectedId) return;
         setLoadingAction(true);
 
         // Optimista: marcar RETIRADA al instante
-        const now = new Date().toISOString();
+        //const now = new Date().toISOString();
         const prev = data;
 
-        mutate(
+        /* mutate(
             (curr) => {
                 if (!curr) return curr;
                 return {
@@ -70,7 +70,7 @@ export default function PanelPostulaciones() {
                 };
             },
             { revalidate: false }
-        );
+        ); */
 
         try {
             await axios.patch(`/api/postulaciones/${selectedId}`, { accion: "RETIRAR" });
@@ -144,7 +144,7 @@ export default function PanelPostulaciones() {
                                 estado={p.estado}
                                 fechaPostulacion={p.fechaPostulacion}
                                 fechaActualizacion={p.fechaActualizacion}
-                                onWithdraw={onWithdraw}
+                                //onWithdraw={onWithdraw}
                                 oferta={{
                                     id: p.oferta.id,
                                     puesto: p.oferta.puesto,

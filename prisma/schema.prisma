@@ -391,8 +391,9 @@ model Postulacion {
   fechaActualizacion DateTime          @updatedAt
 
   // Relaciones
-  oferta OfertaLaboral   @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
-  perfil PerfilCandidato @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+  oferta                OfertaLaboral          @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
+  perfil                PerfilCandidato        @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
+  postulacionDocumentos PostulacionDocumento[]
 
   // Evita duplicados: un candidato no puede aplicar dos veces a la misma oferta
   @@unique([ofertaLaboralId, perfilCandidatoId])
@@ -400,6 +401,41 @@ model Postulacion {
   @@index([ofertaLaboralId])
   @@index([perfilCandidatoId])
   @@index([estado])
+}
+
+model DocumentoTipo {
+  id        String   @id @default(uuid())
+  codigo    String   @unique // "DNI_FRONTAL", "IHSS", etc
+  nombre    String
+  requerido Boolean  @default(true)
+  orden     Int      @default(0)
+  ayuda     String?
+  aceptaPdf Boolean  @default(true)
+  aceptaImg Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  postulacionDocs PostulacionDocumento[]
+}
+
+model PostulacionDocumento {
+  id              String @id @default(uuid())
+  postulacionId   String
+  documentoTipoId String
+
+  estado    DocumentoEstado @default(PENDIENTE)
+  url       String?
+  key       String?
+  mimeType  String?
+  size      Int?
+  subidoEn  DateTime?
+  updatedAt DateTime        @updatedAt
+
+  postulacion   Postulacion   @relation(fields: [postulacionId], references: [id], onDelete: Cascade)
+  documentoTipo DocumentoTipo @relation(fields: [documentoTipoId], references: [id], onDelete: Cascade)
+
+  @@unique([postulacionId, documentoTipoId])
+  @@index([postulacionId])
 }
 
 /**
@@ -443,4 +479,11 @@ enum EstadoPostulacion {
   EVALUACIONES
   CONTRATACION
   RECHAZADA
+}
+
+enum DocumentoEstado {
+  PENDIENTE
+  SUBIDO
+  RECHAZADO
+  APROBADO
 }
