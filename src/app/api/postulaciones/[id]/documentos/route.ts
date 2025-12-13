@@ -122,13 +122,14 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     }
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id: postulacionId } = await params;
     try {
         const session = await auth();
         const userId = session?.user?.id;
         if (!userId) return NextResponse.json({ message: "No autenticado" }, { status: 401 });
 
-        const check = await assertOwnerAndContratacion(params.id, userId);
+        const check = await assertOwnerAndContratacion(postulacionId, userId);
         if (!check.ok) return NextResponse.json({ message: check.message }, { status: check.status });
 
         const formData = await req.formData();
@@ -159,11 +160,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         }
 
         const ext = isPdf ? "pdf" : (file.type.split("/")[1] || "jpg");
-        const key = `contratacion/${params.id}/${tipo.codigo}-${randomUUID()}.${ext}`;
+        const key = `contratacion}/${tipo.codigo}-${randomUUID()}.${ext}`;
 
         // si ya existía uno, borramos el anterior para no acumular basura
         const prev = await prisma.postulacionDocumento.findUnique({
-            where: { postulacionId_documentoTipoId: { postulacionId: params.id, documentoTipoId } },
+            where: { postulacionId_documentoTipoId: { postulacionId, documentoTipoId } },
             select: { url: true, key: true },
         });
         if (prev?.url || prev?.key) {
@@ -177,9 +178,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         });
 
         await prisma.postulacionDocumento.upsert({
-            where: { postulacionId_documentoTipoId: { postulacionId: params.id, documentoTipoId } },
+            where: { postulacionId_documentoTipoId: { postulacionId, documentoTipoId } },
             create: {
-                postulacionId: params.id,
+                postulacionId,
                 documentoTipoId,
                 estado: "SUBIDO",
                 url: blob.url,

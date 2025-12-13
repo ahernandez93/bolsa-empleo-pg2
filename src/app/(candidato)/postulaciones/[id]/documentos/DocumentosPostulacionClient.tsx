@@ -20,7 +20,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UploadCloud, FileText, ExternalLink, Download, CheckCircle2, Trash2 } from "lucide-react";
+import { UploadCloud, FileText, ExternalLink, CheckCircle2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type DocEstado = "PENDIENTE" | "SUBIDO" | "RECHAZADO" | "APROBADO";
