@@ -110,7 +110,7 @@ export default function DocumentosPostulacionClient({ postulacionId }: { postula
             setActive(null);
             setSelectedFile(null);
             mutate();
-        } catch (e) {
+        } catch {
             toast.error("No se pudo subir");
         } finally {
             setUploading(false);
@@ -146,7 +146,7 @@ export default function DocumentosPostulacionClient({ postulacionId }: { postula
             });
             toast.success("Documento eliminado");
             mutate();
-        } catch (e) {
+        } catch {
             mutate(prev, { revalidate: false });
             toast.error("No se pudo eliminar");
         } finally {

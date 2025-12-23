@@ -20,6 +20,7 @@ export type PostulacionConDatos = {
 interface GetColumnsProps {
   onEdit: (postulacion: PostulacionConDatos) => void
   onDelete: (postulacion: PostulacionConDatos) => void
+  onOpenSheet: (postulacionId: string) => void
 }
 
 const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
@@ -35,7 +36,7 @@ const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
   )
 }
 
-export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<PostulacionConDatos>[] => [
+export const getColumns = ({ onEdit, onDelete, onOpenSheet }: GetColumnsProps): ColumnDef<PostulacionConDatos>[] => [
   {
     accessorKey: "perfilUsuarioNombre",
     header: ({ column }) => {
@@ -51,9 +52,18 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
         </Button>
       )
     },
-    cell: ({ row }) => (
-      <span className="font-medium">{row.original.perfilUsuarioNombre} {row.original.perfilUsuarioApellido}</span>
-    ),
+    cell: ({ row }) => {
+      const fullName = `${row.original.perfilUsuarioNombre} ${row.original.perfilUsuarioApellido}`
+      return (
+        <Button
+          variant="link"
+          className="p-0 h-auto font-semibold"
+          onClick={() => onOpenSheet(row.original.id)} //id = postulacionId
+        >
+          {fullName}
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "ofertaPuesto",
@@ -76,7 +86,7 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
     ),
   },
   {
-    id: "ubicacion", // 👈 columna sintética para faceted
+    id: "ubicacion",
     accessorFn: (row) => {
       const c = row.ofertaUbicacionCiudad ?? ""
       const d = row.ofertaUbicacionDepartamento ?? ""
@@ -112,7 +122,6 @@ export const getColumns = ({ onEdit, onDelete }: GetColumnsProps): ColumnDef<Pos
           id={p.id}
           value={p.estado}
           onCommitted={(nuevo) => {
-            // si necesitas reflejar en tu store/table sin re-fetch
             row.original.estado = nuevo
           }}
         />
