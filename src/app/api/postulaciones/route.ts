@@ -58,11 +58,46 @@ export async function POST(req: Request) {
 
         const perfil = await prisma.perfilCandidato.findUnique({
             where: { usuarioId: session.user.id },
-            select: { id: true, cvUrl: true, cvKey: true },
+            select: {
+                id: true,
+                cvUrl: true,
+                cvKey: true,
+                usuario: {
+                    select: {
+                        persona: {
+                            select: {
+                                telefono: true,
+                                ubicacionDepartamentoId: true,
+                                ubicacionCiudadId: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         if (!perfil) {
             return NextResponse.json({ message: "El usuario no tiene perfil de candidato" }, { status: 400 });
+        }
+
+        const missing: string[] = [];
+        const telefono = perfil.usuario?.persona?.telefono ?? null;
+        const depId = perfil.usuario?.persona?.ubicacionDepartamentoId ?? null;
+        const cityId = perfil.usuario?.persona?.ubicacionCiudadId ?? null;
+
+        if (!perfil.cvUrl) missing.push("cv");
+        if (!telefono) missing.push("telefono");
+        if (!depId || !cityId) missing.push("ubicacion");
+
+        if (missing.length > 0) {
+            return NextResponse.json(
+                {
+                    code: "PERFIL_INCOMPLETO",
+                    message: "Antes de postular, completá tu perfil.",
+                    missing,
+                },
+                { status: 422 }
+            );
         }
 
         const yaExiste = await prisma.postulacion.findUnique({
@@ -82,7 +117,6 @@ export async function POST(req: Request) {
             data: {
                 ofertaLaboralId: ofertaId,
                 perfilCandidatoId: perfil.id,
-                //cartaPresentacion: cartaPresentacion?.trim() || null,
                 cvSnapshotUrl: perfil.cvUrl,
                 cvSnapshotKey: perfil.cvKey,
             },
@@ -95,7 +129,6 @@ export async function POST(req: Request) {
                         usuario: {
                             select: {
                                 email: true,
-                                // si tienes relación Usuario -> Persona:
                                 persona: { select: { nombre: true, apellido: true } },
                             },
                         },
@@ -119,7 +152,6 @@ export async function POST(req: Request) {
             })
         } catch (mailErr) {
             console.error("[postulacion:email] error enviando correo:", mailErr)
-            // opcional: guardar log/flag para reintentar luego
         }
 
         return NextResponse.json({ message: "Postulación enviada", postulacion: nueva }, { status: 201 });

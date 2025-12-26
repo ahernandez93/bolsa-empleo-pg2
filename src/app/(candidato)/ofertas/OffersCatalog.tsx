@@ -64,7 +64,6 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
                         <h1 className="text-2xl font-semibold">Ofertas</h1>
                         <p className="text-sm text-muted-foreground">Catalogo de ofertas laborales</p>
                     </div>
-                    {/* Acciones globales (opcional): limpiar, exportar, etc. */}
                 </div>
                 
                 {<FiltersBar
@@ -81,38 +80,11 @@ export default function OffersCatalog({ ofertasLaboralesAbiertas }: { ofertasLab
                     modalityOptions={modalityOptions}
                 />}
 
-                {/* Chips rápidos */}
-                {/* <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {[
-                        "Remoto",
-                        "Tiempo completo",
-                        "Junior",
-                        "Producto",
-                    ].map((c) => (
-                        <Badge key={c} variant="secondary" className="rounded-full">{c}</Badge>
-                    ))}
-                </div> */}
-
-                {/* Encabezado de resultados */}
-                {/* <div className="mt-5 flex items-center justify-between text-sm text-slate-600">
-                    <div>Mostrando <span className="font-medium text-slate-900">{filtered.length}</span> resultados</div>
-                    <div className="flex items-center gap-4">
-                        <button className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900">
-                            <Filter className="h-4 w-4" /> Filtros activos: <span className="font-medium text-slate-900">3</span>
-                        </button>
-                        <div>
-                            Ordenar: <span className="font-medium text-slate-900">Relevancia</span>
-                        </div>
-                    </div>
-                </div> */}
-
                 {/* Grid de ofertas */}
                 <section className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {filtered.map((job) => {
                         const key = String(job.id);
-                        // 🔑 Política:
-                        // - sin sesión o cargando: false
-                        // - con sesión: solo SWR; si aún no llegó, false
+                        
                         const effectiveSaved = authed && !isLoading ? !!savedMap[key] : false;
 
                         return (

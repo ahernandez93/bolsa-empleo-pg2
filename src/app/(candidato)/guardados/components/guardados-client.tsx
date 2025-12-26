@@ -45,11 +45,9 @@ export default function GuardadosClient() {
         return p.toString();
     }, [q, order]);
 
-    // 👇 evita terminar con "/api/guardados/list?" vacío
     const base = "/api/guardados/lista";
     const url = qs ? `${base}?${qs}` : base;
 
-    // 👇 NO dispares SWR hasta que la sesión esté lista y autenticada
     const swrKey = status === "authenticated" ? url : null;
 
     const { data, isLoading, mutate } = useSWR(swrKey, fetcher, {
@@ -64,7 +62,6 @@ export default function GuardadosClient() {
                         <h1 className="text-2xl font-semibold">Guardados</h1>
                         <p className="text-sm text-muted-foreground">Tus vacantes favoritas en un solo lugar.</p>
                     </div>
-                    {/* Acciones globales (opcional): limpiar, exportar, etc. */}
                 </div>
 
                 {/* Toolbar */}
@@ -114,10 +111,8 @@ export default function GuardadosClient() {
                             <JobCard
                                 key={job.id}
                                 {...job}
-                                // ya vienen con isSaved: true desde el API
                                 onToggleSaved={(next: boolean) => {
                                     if (!next) {
-                                        // si quitó de guardados, saca la card de la grilla
                                         mutate((prev) => (prev ?? []).filter((x) => x.id !== job.id), { revalidate: false });
                                     }
                                 }}

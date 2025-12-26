@@ -64,7 +64,6 @@ export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
         const el = ref.current;
         if (!el) return;
 
-        // Delta: ~90% del ancho visible (se siente mejor que un “poquito” fijo)
         const delta = Math.round(el.clientWidth * 0.9) * (dir === "left" ? -1 : 1);
         el.scrollBy({ left: delta, behavior: "smooth" });
     };
@@ -108,20 +107,15 @@ export default function JobsCarousel({ jobs }: { jobs: JobCardProps[] }) {
                 {jobs.map((job) => {
                     const key = String(job.id);
 
-                    // ⚖️ Regla:
-                    // - sin sesión o cargando: siempre false
-                    // - con sesión: savedMap manda; si no hay entry aún, podés caer a job.isSaved
                     const effectiveSaved = authed && !isLoading ? (savedMap[key] ?? !!job.isSaved) : false;
 
                     return (
                         <div key={key} className="min-w-[300px] max-w-[320px] snap-start">
                             <JobCard
                                 {...job}
-                                // Asegúrate de que JobCard -> BotonGuardarOferta sea CONTROLADO (saved prop)
                                 isSaved={effectiveSaved}
                                 onToggleSaved={(next) => {
-                                    if (!authed) return; // por seguridad
-                                    // Mantén las keys como string
+                                    if (!authed) return;
                                     mutate((prev) => ({ ...(prev ?? {}), [key]: next }), { revalidate: false });
                                 }}
                             />
