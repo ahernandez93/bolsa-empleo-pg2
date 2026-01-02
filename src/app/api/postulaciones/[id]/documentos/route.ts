@@ -246,9 +246,9 @@ export async function DELETE(
             where: { postulacionId, documentoTipoId },
             select: { id: true, url: true, key: true },
         });
-        if (!doc) return NextResponse.json({ ok: true }); // idempotente
+        if (!doc) return NextResponse.json({ ok: true });
 
-        // borrar blob (preferí key si la guardás, si no url)
+        // borrar blob
         if (doc.key) await del(doc.key);
         else if (doc.url) await del(doc.url);
 

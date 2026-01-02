@@ -53,7 +53,6 @@ export const getReclutadoresEmpresa = async () => {
         const { empresaId, rol } = await requireEmpresaSession();
         const isSuperAdmin = rol === "SUPERADMIN";
 
-        // Si usás la tabla Usuario como origen de reclutadores:
         const whereUsuario = {
             rol: "RECLUTADOR" as RolUsuario,
             ...(isSuperAdmin

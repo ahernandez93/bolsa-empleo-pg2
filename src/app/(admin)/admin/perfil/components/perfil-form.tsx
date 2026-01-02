@@ -49,7 +49,6 @@ export default function PerfilEmpleadoForm({ initial, onSaved }: Props) {
         try {
             await axios.put("/api/empleados/perfil", {
                 ...data,
-                // asegurar números (RHF puede mandar string si usamos Select)
                 ubicacionDepartamentoId: typeof data.ubicacionDepartamentoId === "string" ? Number(data.ubicacionDepartamentoId) : data.ubicacionDepartamentoId,
                 ubicacionCiudadId: typeof data.ubicacionCiudadId === "string" ? Number(data.ubicacionCiudadId) : data.ubicacionCiudadId,
             });

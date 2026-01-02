@@ -115,12 +115,6 @@ export default function PlanesClient({
                 res.data?.message ??
                 "Tu suscripción se cancelará al finalizar el periodo actual."
             );
-            /* const res = await axios.post("/api/suscripcion/cambiar", {
-                planNombre: "Gratis",
-            });
-            toast.success(
-                res.data?.message ?? "Te has cambiado al plan Gratis. La suscripción de pago ha sido cancelada."
-            ); */
             router.refresh();
             //eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
@@ -170,7 +164,7 @@ export default function PlanesClient({
 
     const canCancel =
         !!suscripcionInfo &&
-        (suscripcionInfo.esDePago ?? true) && // por defecto asumimos que sí es de pago si no viene
+        (suscripcionInfo.esDePago ?? true) &&
         !!suscripcionInfo.status &&
         ["active", "trialing"].includes(suscripcionInfo.status) &&
         !suscripcionInfo.canceladaEn;

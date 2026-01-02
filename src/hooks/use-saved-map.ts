@@ -7,7 +7,6 @@ import { useSession } from "next-auth/react";
 
 function keyFor(ids: string[], authed: boolean, userId: string | null) {
     if (!authed || ids.length === 0) return null;
-    // clave estable por lista de IDs (ordenada)
     return ["saved-map", userId, ids.slice().sort().join(",")];
 }
 
@@ -27,12 +26,12 @@ export function useSavedMap(ids: Array<string | number>, userIdFromParent?: stri
             return data?.saved ?? {};
         },
         {
-            keepPreviousData: false,      // no arrastres estado de otras listas/usuarios
+            keepPreviousData: false,
             revalidateOnMount: true,
             revalidateIfStale: true,
             revalidateOnFocus: true,
             revalidateOnReconnect: true,
-            fallbackData: {},             // por defecto: nada guardado
+            fallbackData: {},
         }
     );
 
@@ -40,7 +39,7 @@ export function useSavedMap(ids: Array<string | number>, userIdFromParent?: stri
         savedMap: map ?? {},
         isLoading,
         error,
-        mutate,       // para actualizar inmediatamente desde el botón
-        swrKey,       // por si querés mutar desde afuera
+        mutate,
+        swrKey
     };
 }

@@ -5,7 +5,6 @@ import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 
-// Validamos query params
 const querySchema = z.object({
     q: z.string().optional().default(""),
     order: z.enum(["recientes", "empresa", "ciudad"]).optional().default("recientes"),
@@ -84,7 +83,6 @@ export async function GET(req: Request) {
             },
         });
 
-        // Normalizamos para tus cards
         const data = items.map((g) => ({
             id: g.oferta.id,
             puesto: g.oferta.puesto,
@@ -95,7 +93,7 @@ export async function GET(req: Request) {
             modalidad: g.oferta.modalidad,
             tipoTrabajo: g.oferta.tipoTrabajo,
             fechaCreacion: g.oferta.fechaCreacion,
-            isSaved: true, // vienen de guardados
+            isSaved: true,
             savedAt: g.createdAt,
         }));
 

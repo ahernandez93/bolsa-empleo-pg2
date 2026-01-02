@@ -8,8 +8,7 @@ export const empleadoPerfilSchema = z.object({
     fechaNacimiento: z
         .string()
         .optional()
-        .or(z.literal(""))
-        /* .transform((v) => (v ? new Date(v) : undefined)) */,
+        .or(z.literal("")),
     genero: z.enum(["MASCULINO", "FEMENINO"]).optional().or(z.literal("")),
     ubicacionDepartamentoId: z.number().int().optional(),
     ubicacionCiudadId: z.number().int().optional(),

@@ -24,7 +24,7 @@ export async function POST() {
             return NextResponse.json({ message: "No tienes una suscripción activa" }, { status: 400 });
         }
 
-        // Si es plan Gratis (sin Stripe) -> la cortás inmediato en tu sistema
+        // Si es plan Gratis (sin Stripe)
         if (!sub.stripeSubscriptionId) {
             return NextResponse.json({
                 ok: true,
@@ -32,7 +32,7 @@ export async function POST() {
             });
         }
 
-        // Si es plan de pago (Stripe) -> cancelar al final del periodo
+        // Si es plan de pago (Stripe) cancelar al final del periodo
         const stripeSub = await stripe.subscriptions.update(sub.stripeSubscriptionId, {
             cancel_at_period_end: true,
         });
@@ -40,8 +40,8 @@ export async function POST() {
         await prisma.suscripcion.update({
             where: { id: sub.id },
             data: {
-                canceladaEn: new Date(),       // fecha en que el usuario pidió cancelarla
-                stripeStatus: stripeSub.status // normalmente sigue 'active'
+                canceladaEn: new Date(),
+                stripeStatus: stripeSub.status
             },
         });
 

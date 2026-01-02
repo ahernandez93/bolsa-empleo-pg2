@@ -19,7 +19,6 @@ export const ofertaLaboralFormSchema = z.object({
     salario: z.coerce.number().nonnegative("Ingrese un salario válido"),
 });
 
-// Extendemos con lo que SOLO el server define
 export const ofertaLaboralServerSchema = ofertaLaboralFormSchema.extend({
     agregadoPorId: z.string().uuid(),
     estado: EstadoOfertaEnum.default("PENDIENTE"),

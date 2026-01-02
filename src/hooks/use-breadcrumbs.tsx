@@ -16,13 +16,6 @@ export function useBreadcrumbs() {
     const breadcrumbs = useMemo(() => {
         const crumbs: BreadcrumbItem[] = []
 
-        // Always add Dashboard as the first breadcrumb
-        /* crumbs.push({
-            title: "Dashboard",
-            url: "/",
-            isActive: pathname === "/"
-        }) */
-
         // Use helper function to find navigation item
         const navMatch = findNavItemByUrl(pathname)
 
@@ -51,14 +44,7 @@ export function useBreadcrumbs() {
                     isActive: true
                 })
             }
-        } /* else if (pathname === "/dashboard") {
-            // Only show Dashboard if we're actually on the dashboard page
-            crumbs.push({
-                title: "Dashboard",
-                url: "/dashboard",
-                isActive: true
-            })
-        } */
+        }
 
         // If no specific match found, just return Dashboard
         return crumbs

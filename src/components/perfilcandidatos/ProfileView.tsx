@@ -12,7 +12,6 @@ export default function ProfileView({ data }: { data: PerfilCandidatoFormValues 
             <Card className="rounded-xl border bg-white p-4">
                 <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16">
-                        {/* Si algún día guardas foto: <AvatarImage src={data.avatarUrl} alt={`${data.nombre} ${data.apellido}`} /> */}
                         <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
                             {getInitials(data.nombre, data.apellido)}
                         </AvatarFallback>
@@ -85,7 +84,7 @@ export default function ProfileView({ data }: { data: PerfilCandidatoFormValues 
                 {data.educacion.map((ed, i) => (
                     <div key={i} className="rounded-lg border p-3">
                         <p className="text-sm font-medium text-slate-900">{ed.institucion} — {ed.titulo}</p>
-                        <p className="text-xs text-slate-500">{ed.fechaFin || ""} {/* {ed.location ? `• ${ed.location}` : ""} */}</p>
+                        <p className="text-xs text-slate-500">{ed.fechaFin || ""} </p>
                     </div>
                 ))}
                 {data.educacion.length === 0 && <Empty text="Aún no registra formación." />}

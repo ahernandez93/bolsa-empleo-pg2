@@ -1,4 +1,3 @@
-// app/restablecer-contrasena-candidato/page.tsx
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";

@@ -1,4 +1,3 @@
-// components/ofertas/VerDetalleOfertaQuickView.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -26,7 +25,7 @@ type OfertaDetail = {
     id: string;
     puesto: string;
     descripcionPuesto: string;
-    empresa: string; // ← API normalizada a string
+    empresa: string;
     modalidad: string;
     tipoTrabajo: string;
     ubicacionCiudadDescripcion?: string | null;
@@ -152,7 +151,7 @@ export function VerDetalleOfertaQuickView({ ofertaId }: { ofertaId: string }) {
                     )}
                 </div>
 
-                {/* Footer con cerrar (si querés, acá podrías poner “Aplicar ahora”) */}
+                {/* Footer con cerrar */}
                 <SheetFooter className="sticky bottom-0 z-10 border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-5 py-3">
                     <div className="flex w-full items-center justify-end gap-2">
                         <SheetClose asChild>

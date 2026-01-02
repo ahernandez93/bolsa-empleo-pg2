@@ -19,16 +19,7 @@ type Props = {
 export function BotonGuardarOferta({ ofertaId, saved = false, className, onChange }: Props) {
     const { status } = useSession();
     const router = useRouter();
-    // const [saved, setSaved] = useState(!!saved);
     const [pending, startTransition] = useTransition();
-
-    /* useEffect(() => {
-        if (status === "authenticated") {
-            setSaved(!!initialSaved);
-        } else if (status === "unauthenticated") {
-            setSaved(false);
-        }
-    }, [status, initialSaved]); */
 
     const onClick = () => {
         // Requiere login
@@ -38,11 +29,7 @@ export function BotonGuardarOferta({ ofertaId, saved = false, className, onChang
             return;
         }
 
-        // UI optimista
-        // setSaved((s) => !s);
-
         const next = !saved;
-        // UI optimista: actualiza arriba
         onChange?.(next);
 
         startTransition(async () => {
@@ -50,13 +37,11 @@ export function BotonGuardarOferta({ ofertaId, saved = false, className, onChang
                 const { data } = await axios.post("/api/guardados", { ofertaId });
                 const serverValue = Boolean(data?.saved);
 
-                // Si el servidor difiere, sincroniza
                 if (serverValue !== next) {
                     onChange?.(serverValue);
                 }
                 toast.success(serverValue ? "Oferta guardada" : "Quitada de guardados");
             } catch (err) {
-                // Revertir optimismo
                 onChange?.(!next);
 
                 if (axios.isAxiosError(err)) {

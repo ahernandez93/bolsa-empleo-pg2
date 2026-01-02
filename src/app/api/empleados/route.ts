@@ -1,4 +1,3 @@
-// app/api/empleados/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -35,13 +34,6 @@ export async function POST(req: Request) {
                 { status: 403 }
             );
         }
-
-        /* if (!empresaId) {
-            return NextResponse.json(
-                { message: "Administrador sin empresa asociada" },
-                { status: 400 }
-            );
-        } */
 
         const body = await req.json();
         const data = empleadoSchema.parse(body);

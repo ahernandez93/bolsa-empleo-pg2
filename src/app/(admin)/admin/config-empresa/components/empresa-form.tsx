@@ -192,27 +192,6 @@ export default function EmpresaConfigForm({ initial, onSaved }: Props) {
                     />
                 </div>
 
-                {/* Si deseas permitir que el admin “apague” su empresa */}
-                {/* 
-        <FormField
-          control={form.control}
-          name="activa"
-          render={({ field }) => (
-            <FormItem className="flex items-center gap-2">
-              <FormControl>
-                <input
-                  type="checkbox"
-                  checked={!!field.value}
-                  onChange={(e) => field.onChange(e.target.checked)}
-                />
-              </FormControl>
-              <FormLabel className="m-0">Empresa activa</FormLabel>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        */}
-
                 <Button type="submit" className="mt-2">Guardar cambios</Button>
             </form>
         </Form>

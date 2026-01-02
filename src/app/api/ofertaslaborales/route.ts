@@ -68,7 +68,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // 2) Validar suscripción
+        //Validar suscripción
         const sus = await getSuscripcionActiva(empresaId);
         if (!sus) {
             return NextResponse.json(
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // 3) Validar límite de ofertas activas
+        //Validar límite de ofertas activas
         const activas = await contarOfertasActivas(empresaId);
         if (activas >= sus.plan.maxOfertasActivas) {
             return NextResponse.json(

@@ -1,4 +1,3 @@
-// app/api/postulaciones/[id]/sheet/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireEmpresaSession } from "@/lib/auth/guard";
@@ -55,12 +54,12 @@ export async function GET(_: Request, { params }: { params: Promise<Params> }) {
         orderBy: { orden: "asc" },
     })
 
-    // 2) Mapear docs subidos por tipo
+    //Mapear docs subidos por tipo
     const docsMap = new Map(
         postulacion.postulacionDocumentos.map((d) => [d.documentoTipoId, d])
     )
 
-    // 3) Merge final: siempre devuelve todos los “slots”
+    //Merge final: siempre devuelve todos los “slots”
     const documentos = tipos.map((t) => {
         const doc = docsMap.get(t.id)
 
@@ -72,7 +71,6 @@ export async function GET(_: Request, { params }: { params: Promise<Params> }) {
             nombre: t.nombre,
             requerido: t.requerido,
             ayuda: t.ayuda,
-
             subido,
             estado: subido ? "SUBIDO" : "PENDIENTE",
             url: doc?.url ?? null,

@@ -14,7 +14,7 @@ export type PlanActual = {
         incluyeDestacado: boolean;
         precioMensual: number;
         duracionMeses: number;
-        fechaInicio: string; // viene serializada
+        fechaInicio: string;
         fechaFin: string;
     } | null;
     meta: {

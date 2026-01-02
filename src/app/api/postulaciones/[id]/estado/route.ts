@@ -9,7 +9,6 @@ export const runtime = "nodejs"
 
 type Params = { id: string };
 
-// Debe coincidir con tu enum en Prisma (incluye RETIRADA si lo agregaste)
 const EstadoEnum = z.enum(["SOLICITUD", "ENTREVISTA", "EVALUACIONES", "CONTRATACION", "RECHAZADA"])
 const BodySchema = z.object({ estado: EstadoEnum })
 
@@ -65,7 +64,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
                 : "Candidato"
         const puesto = updated.oferta.puesto
 
-        // Enviar (no bloquees errores del correo; registra y sigue)
+        // Enviar
         try {
             await sendEstadoPostulacionEmail({
                 to: correo,
@@ -76,7 +75,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
             })
         } catch (err) {
             console.error("[Email estado postulacion] Error:", err)
-            // Puedes guardar un log/flag para reintentar luego si te interesa
         }
 
         return NextResponse.json(updated)

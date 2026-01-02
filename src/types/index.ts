@@ -74,7 +74,7 @@ export type InitialDataUpdatePostulacion = {
     notasInternas: string | null
 
     // Solo lectura para el formulario
-    fechaPostulacion: string            // ISO string
+    fechaPostulacion: string
     ofertaPuesto: string
     candidatoNombre: string | null
     candidatoEmail: string
@@ -82,7 +82,7 @@ export type InitialDataUpdatePostulacion = {
 
 export type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
 
-export type Genero = "MASCULINO" | "FEMENINO" | ""; // "" cuando el form no tiene selección
+export type Genero = "MASCULINO" | "FEMENINO" | "";
 
 export type EmpresaLite = {
     id: string;
@@ -93,9 +93,9 @@ export type EmpleadoPerfilDTO = {
     id: string;
     nombre: string;
     apellido: string;
-    telefono: string;                       // cadena para form
+    telefono: string;                       
     direccion: string;
-    fechaNacimiento: string;                // YYYY-MM-DD o ""
+    fechaNacimiento: string;
     genero: Genero;
     ubicacionDepartamentoId?: number;
     ubicacionCiudadId?: number;

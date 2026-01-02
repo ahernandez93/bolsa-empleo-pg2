@@ -12,7 +12,7 @@ export const empresaConfigSchema = z.object({
     descripcion: z.string().max(1000).optional().or(z.literal("")),
     ubicacionDepartamentoId: z.number().int().optional(),
     ubicacionCiudadId: z.number().int().optional(),
-    activa: z.boolean().optional(), // si querés exponerlo al admin
+    activa: z.boolean().optional(),
 });
 
 export type EmpresaConfigInput = z.infer<typeof empresaConfigSchema>;

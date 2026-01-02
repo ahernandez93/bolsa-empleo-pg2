@@ -24,7 +24,6 @@ export const educacionSchema = z.object({
 const generoEnum = z.enum(["MASCULINO", "FEMENINO", "OTRO"]).optional();
 
 export const perfilCandidatoSchema = z.object({
-    // avatarUrl: z.string().url().optional().or(z.literal("")),
     nombre: z.string().min(2, "Mínimo 2 caracteres"),
     apellido: z.string().min(2, "Mínimo 2 caracteres"),
     telefono: z.string().optional(),

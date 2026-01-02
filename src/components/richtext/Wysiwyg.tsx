@@ -43,7 +43,6 @@ export default function Wysiwyg({ value = "", onChange, className, placeholder }
         },
     });
 
-    // mientras se inicializa, no pintes nada pesado
     if (!editor) {
         return <div className={cn("min-h-[180px] rounded-md border px-3 py-2", className)} />;
     }

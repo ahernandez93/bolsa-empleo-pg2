@@ -12,9 +12,8 @@ if (!stripeSecret) {
 
 const stripe = new Stripe(stripeSecret);
 
-// Body esperado
 const bodySchema = z.object({
-    planNombre: z.enum(["Básico", "Premium"]), // Gratis no debe llegar aquí
+    planNombre: z.enum(["Básico", "Premium"]),
 });
 
 const APP_URL =
@@ -47,17 +46,6 @@ export async function POST(req: Request) {
         const json = await req.json();
         const { planNombre } = bodySchema.parse(json);
 
-        // Seguridad extra: si algún loquito manda "Gratis" por aquí
-        /* if (planNombre === "Gratis") {
-            return NextResponse.json(
-                {
-                    message:
-                        "El plan Gratis no usa Stripe. Usar /api/suscripcion/cambiar.",
-                },
-                { status: 400 }
-            );
-        } */
-
         // Traer el plan desde la BD (por nombre)
         const plan = await prisma.plan.findUnique({
             where: { nombre: planNombre },
@@ -76,7 +64,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // Chequeo de downgrade: igual que en /api/suscripcion/cambiar
+        // Chequeo de downgrade
         const activas = await prisma.ofertaLaboral.count({
             where: { empresaId, estado: { in: ["PENDIENTE", "ABIERTA"] } },
         });
@@ -113,7 +101,6 @@ export async function POST(req: Request) {
         if (!stripeCustomerId) {
             const customer = await stripe.customers.create({
                 name: empresa.nombre,
-                // Si querés, acá también podés pasar email de algún admin
                 metadata: {
                     empresaId: empresa.id,
                 },
@@ -150,7 +137,7 @@ export async function POST(req: Request) {
                     quantity: 1,
                 },
             ],
-            // Importantísimo: para luego saber a quién pertenece en el webhook
+            // Importante: para luego saber a quién pertenece en el webhook
             metadata: {
                 empresaId: empresa.id,
                 planId: plan.id,

@@ -39,14 +39,13 @@ export async function sendEstadoPostulacionEmail(opts: {
 
         console.log("[mailer] Enviando →", { to: opts.to, subject })
         const resp = await resend.emails.send({
-            from: "onboarding@resend.dev", // usar dominio verificado cuando lo tengas
+            from: "onboarding@resend.dev", // usar dominio verificado cuando se tenga
             to: "allan.hernandez777@gmail.com",//opts.to,
             subject,
             html,
         })
 
         console.log("[mailer] Resend response:", resp)
-        // resp = { id: '...', error: null } si fue ok
         if ((resp)?.error) {
             console.error("[mailer] Resend error:", resp.error)
         }

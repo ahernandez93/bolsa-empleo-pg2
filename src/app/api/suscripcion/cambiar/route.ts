@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireEmpresaSession } from "@/lib/auth/guard";
-// import Stripe from "stripe";
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 const bodySchema = z.object({
     planNombre: z.enum(["Gratis", "Básico", "Premium"]),
@@ -41,7 +38,7 @@ export async function POST(req: Request) {
         });
         if (!plan) return NextResponse.json({ message: "Plan no encontrado" }, { status: 404 });
 
-        // Chequeo de downgrade: ¿excedes el límite actual?
+        // Chequeo de downgrade
         const activas = await prisma.ofertaLaboral.count({
             where: { empresaId, estado: { in: ["PENDIENTE", "ABIERTA"] } },
         });
@@ -51,27 +48,6 @@ export async function POST(req: Request) {
             }, { status: 400 });
         }
 
-        /* if (planNombre === "Gratis") {
-            const paidSub = await prisma.suscripcion.findFirst({
-                where: {
-                    empresaId,
-                    activa: true,
-                    stripeSubscriptionId: { not: null },
-                },
-            });
-
-            if (paidSub?.stripeSubscriptionId) {
-                try {
-                    await stripe.subscriptions.cancel(paidSub.stripeSubscriptionId);
-                    console.log(
-                        `Stripe subscription cancelada para empresa=${empresaId} sub=${paidSub.stripeSubscriptionId}`
-                    );
-                } catch (err) {
-                    console.error("Error cancelando suscripción en Stripe:", err);
-                }
-            }
-        }
- */
         // Cancelar suscripción activa actual
         await prisma.suscripcion.updateMany({
             where: { empresaId, activa: true },

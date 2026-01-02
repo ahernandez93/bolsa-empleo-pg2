@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({
-            url: blob.url, //`/uploads/${key}`,
+            url: blob.url,
             mime: file.type,
             size,
             key,
@@ -53,14 +53,12 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
-        // 1) Auth
         const session = await auth();
         const userId = session?.user?.id;
         if (!userId) {
             return NextResponse.json({ message: "No autenticado" }, { status: 401 });
         }
 
-        // 2) key del query
         const { searchParams } = new URL(req.url);
         const url = searchParams.get("url");
         const key = searchParams.get("key");
@@ -68,10 +66,8 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ message: "Falta url o key" }, { status: 400 });
         }
 
-        // 3) Borrar archivo local (ignora si no existe)
         await del(url ?? key!);
 
-        // 4) Limpiar campos del CV en la BD
         await prisma.perfilCandidato.update({
             where: { usuarioId: userId },
             data: {

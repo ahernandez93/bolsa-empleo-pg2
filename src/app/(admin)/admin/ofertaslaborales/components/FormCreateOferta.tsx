@@ -152,12 +152,10 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
 
         try {
             if (isEditMode) {
-                //const payload = data as OfertaLaboralUpdateData;
                 await axios.put(`/api/ofertaslaborales/${initialData?.id}`, data)
                 toast.success("Oferta Laboral actualizada correctamente")
                 console.log("Oferta Laboral actualizada correctamente", data)
             } else {
-                //const payload = data as OfertaLaboralFormData;
                 await axios.post("/api/ofertaslaborales", data)
                 toast.success("Oferta Laboral creada exitosamente")
                 console.log("Oferta Laboral creada exitosamente", data)
@@ -179,10 +177,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
             setIsLoading(false)
         }
     }
-    /* console.log(form.formState.isValid)
-    console.log(form.formState.errors) */
-    /*    console.log("Errores del formulario:", form.formState.errors);
-       console.log("Valores actuales:", form.getValues()); */
     const focusSlim = "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-ring";
 
     return (
@@ -301,8 +295,6 @@ export function FormCreateOferta({ setOpenModalCreate, initialData, isEditMode =
                                     <Wysiwyg
                                         value={field.value}
                                         onChange={field.onChange}
-                                        // asegurate que tu Wysiwyg acepte className para el editor, o añade regla global
-                                        // cla  ssNameEditor={`${focusSlim} outline-none`}
                                         placeholder="Describe responsabilidades, requisitos, beneficios..."
                                     />
                                     <FormMessage />

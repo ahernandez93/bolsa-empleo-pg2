@@ -279,7 +279,7 @@ export async function GET(_: Request, { params }: { params: Promise<Params> }) {
         return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
 
-    // Seguridad (igual a tu lógica)
+    // Seguridad
     const isSuperAdmin = rol === "SUPERADMIN";
     const isRecruiter = rol === "RECLUTADOR";
 
@@ -294,11 +294,6 @@ export async function GET(_: Request, { params }: { params: Promise<Params> }) {
             if (!ok) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
         }
     }
-
-    // (Opcional) solo contratados
-    // if (postulacion.estado !== "CONTRATACION") {
-    //   return NextResponse.json({ message: "Reporte solo en CONTRATACION" }, { status: 403 });
-    // }
 
     const outPdf = await PDFDocument.create();
     const font = await outPdf.embedFont(StandardFonts.Helvetica);

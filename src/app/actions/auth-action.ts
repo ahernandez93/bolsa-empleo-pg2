@@ -66,7 +66,6 @@ export const LoginAction = async (email: string, password: string) => {
     }
 }
 
-// Acción específica para CANDIDATO: valida rol antes de autenticar
 export const LoginActionCandidate = async (email: string, password: string) => {
     try {
         const allowed = await canLoginWithRoles(email, ["CANDIDATO"]);
@@ -166,7 +165,6 @@ export const RegisterCandidateAction = async (input: RegisterCandidateInput) => 
         return {
             success: true,
             error: null,
-            // útil si quieres redirigir o cachear
             ids: { personaId: persona.id, usuarioId: usuario.id, perfilId: perfil.id },
         } as const;
     } catch (error) {
@@ -244,10 +242,6 @@ export async function RegisterCompanyAdminAction(input: RegistroEmpresaValues) {
                 data: {
                     usuarioId: usuario.id,
                     empresaId: empresa.id,
-                    // Si tu modelo requiere más campos, agrega aquí:
-                    // cargo: "ADMINISTRADOR",
-                    // activo: true,
-                    // fechaIngreso: now,
                 },
             })
 

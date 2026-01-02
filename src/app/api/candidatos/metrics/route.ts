@@ -12,7 +12,7 @@ export async function GET() {
             return NextResponse.json({ message: "No autenticado" }, { status: 401 });
         }
 
-        // Buscamos el perfil del candidato (puede no existir aún)
+        // Buscar el perfil del candidato
         const perfil = await prisma.perfilCandidato.findUnique({
             where: { usuarioId: userId },
             select: { id: true },
@@ -30,7 +30,6 @@ export async function GET() {
             });
         }
 
-        // ⚠️ Ajusta los valores de estado si tu modelo usa otros nombres
         const [aplicadas, guardadas, entrevistas, evaluaciones, contratacion, rechazada] = await Promise.all([
             prisma.postulacion.count({
                 where: { perfilCandidatoId: perfil.id },

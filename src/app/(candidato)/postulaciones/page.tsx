@@ -44,11 +44,6 @@ export default function PanelPostulaciones() {
 
     const postulaciones = useMemo(() => data?.postulaciones ?? [], [data]);
 
-    /* const onWithdraw = (id: string) => {
-        setSelectedId(id);
-        setConfirmOpen(true);
-    }; */
-
     const confirmWithdraw = async () => {
         if (!selectedId) return;
         setLoadingAction(true);
@@ -129,7 +124,6 @@ export default function PanelPostulaciones() {
                         <h1 className="text-2xl font-semibold">Postulaciones</h1>
                         <p className="text-sm text-muted-foreground">Tus postulaciones</p>
                     </div>
-                    {/* Acciones globales (opcional): limpiar, exportar, etc. */}
                 </div>
                 {postulaciones.length === 0 ? (
                     <p className="text-sm text-muted-foreground">

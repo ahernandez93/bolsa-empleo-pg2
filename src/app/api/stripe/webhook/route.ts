@@ -41,7 +41,6 @@ export async function POST(req: Request) {
     let event: Stripe.Event;
 
     try {
-        // OJO: hay que leer el body como texto crudo, no como JSON
         const body = await req.text();
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
         //eslint-disable-next-line @typescript-eslint/no-explicit-any

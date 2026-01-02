@@ -115,7 +115,6 @@ export default middleware((req) => {
       const recruiterCanAccess = isAllowedExact || isAllowedPrefixed;
 
       if (!recruiterCanAccess) {
-        // lo mandamos de regreso al dashboard
         return redirectTo("/admin");
       }
     }

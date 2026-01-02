@@ -20,7 +20,7 @@ const filtersSchema = z.object({
     q: z.string().optional().default(""),
     order: z.enum(["recientes", "empresa", "ciudad"]).default("recientes"),
 });
-type FiltersIn = z.input<typeof filtersSchema>;   // { q?: string; order?: ... } <- input (puede venir undefined)
+type FiltersIn = z.input<typeof filtersSchema>;
 
 const fetcher = async (url: string) => {
     const { data } = await axios.get(url);

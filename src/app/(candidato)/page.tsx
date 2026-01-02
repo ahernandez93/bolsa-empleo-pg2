@@ -89,38 +89,6 @@ export default async function HomePage() {
   );
 }
 
-/* function Hero() {
-  return (
-    <section className="pt-8">
-      <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">Construye tu futuro con EmpresaX</h1>
-      <p className="mt-1 text-slate-500">Explora las oportunidades que tenemos para ti y únete a nuestro equipo</p>
-
-      <Card className="mt-4 border-slate-200">
-        <CardContent className="p-3 md:p-4">
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_240px_auto]">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input placeholder="Puesto o palabra clave" className="pl-9" />
-            </div>
-            <div className="relative">
-              <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input placeholder="Ubicación" className="pl-9" />
-            </div>
-            <Button className="md:ml-2">Buscar</Button>
-          </div>
-
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" className="rounded-full">Remoto</Badge>
-            <Badge variant="secondary" className="rounded-full">Junior</Badge>
-            <Badge variant="secondary" className="rounded-full">Tiempo completo</Badge>
-            <Badge variant="secondary" className="rounded-full">Tecnología</Badge>
-          </div>
-        </CardContent>
-      </Card>
-    </section>
-  );
-} */
-
 function ImpactStats() {
   const stats = [
     { label: "+20 vacantes disponibles", sub: "Actualizadas cada semana", icon: <Search className="h-4 w-4" /> },

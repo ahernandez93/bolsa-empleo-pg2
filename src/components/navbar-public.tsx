@@ -82,7 +82,6 @@ export default function NavbarPublic({ session }: { session: Session | null }) {
         }
     }, [mounted, pathname])
 
-    // 🧠 definimos los íconos una sola vez
     const links = session
         ? [
             { href: "/ofertas", label: "Ofertas", icon: <Briefcase className="h-4 w-4" /> },
@@ -157,7 +156,6 @@ function MobileMenu({
                                 [--logo-accent:#22A36B] dark:[--logo-accent:#34D399]"
                             onClick={() => setOpen(false)}
                         >
-                            {/* Usá el móvil con texto o solo isotipo, como prefieras */}
                             <Image
                                 src="/branding/logo-mark.svg"
                                 alt="EmpleaHub"

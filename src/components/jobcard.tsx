@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Building2, Briefcase, CheckCircle2, XCircle } from "lucide-react";
 import type { JobCardProps } from "@/components/jobcarousel";
 import { useState, useTransition } from "react";
-import { useSession, /* signIn */ } from "next-auth/react"; // si usas next-auth
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
     AlertDialog,
@@ -18,7 +18,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    /* AlertDialogTrigger, */
 } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -106,7 +105,7 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
     };
 
     const goCompletarPerfil = () => {
-        const redirect = `/ofertas`; // o `/ofertas/${id}` si tenés detalle por id
+        const redirect = `/ofertas`;
         router.push(`/perfil?redirect=${encodeURIComponent(redirect)}`);
     };
 
@@ -200,7 +199,7 @@ export default function JobCard({ id, puesto, area, ubicacionDepartamentoDescrip
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* ✅ Modal perfil incompleto */}
+            {/* Modal perfil incompleto */}
             <AlertDialog open={openPerfil} onOpenChange={setOpenPerfil}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

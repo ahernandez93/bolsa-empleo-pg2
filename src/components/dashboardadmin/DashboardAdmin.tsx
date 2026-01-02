@@ -123,8 +123,6 @@ export default function DashboardAdmin() {
 
                         <div className="flex items-center gap-2">
                             <span className="text-xs text-muted-foreground">Empresa:</span>
-                            {/* Select de empresas usando shadcn/ui */}
-                            {/* importá: Select, SelectTrigger, SelectValue, SelectContent, SelectItem */}
                             <div className="w-[260px]">
                                 <Select
                                     value={empresaFiltro}

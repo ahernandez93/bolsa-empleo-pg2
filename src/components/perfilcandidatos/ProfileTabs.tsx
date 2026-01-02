@@ -11,14 +11,13 @@ import axios from "axios";
 export default function ProfileTabs({ initialData, onSaved }: { initialData: PerfilCandidatoFormValues; onSaved?: (updated: PerfilCandidatoFormValues) => void }) {
     const [viewData, setViewData] = useState<PerfilCandidatoFormValues>(initialData);
 
-    // Si initialData cambia (por ejemplo, si la página re-carga), sincrónizalo:
     useEffect(() => {
         setViewData(initialData);
     }, [initialData]);
 
     const handleSaved = (updated: PerfilCandidatoFormValues) => {
-        setViewData(updated);     // refresca las vistas locales (ProfileView, PreviewCard)
-        onSaved?.(updated);       // notifica a la página
+        setViewData(updated);
+        onSaved?.(updated);
     };
 
     return (

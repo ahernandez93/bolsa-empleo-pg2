@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/ubicaciones/departamentos?q=fra
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
@@ -17,7 +16,6 @@ export async function GET(req: Request) {
             orderBy: { nombre: "asc" },
         });
 
-        // Cache suave en el browser, pero revalidable
         return NextResponse.json(departamentos, {
             headers: {
                 "Cache-Control": "public, max-age=60, s-maxage=60, stale-while-revalidate=300",

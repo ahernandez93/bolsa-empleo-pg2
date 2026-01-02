@@ -88,8 +88,6 @@ export async function PUT(request: Request, ctx: { params: Promise<Params> }) {
 
         const body = await request.json()
 
-        //const validatedData = ofertaLaboralUpdateSchema.parse(body)
-
         const existingOfertaLaboral = await prisma.ofertaLaboral.findUnique({
             where: { id },
         })

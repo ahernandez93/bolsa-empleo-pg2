@@ -30,7 +30,6 @@ type Props = {
     estado: EstadoPostulacion;
     fechaPostulacion: string | Date;
     fechaActualizacion: string | Date;
-    // onWithd  raw: (postulacionId: string) => void;
     canWithdraw?: boolean;
 };
 
@@ -46,7 +45,6 @@ const ESTADO_CFG: Record<
 };
 
 function StepsBar({ step }: { step: number }) {
-    // 0..4 (0 = rechazada/retirada)
     const total = 4;
     return (
         <div className="flex items-center gap-1.5">
@@ -72,8 +70,6 @@ export default function PostulacionCard({
     estado,
     fechaPostulacion,
     fechaActualizacion,
-    // onWithdraw,
-    //canWithdraw = true,
 }: Props) {
     const cfg = ESTADO_CFG[estado];
 
@@ -85,8 +81,6 @@ export default function PostulacionCard({
         addSuffix: true,
         locale: es,
     });
-
-    /* const disableWithdraw = !canWithdraw || estado === "RECHAZADA" || estado === "RETIRADA" || estado === "CONTRATACION"; */
 
     const isContratacion = estado === "CONTRATACION";
 
@@ -135,20 +129,6 @@ export default function PostulacionCard({
                         Proceso finalizado
                     </div>
                 )}
-
-                {/* <div className="mt-2 flex gap-2">
-                    <Link href={`/ofertas/${oferta.id}`} className="w-full">
-                        <Button variant="secondary" className="w-full">Ver oferta</Button>
-                    </Link>
-                    <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => onWithdraw(id)}
-                        disabled={disableWithdraw}
-                    >
-                        Retirar
-                    </Button>
-                </div> */}
 
                 {/* ÚNICA acción: Documentación */}
                 {isContratacion && (

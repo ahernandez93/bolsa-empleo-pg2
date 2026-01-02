@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/ubicaciones/ciudades?departamentoId=12&q=teg
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);

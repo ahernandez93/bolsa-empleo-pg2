@@ -16,7 +16,7 @@ export async function GET() {
         if (!empresaId) {
             return NextResponse.json({
                 ok: true,
-                rol, // 👈 importante para el frontend
+                rol,
                 plan: null,
                 meta: {
                     ofertasActivas: 0,
@@ -57,10 +57,6 @@ export async function GET() {
         const restantes = Math.max(sub.plan.maxOfertasActivas - ofertasActivas, 0);
         const hoy = new Date();
 
-        /* const diasParaVencer = daysBetween(hoy, sub.fechaFin);
-        const vencePronto = diasParaVencer <= 7;
-        const expirada = sub.fechaFin < hoy; */
-
         const fechaFinEfectiva: Date | null =
             sub.currentPeriodEnd ?? sub.fechaFin ?? null;
 
@@ -74,7 +70,7 @@ export async function GET() {
             vencePronto = !expirada && diasParaVencer <= 7;
         }
 
-        // 👇 Consideramos también el estado Stripe si existe
+        //Consideramos también el estado Stripe si existe
         const stripeStatus = sub.stripeStatus as string | null;
         const isStripeActive =
             !stripeStatus || stripeStatus === "active" || stripeStatus === "trialing";

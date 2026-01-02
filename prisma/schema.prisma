@@ -58,7 +58,7 @@ model UbicacionCiudad {
 model Empresa {
   id                      String   @id @default(uuid())
   nombre                  String
-  rtn                     String? // o NIF/RFC según país
+  rtn                     String?
   sitioWeb                String?
   telefono                String?
   descripcion             String?
@@ -75,7 +75,7 @@ model Empresa {
   ubicacionCiudad       UbicacionCiudad?       @relation(fields: [ubicacionCiudadId], references: [id], onDelete: SetNull)
 
   usuarios      Usuario[] // reclutadores ligados a la empresa
-  empleados     Empleado[] // si seguís usando "Empleado" como staff interno ligado a Empresa
+  empleados     Empleado[]
   ofertas       OfertaLaboral[]
   suscripciones Suscripcion[]
 
@@ -89,7 +89,7 @@ model Plan {
   id                String   @id @default(uuid())
   nombre            String   @unique // "Gratis" | "Básico" | "Premium"
   descripcion       String?
-  precioMensual     Float // en centavos (mejor práctica) o Float si querés
+  precioMensual     Float
   duracionMeses     Int // 1 = mensual, 12 = anual, etc.
   maxOfertasActivas Int // límite de ofertas activas por empresa
   incluyeDestacado  Boolean  @default(false) // si permite marcar ofertas como destacadas
@@ -385,7 +385,7 @@ model Postulacion {
   perfilCandidatoId  String
   estado             EstadoPostulacion @default(SOLICITUD)
   cvSnapshotUrl      String? // URL del CV al momento de postular (snapshot)
-  cvSnapshotKey      String? // key/filename del snapshot (para borrar si reemplazas)
+  cvSnapshotKey      String? // key/filename del snapshot
   notasInternas      String? // notas del reclutador
   fechaPostulacion   DateTime          @default(now())
   fechaActualizacion DateTime          @updatedAt

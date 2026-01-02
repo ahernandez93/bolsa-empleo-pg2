@@ -16,9 +16,6 @@ import { registroEmpresaSchema, type RegistroEmpresaValues } from "@/lib/schemas
 import { RegisterCompanyAdminAction } from "@/app/actions/auth-action"
 import { signIn } from "next-auth/react"
 
-// const FormSchema = registroEmpresaSchema
-// type FormValues = RegistroEmpresaValues
-
 export function RegistroEmpresaForm({ className, ...props }: React.ComponentProps<"div">) {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
@@ -48,7 +45,6 @@ export function RegistroEmpresaForm({ className, ...props }: React.ComponentProp
 
         if (res.success) {
             toast.success("Registro exitoso. Iniciando sesión...")
-            // Igual que tu candidato:
             const login = await signIn("credentials", {
                 email: data.usuario.email,
                 password: data.usuario.password,
@@ -58,7 +54,7 @@ export function RegistroEmpresaForm({ className, ...props }: React.ComponentProp
                 setError(login.error)
                 toast.error(login.error)
             }
-            router.push("/admin")     // o el dashboard que uses
+            router.push("/admin")
             router.refresh()
         } else {
             setError(res.error ?? "Error al registrar")
@@ -169,22 +165,6 @@ export function RegistroEmpresaForm({ className, ...props }: React.ComponentProp
                                     />
                                 </div>
 
-                                {/*  <FormField
-                                    control={form.control}
-                                    name="empresa.descripcion"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Descripción</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="¿Qué hace tu empresa?" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                /> */}
-
-                                {/* Si luego querés, aquí agregás selects de Departamento/Ciudad (shadcn Select) */}
-                                {/* PLAN (oculto por ahora, default Gratis) */}
                                 <input type="hidden" {...form.register("planNombre")} value="Gratis" />
 
                                 <Button type="submit" className="w-full" disabled={isLoading}>
