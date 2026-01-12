@@ -34,6 +34,30 @@ const ESTADO_CONFIG: Record<Estado, { label: string; badgeClass: string; dotColo
     RECHAZADA: { label: "Rechazada", badgeClass: "bg-red-600 text-white", dotColor: "bg-red-600" },
 }
 
+const ORDER: Record<Exclude<Estado, "RECHAZADA">, number> = {
+    SOLICITUD: 0,
+    ENTREVISTA: 1,
+    EVALUACIONES: 2,
+    CONTRATACION: 3,
+}
+
+const ALL_ESTADOS: Estado[] = ["SOLICITUD", "ENTREVISTA", "EVALUACIONES", "CONTRATACION", "RECHAZADA"]
+
+function isFinalEstado(estado: Estado) {
+    return estado === "CONTRATACION" || estado === "RECHAZADA"
+}
+
+function isAllowedOption(current: Estado, candidate: Estado) {
+    if (candidate === current) return true
+    if (isFinalEstado(current)) return false
+    if (candidate === "RECHAZADA") return true
+
+    const currentRank = ORDER[current as Exclude<Estado, "RECHAZADA">]
+    const candidateRank = ORDER[candidate as Exclude<Estado, "RECHAZADA">]
+    return candidateRank >= currentRank
+}
+
+
 export function FormEditPostulacion({ setOpenModalEdit, initialData }: FormEditProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -152,7 +176,7 @@ export function FormEditPostulacion({ setOpenModalEdit, initialData }: FormEditP
                                         <FormItem>
                                             <FormLabel>Estado</FormLabel>
                                             <Select
-                                                disabled={isLoading}
+                                                disabled={isLoading || isFinalEstado(field.value as Estado)}
                                                 value={field.value || ""}
                                                 onValueChange={field.onChange}
                                             >
@@ -166,21 +190,24 @@ export function FormEditPostulacion({ setOpenModalEdit, initialData }: FormEditP
                                                     )}
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {(Object.keys(ESTADO_CONFIG) as Estado[]).map((key) => {
-                                                        const c = ESTADO_CONFIG[key]
-                                                        return (
-                                                            <SelectItem key={key} value={key}>
-                                                                <span className="inline-flex items-center gap-2">
-                                                                    <span className={`inline-block h-2 w-2 rounded-full ${c.dotColor}`} />
-                                                                    {c.label}
-                                                                </span>
-                                                            </SelectItem>
-                                                        )
-                                                    })}
+                                                    {ALL_ESTADOS
+                                                        .filter((estado) => isAllowedOption(field.value as Estado, estado))
+                                                        .map((key) => {
+                                                            const c = ESTADO_CONFIG[key]
+                                                            return (
+                                                                <SelectItem key={key} value={key}>
+                                                                    <span className="inline-flex items-center gap-2">
+                                                                        <span className={`inline-block h-2 w-2 rounded-full ${c.dotColor}`} />
+                                                                        {c.label}
+                                                                    </span>
+                                                                </SelectItem>
+                                                            )
+                                                        })}
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
                                         </FormItem>
+
                                     )
                                 }}
                             />
