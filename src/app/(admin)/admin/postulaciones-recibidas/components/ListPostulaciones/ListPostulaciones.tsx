@@ -51,10 +51,12 @@ export function ListPostulaciones({ postulaciones }: ListPostulacionesProps) {
         id: "",
         estado: "SOLICITUD",
         notasInternas: "",
+        historial: [],
         fechaPostulacion: "",
         ofertaPuesto: "",
         candidatoNombre: "",
         candidatoEmail: "",
+
     })
     const [openModalEdit, setOpenModalEdit] = useState(false);
     const router = useRouter()

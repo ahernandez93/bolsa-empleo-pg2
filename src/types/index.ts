@@ -68,10 +68,20 @@ export type OfertaLaboralCompleta = {
 
 export type InitialDataUpdateOfertaLaboral = Pick<OfertaLaboral, "id" | "puesto" | "descripcionPuesto" | "area" | "ubicacionDepartamentoId" | "ubicacionCiudadId" | "empresaId" | "nivelAcademico" | "experienciaLaboral" | "tipoTrabajo" | "modalidad" | "salario" | "estado" | "reclutadorId"> & { reclutadorNombre?: string | null; };
 
+export type PostulacionHistorialItem = {
+    id: string
+    estadoAnterior: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
+    estadoNuevo: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
+    notasInternas: string | null
+    createdAt: string
+    cambiadoPor: { id: string; nombre: string | null; email: string } | null
+}
+
 export type InitialDataUpdatePostulacion = {
     id: string
     estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
     notasInternas: string | null
+    historial: PostulacionHistorialItem[]
 
     // Solo lectura para el formulario
     fechaPostulacion: string
@@ -79,6 +89,7 @@ export type InitialDataUpdatePostulacion = {
     candidatoNombre: string | null
     candidatoEmail: string
 }
+
 
 export type RolUsuario = "ADMIN" | "RECLUTADOR" | "SUPERADMIN";
 

@@ -7,6 +7,15 @@ import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 import { EstadoSelect } from "./EstadoSelect"
 import { arrayIncludes } from "@/helpers/filters"
 
+const ESTADO_LABELS: Record<PostulacionConDatos["estado"], string> = {
+  SOLICITUD: "Solicitud",
+  ENTREVISTA: "Entrevista",
+  EVALUACIONES: "Evaluaciones",
+  CONTRATACION: "Contratacion",
+  RECHAZADA: "Rechazada",
+}
+
+
 export type PostulacionConDatos = {
   id: string
   perfilUsuarioNombre: string
@@ -16,7 +25,10 @@ export type PostulacionConDatos = {
   ofertaUbicacionDepartamento: string | undefined
   fechaPostulacion: string
   estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
+  ultimoCambioEstado?: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
+  ultimoCambioFecha?: string
 }
+
 interface GetColumnsProps {
   onEdit: (postulacion: PostulacionConDatos) => void
   onDelete: (postulacion: PostulacionConDatos) => void
@@ -145,6 +157,24 @@ export const getColumns = ({ onEdit, onDelete, onOpenSheet }: GetColumnsProps): 
     },
     cell: ({ row }) => format(new Date(row.original.fechaPostulacion), "dd/MM/yyyy"),
   },
+  {
+    id: "ultimoCambio",
+    header: "Ultimo cambio",
+    cell: ({ row }) => {
+      const estado = row.original.ultimoCambioEstado ?? row.original.estado
+      const fecha = row.original.ultimoCambioFecha
+      if (!fecha) return "—"
+      return (
+        <div className="space-y-1">
+          <div className="text-sm font-semibold">{ESTADO_LABELS[estado]}</div>
+          <div className="text-xs text-muted-foreground">
+            {format(new Date(fecha), "dd/MM/yyyy HH:mm")}
+          </div>
+        </div>
+      )
+    },
+  },
+
   {
     id: "actions",
     header: "Acciones",

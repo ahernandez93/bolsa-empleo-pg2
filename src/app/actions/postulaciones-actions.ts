@@ -69,24 +69,38 @@ export const getPostulaciones = async () => {
                         ubicacionDepartamento: true,
                     },
                 },
+                historialCambios: {
+                    orderBy: { createdAt: "desc" },
+                    take: 1,
+                    select: {
+                        estadoNuevo: true,
+                        createdAt: true,
+                    },
+                },
             },
             orderBy: {
                 fechaPostulacion: "desc",
             },
         });
 
-        const data = postulaciones.map(postulacion => ({
-            id: postulacion.id,
-            perfilUsuarioNombre: postulacion.perfil.usuario.persona.nombre,
-            perfilUsuarioApellido: postulacion.perfil.usuario.persona.apellido,
-            ofertaPuesto: postulacion.oferta.puesto,
-            ofertaUbicacionCiudad: postulacion.oferta.ubicacionCiudad?.nombre,
-            ofertaUbicacionDepartamento: postulacion.oferta.ubicacionDepartamento?.nombre,
-            fechaPostulacion: postulacion.fechaPostulacion.toISOString(),
-            estado: postulacion.estado,
-        }));
+        const data = postulaciones.map(postulacion => {
+            const ultimoCambio = postulacion.historialCambios[0];
+            return {
+                id: postulacion.id,
+                perfilUsuarioNombre: postulacion.perfil.usuario.persona.nombre,
+                perfilUsuarioApellido: postulacion.perfil.usuario.persona.apellido,
+                ofertaPuesto: postulacion.oferta.puesto,
+                ofertaUbicacionCiudad: postulacion.oferta.ubicacionCiudad?.nombre,
+                ofertaUbicacionDepartamento: postulacion.oferta.ubicacionDepartamento?.nombre,
+                fechaPostulacion: postulacion.fechaPostulacion.toISOString(),
+                estado: postulacion.estado,
+                ultimoCambioEstado: ultimoCambio?.estadoNuevo ?? postulacion.estado,
+                ultimoCambioFecha: (ultimoCambio?.createdAt ?? postulacion.fechaActualizacion).toISOString(),
+            };
+        });
 
         return data;
+
     } catch (error) {
         console.error("Error fetching postulaciones from database:", error);
         return [];

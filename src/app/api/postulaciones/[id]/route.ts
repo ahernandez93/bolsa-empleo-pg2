@@ -53,8 +53,26 @@ export async function GET(req: Request, ctx: { params: Promise<Params> }) {
             },
           },
         },
+        historialCambios: {
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            estadoAnterior: true,
+            estadoNuevo: true,
+            notasInternas: true,
+            createdAt: true,
+            cambiadoPor: {
+              select: {
+                id: true,
+                persona: { select: { nombre: true, apellido: true } },
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
+
 
     if (!p) {
       return NextResponse.json({ message: "Postulación no encontrada" }, { status: 404 });
@@ -70,7 +88,24 @@ export async function GET(req: Request, ctx: { params: Promise<Params> }) {
         ? `${p.perfil.usuario.persona.nombre} ${p.perfil.usuario.persona.apellido}`.trim()
         : null,
       candidatoEmail: p.perfil.usuario.email,
+      historial: p.historialCambios.map((item: (typeof p.historialCambios)[number]) => ({
+        id: item.id,
+        estadoAnterior: item.estadoAnterior,
+        estadoNuevo: item.estadoNuevo,
+        notasInternas: item.notasInternas ?? null,
+        createdAt: item.createdAt.toISOString(),
+        cambiadoPor: item.cambiadoPor
+          ? {
+              id: item.cambiadoPor.id,
+              nombre: item.cambiadoPor.persona
+                ? `${item.cambiadoPor.persona.nombre} ${item.cambiadoPor.persona.apellido}`.trim()
+                : null,
+              email: item.cambiadoPor.email,
+            }
+          : null,
+      })),
     };
+
 
     return NextResponse.json(initialData);
   } catch (e) {
@@ -97,7 +132,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
 
     const current = await prisma.postulacion.findUnique({
       where: { id },
-      select: { estado: true },
+      select: { estado: true, notasInternas: true },
     });
 
     if (!current) {
@@ -158,6 +193,23 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
         },
       },
     });
+
+    const notasTrim = notasInternas?.trim() || null;
+    const notasChanged = (current.notasInternas ?? null) !== notasTrim;
+
+    if (estadoChanged || notasChanged) {
+      await prisma.postulacionHistorial.create({
+        data: {
+          postulacionId: id,
+          estadoAnterior: currentEstado,
+          estadoNuevo: estado as Estado,
+          notasInternas: notasTrim,
+          cambiadoPorId: session.user.id,
+        },
+      });
+    }
+
+
 
     if (estadoChanged) {
       const correo = updated.perfil.usuario.email;

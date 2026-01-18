@@ -24,6 +24,9 @@ type FormEditProps = {
     initialData: InitialDataUpdatePostulacion;
 };
 
+type HistorialItem = InitialDataUpdatePostulacion["historial"][number]
+
+
 type Estado = "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
 
 const ESTADO_CONFIG: Record<Estado, { label: string; badgeClass: string; dotColor: string }> = {
@@ -57,8 +60,23 @@ function isAllowedOption(current: Estado, candidate: Estado) {
     return candidateRank >= currentRank
 }
 
+const formatHistorialFecha = (item: HistorialItem) =>
+    new Date(item.createdAt).toLocaleString("es-HN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    })
+
+const resolveHistorialAutor = (item: HistorialItem) => {
+    if (item.cambiadoPor?.nombre) return item.cambiadoPor.nombre
+    if (item.cambiadoPor?.email) return item.cambiadoPor.email
+    return "Sistema"
+}
 
 export function FormEditPostulacion({ setOpenModalEdit, initialData }: FormEditProps) {
+
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -234,12 +252,51 @@ export function FormEditPostulacion({ setOpenModalEdit, initialData }: FormEditP
                         </CardContent>
                     </Card>
 
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Historial de cambios</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {initialData.historial?.length ? (
+                                <div className="space-y-3">
+                                    {initialData.historial.map((item) => (
+                                        <div key={item.id} className="rounded-lg border p-3">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="font-semibold">
+                                                    {ESTADO_CONFIG[item.estadoAnterior]?.label ?? item.estadoAnterior}
+                                                    {" → "}
+                                                    {ESTADO_CONFIG[item.estadoNuevo]?.label ?? item.estadoNuevo}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {formatHistorialFecha(item)}
+                                                </span>
+                                            </div>
+                                            <div className="mt-1 text-xs text-muted-foreground">
+                                                Por: {resolveHistorialAutor(item)}
+                                            </div>
+                                            {item.notasInternas ? (
+                                                <div className="mt-2 text-sm whitespace-pre-wrap">
+                                                    {item.notasInternas}
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-sm text-muted-foreground">
+                                    No hay cambios registrados.
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
                     <div>
                         <Button type="submit" className="w-full" disabled={!isValid || isLoading}>
                             Guardar cambios
                         </Button>
                         {error && <p className="text-red-600 text-center mt-2">{error}</p>}
                     </div>
+
                 </form>
             </Form>
         </div>

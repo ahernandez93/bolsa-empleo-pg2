@@ -170,9 +170,11 @@ model Usuario {
   guardados           GuardadoOferta[]
   empresa             Empresa?             @relation(fields: [empresaId], references: [id], onDelete: SetNull)
   passwordResetTokens PasswordResetToken[]
+  cambiosPostulacion   PostulacionHistorial[]
 
   @@index([empresaId])
 }
+
 
 model PasswordResetToken {
   id        String    @id @default(uuid())
@@ -394,9 +396,11 @@ model Postulacion {
   oferta                OfertaLaboral          @relation(fields: [ofertaLaboralId], references: [id], onDelete: Cascade)
   perfil                PerfilCandidato        @relation(fields: [perfilCandidatoId], references: [id], onDelete: Cascade)
   postulacionDocumentos PostulacionDocumento[]
+  historialCambios      PostulacionHistorial[]
 
   // Evita duplicados: un candidato no puede aplicar dos veces a la misma oferta
   @@unique([ofertaLaboralId, perfilCandidatoId])
+
   // Índices para consultas habituales
   @@index([ofertaLaboralId])
   @@index([perfilCandidatoId])
@@ -437,6 +441,23 @@ model PostulacionDocumento {
   @@unique([postulacionId, documentoTipoId])
   @@index([postulacionId])
 }
+
+model PostulacionHistorial {
+  id             String            @id @default(uuid())
+  postulacionId  String
+  estadoAnterior EstadoPostulacion
+  estadoNuevo    EstadoPostulacion
+  notasInternas  String?
+  cambiadoPorId  String?
+  createdAt      DateTime          @default(now())
+
+  postulacion Postulacion @relation(fields: [postulacionId], references: [id], onDelete: Cascade)
+  cambiadoPor Usuario?    @relation(fields: [cambiadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([postulacionId])
+  @@index([cambiadoPorId])
+}
+
 
 /**
  * ===========================

@@ -69,8 +69,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
 
     const current = await prisma.postulacion.findUnique({
       where: { id },
-      select: { estado: true },
+      select: { estado: true, notasInternas: true },
     });
+
 
     if (!current) {
       return NextResponse.json({ message: "Postulación no encontrada" }, { status: 404 });
@@ -113,6 +114,17 @@ export async function PATCH(req: Request, ctx: { params: Promise<Params> }) {
         },
       },
     });
+
+    await prisma.postulacionHistorial.create({
+      data: {
+        postulacionId: id,
+        estadoAnterior: currentEstado,
+        estadoNuevo: estado,
+        notasInternas: current.notasInternas ?? null,
+        cambiadoPorId: session.user.id,
+      },
+    });
+
 
     const correo = updated.perfil.usuario.email;
     const nombre = updated.perfil.usuario.persona
