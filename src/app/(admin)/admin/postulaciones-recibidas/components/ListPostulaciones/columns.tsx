@@ -3,9 +3,11 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Pencil, Trash2, ArrowUp, ArrowDown } from "lucide-react"
 import { EstadoSelect } from "./EstadoSelect"
 import { arrayIncludes } from "@/helpers/filters"
+
 
 const ESTADO_LABELS: Record<PostulacionConDatos["estado"], string> = {
   SOLICITUD: "Solicitud",
@@ -27,6 +29,7 @@ export type PostulacionConDatos = {
   estado: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
   ultimoCambioEstado?: "SOLICITUD" | "ENTREVISTA" | "EVALUACIONES" | "CONTRATACION" | "RECHAZADA"
   ultimoCambioFecha?: string
+  ultimoCambioNotas?: string | null
 }
 
 interface GetColumnsProps {
@@ -47,6 +50,12 @@ const SortIcon = ({ sort }: { sort: "asc" | "desc" | false }) => {
     </span>
   )
 }
+
+const truncateText = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value
+  return `${value.slice(0, Math.max(0, maxLength - 1))}…`
+}
+
 
 export const getColumns = ({ onEdit, onDelete, onOpenSheet }: GetColumnsProps): ColumnDef<PostulacionConDatos>[] => [
   {
@@ -174,6 +183,27 @@ export const getColumns = ({ onEdit, onDelete, onOpenSheet }: GetColumnsProps): 
       )
     },
   },
+  {
+    id: "ultimoCambioNotas",
+    header: "Notas",
+    cell: ({ row }) => {
+      const notas = row.original.ultimoCambioNotas
+      if (!notas) return "—"
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="text-sm text-muted-foreground cursor-default">
+              {truncateText(notas, 20)}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" sideOffset={6}>
+            {notas}
+          </TooltipContent>
+        </Tooltip>
+      )
+    },
+  },
+
 
   {
     id: "actions",

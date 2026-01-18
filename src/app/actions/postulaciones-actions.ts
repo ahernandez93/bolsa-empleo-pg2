@@ -75,6 +75,7 @@ export const getPostulaciones = async () => {
                     select: {
                         estadoNuevo: true,
                         createdAt: true,
+                        notasInternas: true,
                     },
                 },
             },
@@ -96,6 +97,7 @@ export const getPostulaciones = async () => {
                 estado: postulacion.estado,
                 ultimoCambioEstado: ultimoCambio?.estadoNuevo ?? postulacion.estado,
                 ultimoCambioFecha: (ultimoCambio?.createdAt ?? postulacion.fechaActualizacion).toISOString(),
+                ultimoCambioNotas: ultimoCambio?.notasInternas ?? null,
             };
         });
 
