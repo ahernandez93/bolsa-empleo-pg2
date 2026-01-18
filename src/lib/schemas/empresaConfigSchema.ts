@@ -8,7 +8,13 @@ export const empresaConfigSchema = z.object({
         .url("URL inválida")
         .optional()
         .or(z.literal("")),
-    telefono: z.string().min(7, "Teléfono inválido").optional().or(z.literal("")),
+    telefono: z
+        .string()
+        .optional()
+        .or(z.literal(""))
+        .refine((value) => value === "" || typeof value !== "string" || /^\d{8}$/.test(value), {
+            message: "El teléfono debe tener 8 dígitos",
+        }),
     descripcion: z.string().max(1000).optional().or(z.literal("")),
     ubicacionDepartamentoId: z.number().int().optional(),
     ubicacionCiudadId: z.number().int().optional(),

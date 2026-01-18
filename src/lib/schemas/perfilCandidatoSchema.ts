@@ -26,7 +26,12 @@ const generoEnum = z.enum(["MASCULINO", "FEMENINO", "OTRO"]).optional();
 export const perfilCandidatoSchema = z.object({
     nombre: z.string().min(2, "Mínimo 2 caracteres"),
     apellido: z.string().min(2, "Mínimo 2 caracteres"),
-    telefono: z.string().optional(),
+    telefono: z
+        .string()
+        .optional()
+        .refine((value) => !value || /^\d{8}$/.test(value), {
+            message: "El teléfono debe tener 8 dígitos",
+        }),
     direccion: z.string().optional(),
     fechaNacimiento: z.string().optional(),
     genero: generoEnum,

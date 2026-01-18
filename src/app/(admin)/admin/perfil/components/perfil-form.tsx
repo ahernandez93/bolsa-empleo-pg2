@@ -99,7 +99,19 @@ export default function PerfilEmpleadoForm({ initial, onSaved }: Props) {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Teléfono</FormLabel>
-                                <FormControl><Input {...field} placeholder="Ej: 9999-9999" /></FormControl>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder="Ej: 9999-9999"
+                                        inputMode="numeric"
+                                        maxLength={8}
+                                        value={field.value ?? ""}
+                                        onChange={(event) => {
+                                            const sanitizedValue = event.target.value.replace(/\D/g, "").slice(0, 8)
+                                            field.onChange(sanitizedValue)
+                                        }}
+                                    />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

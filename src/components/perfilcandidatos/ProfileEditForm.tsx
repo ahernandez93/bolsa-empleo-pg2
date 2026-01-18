@@ -7,6 +7,7 @@ import { perfilCandidatoSchema } from "@/lib/schemas/perfilCandidatoSchema";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -246,15 +247,49 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
                 </div>
             </Card>
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {/* Datos personales */}
                 <Card className="space-y-3 rounded-xl border bg-white p-4">
                     <h3 className="text-sm font-semibold text-slate-700">Datos personales</h3>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <Field label="Nombre" {...form.register("nombre")} />
                         <Field label="Apellido" {...form.register("apellido")} />
-                        <Field label="Correo" type="email" {...form.register("email")} />
-                        <Field label="Teléfono" type="tel" {...form.register("telefono")} />
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Correo</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="telefono"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Teléfono</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="tel"
+                                            inputMode="numeric"
+                                            maxLength={8}
+                                            value={field.value ?? ""}
+                                            onChange={(event) => {
+                                                const sanitizedValue = event.target.value.replace(/\D/g, "").slice(0, 8)
+                                                field.onChange(sanitizedValue)
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <Field label="Dirección" className="md:col-span-2" {...form.register("direccion")} />
                         <Field label="Fecha de nacimiento" type="date" {...form.register("fechaNacimiento")} />
 
@@ -486,7 +521,8 @@ export default function ProfileEditForm({ initialData, onSaved }: Props) {
                         {saving ? "Guardando..." : "Guardar cambios"}
                     </Button>
                 </div>
-            </form>
+                </form>
+            </Form>
         </section>
     );
 }

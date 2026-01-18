@@ -156,7 +156,16 @@ export function FormCreateEmpleado({ setOpenModalCreate, initialData, isEditMode
                         <FormItem>
                             <FormLabel>Teléfono</FormLabel>
                             <FormControl>
-                                <Input placeholder="Teléfono" {...field} />
+                                <Input
+                                    placeholder="Teléfono"
+                                    inputMode="numeric"
+                                    maxLength={8}
+                                    value={field.value ?? ""}
+                                    onChange={(event) => {
+                                        const sanitizedValue = event.target.value.replace(/\D/g, "").slice(0, 8)
+                                        field.onChange(sanitizedValue)
+                                    }}
+                                />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
